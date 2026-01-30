@@ -3,7 +3,10 @@ import { NPM_REGISTRY } from '#constants'
 import { LRUCache } from 'lru-cache'
 import { ofetch } from 'ofetch'
 
-type ResolvedPackumentVersion = Pick<PackumentVersion, 'version'> & { tag?: string }
+interface ResolvedPackumentVersion extends Pick<PackumentVersion, 'version'> {
+  tag?: string
+  hasProvenance: boolean
+}
 
 interface ResolvedPackument {
   versions: Record<string, ResolvedPackumentVersion>
@@ -33,7 +36,14 @@ const cache = new LRUCache<string, ResolvedPackument>({
     const resolvedVersions = Object.fromEntries(
       Object.keys(pkg.versions)
         .filter((v) => pkg.time[v])
-        .map<[string, ResolvedPackumentVersion]>((v) => [v, { version: v }]),
+        .map<[string, ResolvedPackumentVersion]>((v) => [
+          v,
+          {
+            version: v,
+            // @ts-expect-error present if published with provenance
+            hasProvenance: !!pkg.versions[v].dist.attestations,
+          },
+        ]),
     )
 
     Object.entries(pkg['dist-tags']).forEach(([tag, version]) => {

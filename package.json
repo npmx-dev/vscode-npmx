@@ -38,6 +38,24 @@
   "activationEvents": [
     "onStartupFinished"
   ],
+  "contributes": {
+    "configuration": {
+      "title": "Only suggest version",
+      "properties": {
+        "npmx.versionCompletion": {
+          "type": "string",
+          "enum": ["all", "provenance-only", "off"],
+          "enumDescriptions": [
+            "show all versions",
+            "show only versions with provenance",
+            "disables version completion"
+          ],
+          "default": "provenance-only",
+          "description": "Version completion behavior: 'all' shows all versions, 'provenance-only' shows only versions with provenance, 'off' disables version completion"
+        }
+      }
+    }
+  },
   "scripts": {
     "dev": "tsdown --watch",
     "build": "tsdown",

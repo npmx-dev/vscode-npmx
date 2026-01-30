@@ -1,6 +1,7 @@
 import type { Node } from 'jsonc-parser'
 import type { Position, TextDocument } from 'vscode'
 import { PACKAGE_JSON_PATTERN } from '#constants'
+import { config } from '#state'
 import { getNodeRange, isInDepSection, parse } from '#utils/ast/json'
 import { findNodeAtOffset } from 'jsonc-parser'
 import { languages } from 'vscode'
@@ -31,6 +32,8 @@ class JsonCompletionItemProvider extends BaseCompletionItemProvider<Node> {
 }
 
 export function registerJsonCompletionItemProvider() {
+  if (config.versionCompletion === 'off')
+    return
   return languages.registerCompletionItemProvider(
     { pattern: PACKAGE_JSON_PATTERN },
     new JsonCompletionItemProvider(),

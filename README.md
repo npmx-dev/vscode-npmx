@@ -11,7 +11,9 @@
 
 <!-- configs -->
 
-**No data**
+| Key                      | Description                                                                                                                                     | Type     | Default             |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------- |
+| `npmx.versionCompletion` | Version completion behavior: 'all' shows all versions, 'provenance-only' shows only versions with provenance, 'off' disables version completion | `string` | `"provenance-only"` |
 
 <!-- configs -->
 ## License

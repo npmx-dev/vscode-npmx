@@ -1,4 +1,5 @@
 import type { CompletionItemProvider, Position, Range, TextDocument } from 'vscode'
+import { config } from '#state'
 import { getPackageInfo } from '#utils/npm'
 import { CompletionItem, CompletionItemKind } from 'vscode'
 
@@ -34,7 +35,12 @@ export abstract class BaseCompletionItemProvider<T> implements CompletionItemPro
 
     const prefix = getPrefix(version)
 
-    return Object.values(pkg.versions).map(({ version, tag }) => {
+    let versionsKV = Object.values(pkg.versions)
+
+    if (config.versionCompletion === 'provenance-only')
+      versionsKV = versionsKV.filter(({ hasProvenance }) => hasProvenance)
+
+    return versionsKV.map(({ version, tag }) => {
       const text = `${prefix}${version}`
       const item = new CompletionItem(text, CompletionItemKind.Value)
 
