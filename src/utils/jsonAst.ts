@@ -1,9 +1,10 @@
 import type { Node } from 'jsonc-parser'
 import type { TextDocument } from 'vscode'
 import { createHash } from 'node:crypto'
-import { parseTree } from 'jsonc-parser'
+import { findNodeAtLocation, parseTree } from 'jsonc-parser'
 import { Range } from 'vscode'
 import { logger } from '../state'
+import { DEP_SECTIONS } from './constants'
 
 const astCache = new Map<string, {
   hash: string
@@ -51,4 +52,16 @@ export function getNodeRange(doc: TextDocument, node: Node) {
   )
 
   return new Range(start, end)
+}
+
+export function isInDepSection(root: Node, node: Node) {
+  return DEP_SECTIONS.some((section) => {
+    const dep = findNodeAtLocation(root, [section])
+    if (!dep || !dep.parent)
+      return false
+
+    const { offset, length } = dep.parent.children![1]
+
+    return node.offset > offset && node.offset < offset + length
+  })
 }

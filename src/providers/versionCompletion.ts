@@ -1,7 +1,7 @@
 import type { CompletionItemProvider, Position, TextDocument } from 'vscode'
 import { findNodeAtOffset } from 'jsonc-parser'
 import { CompletionItem, CompletionItemKind } from 'vscode'
-import { getJsonAst, getNodeRange } from '../utils/jsonAst'
+import { getJsonAst, getNodeRange, isInDepSection } from '../utils/jsonAst'
 import { getPackageInfo } from '../utils/npm'
 
 function isVersionPrefix(c: string) {
@@ -24,7 +24,7 @@ export class PackageJsonVersionCompletionProvider implements CompletionItemProvi
       return
 
     const node = findNodeAtOffset(root, offset)
-    if (!node || node.type !== 'string')
+    if (!node || node.type !== 'string' || !isInDepSection(root, node))
       return
 
     const name = node.parent!.children![0].value as string

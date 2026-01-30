@@ -1,14 +1,8 @@
 import type { DocumentLinkProvider, TextDocument } from 'vscode'
 import { findNodeAtLocation } from 'jsonc-parser'
 import { DocumentLink, Uri } from 'vscode'
+import { DEP_SECTIONS } from '../utils/constants'
 import { getJsonAst, getNodeRange } from '../utils/jsonAst'
-
-const sections = [
-  'dependencies',
-  'devDependencies',
-  'peerDependencies',
-  'optionalDependencies',
-]
 
 export class PackageJsonLinkProvider implements DocumentLinkProvider {
   provideDocumentLinks(document: TextDocument) {
@@ -21,7 +15,7 @@ export class PackageJsonLinkProvider implements DocumentLinkProvider {
 
     const links: DocumentLink[] = []
 
-    sections.forEach((section) => {
+    DEP_SECTIONS.forEach((section) => {
       const node = findNodeAtLocation(root, [section])
       if (!node || !node.children)
         return
