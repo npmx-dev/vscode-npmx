@@ -32,6 +32,9 @@ importers:
       nano-staged:
         specifier: ^0.9.0
         version: 0.9.0
+      ofetch:
+        specifier: ^2.0.0-alpha.3
+        version: 2.0.0-alpha.3
       reactive-vscode:
         specifier: ^0.4.1
         version: 0.4.1(@types/vscode@1.101.0)
@@ -1978,6 +1981,9 @@ packages:
 
   obug@2.1.1:
     resolution: {integrity: sha512-uTqF9MuPraAQ+IsnPf366RG4cP9RtUi7MLO1N3KEc+wb0a6yKpeL0lmk2IB1jY5KHPAlTc6T/JRdC/YqxHNwkQ==}
+
+  ofetch@2.0.0-alpha.3:
+    resolution: {integrity: sha512-zpYTCs2byOuft65vI3z43Dd6iSdFbOZZLb9/d21aCpx2rGastVU9dOCv0lu4ykc1Ur1anAYjDi3SUvR0vq50JA==}
 
   once@1.4.0:
     resolution: {integrity: sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==}
@@ -4923,6 +4929,8 @@ snapshots:
   object-inspect@1.13.4: {}
 
   obug@2.1.1: {}
+
+  ofetch@2.0.0-alpha.3: {}
 
   once@1.4.0:
     dependencies:

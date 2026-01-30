@@ -13,6 +13,7 @@ export default defineConfig({
     'reactive-vscode',
     '@reactive-vscode/reactivity',
     'jsonc-parser',
+    'ofetch',
   ],
   minify: 'dce-only',
 })
