@@ -32,6 +32,9 @@ importers:
       jsonc-parser:
         specifier: ^3.3.1
         version: 3.3.1
+      lru-cache:
+        specifier: ^11.2.5
+        version: 11.2.5
       nano-staged:
         specifier: ^0.9.0
         version: 0.9.0
@@ -1732,8 +1735,8 @@ packages:
   lru-cache@10.4.3:
     resolution: {integrity: sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==}
 
-  lru-cache@11.2.2:
-    resolution: {integrity: sha512-F9ODfyqML2coTIsQpSkRHnLSZMtkU8Q+mSfcaIyKwy58u+8k5nvAYeiNhsyMARvzNcXJ9QfWVrcPsC9e9rAxtg==}
+  lru-cache@11.2.5:
+    resolution: {integrity: sha512-vFrFJkWtJvJnD5hg+hJvVE8Lh/TcMzKnTgCWmtBipwI5yLX/iX+5UB2tfuyODF5E7k9xEzMdYgGqaSb1c0c5Yw==}
     engines: {node: 20 || >=22}
 
   lru-cache@6.0.0:
@@ -4508,7 +4511,7 @@ snapshots:
 
   lru-cache@10.4.3: {}
 
-  lru-cache@11.2.2: {}
+  lru-cache@11.2.5: {}
 
   lru-cache@6.0.0:
     dependencies:
@@ -5017,7 +5020,7 @@ snapshots:
 
   path-scurry@2.0.0:
     dependencies:
-      lru-cache: 11.2.2
+      lru-cache: 11.2.5
       minipass: 7.1.2
 
   path-type@6.0.0: {}

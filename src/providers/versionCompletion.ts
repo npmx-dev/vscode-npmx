@@ -2,7 +2,7 @@ import type { CompletionItemProvider, Position, TextDocument } from 'vscode'
 import { findNodeAtOffset } from 'jsonc-parser'
 import { CompletionItem, CompletionItemKind } from 'vscode'
 import { getJsonAst, getNodeRange } from '../utils/jsonAst'
-import { getPackage } from '../utils/npm'
+import { getPackageInfo } from '../utils/npm'
 
 function isVersionPrefix(c: string) {
   return c === '^' || c === '~'
@@ -28,18 +28,19 @@ export class PackageJsonVersionCompletionProvider implements CompletionItemProvi
       return
 
     const name = node.parent!.children![0].value as string
-    const pkg = await getPackage(name)
+    const pkg = await getPackageInfo(name)
 
     const version = node.value as string
     const prefix = getPrefix(version)
 
-    return Object.keys(pkg.versions).map((v) => {
-      const text = `${prefix}${v}`
+    return Object.values(pkg.versions).map(({ version, tag }) => {
+      const text = `${prefix}${version}`
       const item = new CompletionItem(text, CompletionItemKind.Value)
 
       item.range = getNodeRange(document, node)
       item.insertText = text
-      item.detail = 'npm version'
+      if (tag)
+        item.detail = tag
 
       return item
     })
