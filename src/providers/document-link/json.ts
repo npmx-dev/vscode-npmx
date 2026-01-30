@@ -1,14 +1,12 @@
-import type { DocumentLinkProvider, TextDocument } from 'vscode'
-import { DEP_SECTIONS } from '#constants'
+import type { DocumentLink, TextDocument } from 'vscode'
+import { DEP_SECTIONS, PACKAGE_JSON_PATTERN } from '#constants'
 import { getNodeRange, parse } from '#utils/ast/json'
 import { findNodeAtLocation } from 'jsonc-parser'
-import { DocumentLink, Uri } from 'vscode'
+import { languages } from 'vscode'
+import { BaseDocumentLinkProvider } from './base'
 
-export class PackageJsonLinkProvider implements DocumentLinkProvider {
+class JsonDocumentLinkProvider extends BaseDocumentLinkProvider {
   provideDocumentLinks(document: TextDocument) {
-    if (!document.fileName.endsWith('package.json'))
-      return
-
     const root = parse(document)
     if (!root)
       return
@@ -26,12 +24,17 @@ export class PackageJsonLinkProvider implements DocumentLinkProvider {
           continue
 
         const range = getNodeRange(document, keyNode)
-        const uri = Uri.parse(`https://npmx.dev/package/${keyNode.value}`)
-
-        links.push(new DocumentLink(range, uri))
+        links.push(this.createLink(keyNode.value, range))
       }
     })
 
     return links
   }
+}
+
+export function registerJsonDocumentLinkProvider() {
+  return languages.registerDocumentLinkProvider(
+    { pattern: PACKAGE_JSON_PATTERN },
+    new JsonDocumentLinkProvider(),
+  )
 }
