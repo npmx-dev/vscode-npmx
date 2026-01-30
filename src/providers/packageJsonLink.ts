@@ -1,6 +1,7 @@
 import type { DocumentLinkProvider, TextDocument } from 'vscode'
-import { findNodeAtLocation, parseTree } from 'jsonc-parser'
+import { findNodeAtLocation } from 'jsonc-parser'
 import { DocumentLink, Range, Uri } from 'vscode'
+import { getJsonAst } from '../utils/jsonAst'
 
 const sections = [
   'dependencies',
@@ -14,8 +15,7 @@ export class PackageJsonLinkProvider implements DocumentLinkProvider {
     if (!document.fileName.endsWith('package.json'))
       return
 
-    const text = document.getText()
-    const root = parseTree(text)
+    const root = getJsonAst(document)
     if (!root)
       return
 
