@@ -16,7 +16,7 @@ export const { activate, deactivate } = defineExtension((ctx) => {
     languages.registerCompletionItemProvider(
       { pattern: '**/package.json' },
       new PackageJsonVersionCompletionProvider(),
-      ...['"', '.', '^', '~'],
+      ...['.', '^', '~', ...Array.from({ length: 10 }).map((_, i) => `${i}`)],
     ),
   )
 })

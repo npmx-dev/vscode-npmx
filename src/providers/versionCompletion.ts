@@ -1,14 +1,18 @@
 import type { CompletionItemProvider, Position, TextDocument } from 'vscode'
 import { findNodeAtOffset } from 'jsonc-parser'
 import { CompletionItem, CompletionItemKind } from 'vscode'
-import { getJsonAst } from '../utils/jsonAst'
+import { getJsonAst, getNodeRange } from '../utils/jsonAst'
+import { getPackage } from '../utils/npm'
 
-async function fetchVersions(name: string) {
-  return ['1.0.0', '2.0.0']
+function isVersionPrefix(c: string) {
+  return c === '^' || c === '~'
 }
 
-function resolvePackageName(name: string) {
-  return ''
+function getPrefix(v: string) {
+  const firstChar = v[0]
+  const valid = isVersionPrefix(firstChar)
+
+  return valid ? firstChar : ''
 }
 
 export class PackageJsonVersionCompletionProvider implements CompletionItemProvider {
@@ -23,16 +27,18 @@ export class PackageJsonVersionCompletionProvider implements CompletionItemProvi
     if (!node || node.type !== 'string')
       return
 
-    const packageName = resolvePackageName(node.value)
-    if (!packageName)
-      return
+    const name = node.parent!.children![0].value as string
+    const pkg = await getPackage(name)
 
-    const versions = await fetchVersions(packageName)
+    const version = node.value as string
+    const prefix = getPrefix(version)
 
-    return versions.map((v) => {
-      const item = new CompletionItem(v, CompletionItemKind.Value)
+    return Object.keys(pkg.versions).map((v) => {
+      const text = `${prefix}${v}`
+      const item = new CompletionItem(text, CompletionItemKind.Value)
 
-      item.insertText = `^${v}`
+      item.range = getNodeRange(document, node)
+      item.insertText = text
       item.detail = 'npm version'
 
       return item
