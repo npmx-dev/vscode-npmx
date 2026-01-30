@@ -16,6 +16,7 @@ export default defineConfig({
     'yaml',
     'ofetch',
     'lru-cache',
+    'module-replacements',
   ],
   minify: 'dce-only',
 })
