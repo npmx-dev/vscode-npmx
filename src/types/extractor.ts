@@ -7,7 +7,7 @@ export interface DependencyInfo<T> {
 }
 
 export interface Extractor<T> {
-  parse: (document: TextDocument) => T | undefined
+  parse: (document: TextDocument) => T | null | undefined
 
   getNodeRange: (document: TextDocument, node: T) => Range
 
