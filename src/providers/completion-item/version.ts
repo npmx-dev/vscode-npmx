@@ -35,7 +35,7 @@ export class VersionCompletionItemProvider<T extends Extractor<any>> implements 
       return
 
     const {
-      node,
+      versionNode,
       name,
       version,
     } = info
@@ -53,7 +53,7 @@ export class VersionCompletionItemProvider<T extends Extractor<any>> implements 
       const text = `${prefix}${version}`
       const item = new CompletionItem(text, CompletionItemKind.Value)
 
-      item.range = this.extractor.getNodeRange(document, node)
+      item.range = this.extractor.getNodeRange(document, versionNode)
       item.insertText = text
       if (tag)
         item.detail = tag

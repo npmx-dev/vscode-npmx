@@ -1,6 +1,7 @@
 import type { DependencyInfo, Extractor } from '#types/extractor'
 import type { Node } from 'jsonc-parser'
 import type { TextDocument } from 'vscode'
+import { isInRange } from '#utils/ast'
 import { createCachedParse } from '#utils/data'
 import { findNodeAtLocation, findNodeAtOffset, parseTree } from 'jsonc-parser'
 import { Range } from 'vscode'
@@ -30,7 +31,7 @@ export class JsonExtractor implements Extractor<Node> {
 
       const { offset, length } = dep.parent.children![1]
 
-      return node.offset > offset && node.offset < offset + length
+      return isInRange(node.offset, [offset, offset + length])
     })
   }
 
