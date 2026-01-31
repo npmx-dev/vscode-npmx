@@ -1,5 +1,6 @@
 import type { DependencyInfo, Extractor, ValidNode } from '#types/extractor'
 import type { ResolvedPackument } from '#utils/npm'
+import type { Awaitable } from 'reactive-vscode'
 import type { Diagnostic, TextDocument } from 'vscode'
 import { basename } from 'node:path'
 import { logger } from '#state'
@@ -8,14 +9,16 @@ import { useActiveTextEditor, useDocumentText, watch } from 'reactive-vscode'
 import { languages } from 'vscode'
 import { displayName } from '../../generated-meta'
 import { checkDeprecation } from './rules/deprecation'
+import { checkReplacement } from './rules/replacement'
 
 export interface NodeDiagnosticInfo extends Pick<Diagnostic, 'message' | 'severity'> {
   node: ValidNode
 }
-export type DiagnosticRule = (dep: DependencyInfo, pkg: ResolvedPackument) => NodeDiagnosticInfo | undefined
+export type DiagnosticRule = (dep: DependencyInfo, pkg: ResolvedPackument) => Awaitable<NodeDiagnosticInfo | undefined>
 
 const rules: DiagnosticRule[] = [
   checkDeprecation,
+  checkReplacement,
 ]
 
 export function registerDiagnosticCollection(mapping: Record<string, Extractor | undefined>) {
@@ -38,7 +41,7 @@ export function registerDiagnosticCollection(mapping: Record<string, Extractor |
           const pkg = await getPackageInfo(dep.name)
 
           for (const rule of rules) {
-            const diagnostic = rule(dep, pkg)
+            const diagnostic = await rule(dep, pkg)
 
             if (diagnostic) {
               diagnostics.push({
@@ -55,6 +58,8 @@ export function registerDiagnosticCollection(mapping: Record<string, Extractor |
       }),
     )
 
+    if (diagnostics.length > 0)
+      logger.info(`${diagnostics.length} diagnostic collected in ${document.fileName}.`)
     diagnosticCollection.set(document.uri, diagnostics)
   }
 

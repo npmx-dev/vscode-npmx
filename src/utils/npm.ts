@@ -18,7 +18,7 @@ export interface ResolvedPackument {
  * Encode a package name for use in npm registry URLs.
  * Handles scoped packages (e.g., @scope/name -> @scope%2Fname).
  */
-function encodePackageName(name: string): string {
+export function encodePackageName(name: string): string {
   if (name.startsWith('@')) {
     return `@${encodeURIComponent(name.slice(1))}`
   }
@@ -33,7 +33,7 @@ const cache = new LRUCache<string, ResolvedPackument>({
   fetchMethod: async (name, staleValue, { signal }) => {
     const encodedName = encodePackageName(name)
 
-    logger.info(`fetching ${name}...`)
+    logger.info(`fetching package info for ${name}...`)
     const pkg = await ofetch<Packument>(`${NPM_REGISTRY}/${encodedName}`, { signal })
 
     const resolvedVersions = Object.fromEntries(
