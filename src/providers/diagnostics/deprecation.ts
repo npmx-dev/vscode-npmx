@@ -3,12 +3,9 @@ import type { TextDocument } from 'vscode'
 import { basename } from 'node:path'
 import { logger } from '#state'
 import { getPackageInfo } from '#utils/npm'
+import { extractVersion } from '#utils/version'
 import { useActiveTextEditor, useDocumentText, watch } from 'reactive-vscode'
 import { Diagnostic, DiagnosticSeverity, languages } from 'vscode'
-
-function extractVersion(versionRange: string): string {
-  return versionRange.replace(/^[\^~]/, '')
-}
 
 export function useDeprecationDiagnostics(mapping: Record<string, Extractor>) {
   const diagnosticCollection = languages.createDiagnosticCollection('npmx')

@@ -2,18 +2,8 @@ import type { Extractor } from '#types/extractor'
 import type { CompletionItemProvider, Position, TextDocument } from 'vscode'
 import { config } from '#state'
 import { getPackageInfo } from '#utils/npm'
+import { extractVersionPrefix } from '#utils/version'
 import { CompletionItem, CompletionItemKind } from 'vscode'
-
-function isVersionPrefix(c: string) {
-  return c === '^' || c === '~'
-}
-
-function extractVersionPrefix(v: string) {
-  const firstChar = v[0]
-  const valid = isVersionPrefix(firstChar)
-
-  return valid ? firstChar : ''
-}
 
 export class VersionCompletionItemProvider<T extends Extractor> implements CompletionItemProvider {
   extractor: T
