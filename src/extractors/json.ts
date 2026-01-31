@@ -17,9 +17,7 @@ export class JsonExtractor implements Extractor<Node> {
 
   getNodeRange(doc: TextDocument, node: Node) {
     const start = doc.positionAt(node.offset + 1)
-    const end = doc.positionAt(
-      node.offset + node.length - 1,
-    )
+    const end = doc.positionAt(node.offset + node.length - 1)
 
     return new Range(start, end)
   }
