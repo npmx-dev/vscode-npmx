@@ -9,10 +9,10 @@ import { languages } from 'vscode'
 import { displayName } from '../../generated-meta'
 import { checkDeprecations } from './rules/deprecation'
 
-export interface DiagnosticRuleDetails extends Pick<Diagnostic, 'message' | 'severity'> {
+export interface NodeDiagnosticInfo extends Pick<Diagnostic, 'message' | 'severity'> {
   node: ValidNode
 }
-export type DiagnosticRule = (dep: DependencyInfo, pkg: ResolvedPackument) => DiagnosticRuleDetails | undefined
+export type DiagnosticRule = (dep: DependencyInfo, pkg: ResolvedPackument) => NodeDiagnosticInfo | undefined
 
 const rules: DiagnosticRule[] = [
   checkDeprecations,
