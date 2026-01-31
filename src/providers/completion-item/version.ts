@@ -15,7 +15,7 @@ function extractVersionPrefix(v: string) {
   return valid ? firstChar : ''
 }
 
-export class VersionCompletionItemProvider<T extends Extractor<any>> implements CompletionItemProvider {
+export class VersionCompletionItemProvider<T extends Extractor> implements CompletionItemProvider {
   extractor: T
 
   constructor(extractor: T) {

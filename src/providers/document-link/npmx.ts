@@ -2,7 +2,7 @@ import type { Extractor } from '#types/extractor'
 import type { DocumentLinkProvider, TextDocument } from 'vscode'
 import { DocumentLink, Uri } from 'vscode'
 
-export class NpmxDocumentLinkProvider<T extends Extractor<any>> implements DocumentLinkProvider {
+export class NpmxDocumentLinkProvider<T extends Extractor> implements DocumentLinkProvider {
   extractor: T
 
   constructor(extractor: T) {
