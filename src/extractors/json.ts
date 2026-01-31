@@ -34,8 +34,29 @@ export class JsonExtractor implements Extractor<Node> {
     })
   }
 
+  private convertNodeToDependencyInfo(node: Node): DependencyInfo<Node> | undefined {
+    if (!node.children?.length)
+      return
+
+    const [nameNode, versionNode] = node.children
+
+    if (
+      typeof nameNode?.value !== 'string'
+      || typeof versionNode.value !== 'string'
+    ) {
+      return
+    }
+
+    return {
+      nameNode,
+      versionNode,
+      name: nameNode.value,
+      version: versionNode.value,
+    }
+  }
+
   getDependenciesInfo(root: Node) {
-    const info: DependencyInfo<Node>[] = []
+    const result: DependencyInfo<Node>[] = []
 
     DEP_SECTIONS.forEach((section) => {
       const node = findNodeAtLocation(root, [section])
@@ -43,19 +64,14 @@ export class JsonExtractor implements Extractor<Node> {
         return
 
       for (const dep of node.children) {
-        const keyNode = dep.children?.[0]
-        if (!keyNode || typeof keyNode.value !== 'string')
-          continue
+        const info = this.convertNodeToDependencyInfo(dep)
 
-        info.push({
-          node: keyNode,
-          name: keyNode.value,
-          version: '',
-        })
+        if (info)
+          result.push(info)
       }
     })
 
-    return info
+    return result
   }
 
   getDependencyInfoByOffset(root: Node, offset: number) {
@@ -63,10 +79,6 @@ export class JsonExtractor implements Extractor<Node> {
     if (!node || node.type !== 'string' || !this.inDependencySection(root, node))
       return
 
-    return {
-      node,
-      name: node.parent!.children![0].value as string,
-      version: node.value as string,
-    }
+    return this.convertNodeToDependencyInfo(node.parent!)
   }
 }

@@ -1,7 +1,8 @@
 import type { Range, TextDocument } from 'vscode'
 
 export interface DependencyInfo<T> {
-  node: T
+  nameNode: T
+  versionNode: T
   name: string
   version: string
 }

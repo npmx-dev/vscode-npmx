@@ -14,8 +14,8 @@ export class NpmxDocumentLinkProvider<T extends Extractor<any>> implements Docum
     if (!root)
       return
 
-    return this.extractor.getDependenciesInfo(root).map(({ node, name }) => {
-      const range = this.extractor.getNodeRange(document, node)
+    return this.extractor.getDependenciesInfo(root).map(({ nameNode, name }) => {
+      const range = this.extractor.getNodeRange(document, nameNode)
 
       const uri = Uri.parse(`https://npmx.dev/package/${name}`)
 
