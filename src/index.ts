@@ -11,7 +11,7 @@ import { JsonExtractor } from './extractors/json'
 import { YamlExtractor } from './extractors/yaml'
 import { displayName, version } from './generated-meta'
 import { VersionCompletionItemProvider } from './providers/completion-item/version'
-import { useDeprecationDiagnostics } from './providers/diagnostics/deprecation'
+import { registerDiagnosticCollection } from './providers/diagnostics'
 import { NpmxDocumentLinkProvider } from './providers/document-link/npmx'
 import { config, logger } from './state'
 
@@ -47,8 +47,7 @@ export const { activate, deactivate } = defineExtension((ctx) => {
     )
   }
 
-  // Deprecation diagnostics with reactive-vscode
-  useDeprecationDiagnostics({
+  registerDiagnosticCollection({
     [PACKAGE_JSON_BASENAME]: jsonExtractor,
     [PNPM_WORKSPACE_BASENAME]: yamlExtractor,
   })

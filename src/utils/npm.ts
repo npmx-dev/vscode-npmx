@@ -10,7 +10,7 @@ interface ResolvedPackumentVersion extends Pick<PackumentVersion, 'version'> {
   deprecated?: string
 }
 
-interface ResolvedPackument {
+export interface ResolvedPackument {
   versions: Record<string, ResolvedPackumentVersion>
 }
 
