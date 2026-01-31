@@ -6,6 +6,7 @@ import { ofetch } from 'ofetch'
 interface ResolvedPackumentVersion extends Pick<PackumentVersion, 'version'> {
   tag?: string
   hasProvenance: boolean
+  deprecated?: string
 }
 
 interface ResolvedPackument {
@@ -42,6 +43,7 @@ const cache = new LRUCache<string, ResolvedPackument>({
             version: v,
             // @ts-expect-error present if published with provenance
             hasProvenance: !!pkg.versions[v].dist.attestations,
+            deprecated: pkg.versions[v].deprecated,
           },
         ]),
     )

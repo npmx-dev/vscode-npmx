@@ -1,10 +1,17 @@
-import { PACKAGE_JSON_PATTERN, PNPM_WORKSPACE_PATTERN, VERSION_TRIGGER_CHARACTERS } from '#constants'
+import {
+  PACKAGE_JSON_BASENAME,
+  PACKAGE_JSON_PATTERN,
+  PNPM_WORKSPACE_BASENAME,
+  PNPM_WORKSPACE_PATTERN,
+  VERSION_TRIGGER_CHARACTERS,
+} from '#constants'
 import { defineExtension } from 'reactive-vscode'
 import { languages } from 'vscode'
 import { JsonExtractor } from './extractors/json'
 import { YamlExtractor } from './extractors/yaml'
 import { displayName, version } from './generated-meta'
 import { VersionCompletionItemProvider } from './providers/completion-item/version'
+import { useDeprecationDiagnostics } from './providers/diagnostics/deprecation'
 import { NpmxDocumentLinkProvider } from './providers/document-link/npmx'
 import { config, logger } from './state'
 
@@ -39,4 +46,10 @@ export const { activate, deactivate } = defineExtension((ctx) => {
       ),
     )
   }
+
+  // Deprecation diagnostics with reactive-vscode
+  useDeprecationDiagnostics({
+    [PACKAGE_JSON_BASENAME]: jsonExtractor,
+    [PNPM_WORKSPACE_BASENAME]: yamlExtractor,
+  })
 })

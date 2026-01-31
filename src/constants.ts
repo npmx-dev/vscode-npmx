@@ -1,5 +1,8 @@
-export const PACKAGE_JSON_PATTERN = '**/package.json'
-export const PNPM_WORKSPACE_PATTERN = '**/pnpm-workspace.yaml'
+export const PACKAGE_JSON_BASENAME = 'package.json'
+export const PNPM_WORKSPACE_BASENAME = 'pnpm-workspace.yaml'
+
+export const PACKAGE_JSON_PATTERN = `**/${PACKAGE_JSON_BASENAME}`
+export const PNPM_WORKSPACE_PATTERN = `**/${PNPM_WORKSPACE_BASENAME}`
 
 export const VERSION_TRIGGER_CHARACTERS = ['.', '^', '~', ...Array.from({ length: 10 }).map((_, i) => `${i}`)]
 
