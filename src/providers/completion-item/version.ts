@@ -8,14 +8,12 @@ function isVersionPrefix(c: string) {
   return c === '^' || c === '~'
 }
 
-function getPrefix(v: string) {
+function extractVersionPrefix(v: string) {
   const firstChar = v[0]
   const valid = isVersionPrefix(firstChar)
 
   return valid ? firstChar : ''
 }
-
-export const triggerChars = ['.', '^', '~', ...Array.from({ length: 10 }).map((_, i) => `${i}`)]
 
 export class VersionCompletionItemProvider<T extends Extractor<any>> implements CompletionItemProvider {
   extractor: T
@@ -42,7 +40,7 @@ export class VersionCompletionItemProvider<T extends Extractor<any>> implements 
 
     const pkg = await getPackageInfo(name)
 
-    const prefix = getPrefix(version)
+    const prefix = extractVersionPrefix(version)
 
     let versionsKV = Object.values(pkg.versions)
 

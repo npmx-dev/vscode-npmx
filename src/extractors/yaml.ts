@@ -6,9 +6,12 @@ import { createCachedParse } from '#utils/data'
 import { Range } from 'vscode'
 import { isMap, isPair, isScalar, parseDocument } from 'yaml'
 
-type CatalogPair = Pair<Scalar<string>, Scalar<string>>
+const CATALOG_SECTION = 'catalog'
+const CATALOGS_SECTION = 'catalogs'
 
-type TraverseCatalogCallback = (catalog: CatalogPair) => boolean | void
+type CatalogEntry = Pair<Scalar<string>, Scalar<string>>
+
+type CatalogEntryVisitor = (catalog: CatalogEntry) => boolean | void
 
 export class YamlExtractor implements Extractor<Node> {
   parse = createCachedParse((text) => parseDocument(text).contents)
@@ -40,27 +43,36 @@ export class YamlExtractor implements Extractor<Node> {
     return result
   }
 
-  private traverseCatalogs(root: YAMLMap, callback: TraverseCatalogCallback) {
-    const catalog = root.items.find((i) => isScalar(i.key) && i.key.value === 'catalog')
-    this.traverseCatalog(catalog, callback)
+  private traverseCatalogs(root: YAMLMap, callback: CatalogEntryVisitor): boolean {
+    const catalog = root.items.find((i) => isScalar(i.key) && i.key.value === CATALOG_SECTION)
+    if (this.traverseCatalog(catalog, callback))
+      return true
 
-    const catalogs = root.items.find((i) => isScalar(i.key) && i.key.value === 'catalogs')
-    if (isMap(catalogs?.value))
-      catalogs.value.items.forEach((c) => this.traverseCatalog(c, callback))
+    const catalogs = root.items.find((i) => isScalar(i.key) && i.key.value === CATALOGS_SECTION)
+    if (isMap(catalogs?.value)) {
+      for (const c of catalogs.value.items) {
+        if (this.traverseCatalog(c, callback))
+          return true
+      }
+    }
+
+    return false
   }
 
-  private traverseCatalog(catalog: unknown, callback: TraverseCatalogCallback) {
+  private traverseCatalog(catalog: unknown, callback: CatalogEntryVisitor): boolean {
     if (!isPair(catalog))
-      return
+      return false
     if (!isMap(catalog.value))
-      return
+      return false
 
     for (const item of catalog.value.items) {
       if (isScalar(item.key) && isScalar(item.value)) {
-        if (callback(item as CatalogPair))
-          return
+        if (callback(item as CatalogEntry))
+          return true
       }
     }
+
+    return false
   }
 
   getDependencyInfoByOffset(root: Node, offset: number): DependencyInfo<Node> | undefined {

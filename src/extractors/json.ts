@@ -6,7 +6,7 @@ import { createCachedParse } from '#utils/data'
 import { findNodeAtLocation, findNodeAtOffset, parseTree } from 'jsonc-parser'
 import { Range } from 'vscode'
 
-const DEP_SECTIONS = [
+const DEPENDENCY_SECTIONS = [
   'dependencies',
   'devDependencies',
   'peerDependencies',
@@ -23,8 +23,8 @@ export class JsonExtractor implements Extractor<Node> {
     return new Range(start, end)
   }
 
-  inDependencySection(root: Node, node: Node) {
-    return DEP_SECTIONS.some((section) => {
+  isInDependencySection(root: Node, node: Node) {
+    return DEPENDENCY_SECTIONS.some((section) => {
       const dep = findNodeAtLocation(root, [section])
       if (!dep || !dep.parent)
         return false
@@ -35,7 +35,7 @@ export class JsonExtractor implements Extractor<Node> {
     })
   }
 
-  private convertNodeToDependencyInfo(node: Node): DependencyInfo<Node> | undefined {
+  private parseDependencyNode(node: Node): DependencyInfo<Node> | undefined {
     if (!node.children?.length)
       return
 
@@ -59,13 +59,13 @@ export class JsonExtractor implements Extractor<Node> {
   getDependenciesInfo(root: Node) {
     const result: DependencyInfo<Node>[] = []
 
-    DEP_SECTIONS.forEach((section) => {
+    DEPENDENCY_SECTIONS.forEach((section) => {
       const node = findNodeAtLocation(root, [section])
       if (!node || !node.children)
         return
 
       for (const dep of node.children) {
-        const info = this.convertNodeToDependencyInfo(dep)
+        const info = this.parseDependencyNode(dep)
 
         if (info)
           result.push(info)
@@ -77,9 +77,9 @@ export class JsonExtractor implements Extractor<Node> {
 
   getDependencyInfoByOffset(root: Node, offset: number) {
     const node = findNodeAtOffset(root, offset)
-    if (!node || node.type !== 'string' || !this.inDependencySection(root, node))
+    if (!node || node.type !== 'string' || !this.isInDependencySection(root, node))
       return
 
-    return this.convertNodeToDependencyInfo(node.parent!)
+    return this.parseDependencyNode(node.parent!)
   }
 }
