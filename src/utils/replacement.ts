@@ -13,13 +13,15 @@ const cache = new LRUCache<string, ModuleReplacement>({
   fetchMethod: async (name, staleValue, { signal }) => {
     const encodedName = encodePackageName(name)
 
-    logger.info(`fetching replacement for ${name}...`)
     try {
-      return await ofetch<ModuleReplacement>(`${NPMX_DEV_API}/replacements/${encodedName}`, { signal })
+      logger.info(`[${name}]: fetching replacement...`)
+      const r = await ofetch<ModuleReplacement>(`${NPMX_DEV_API}/replacements/${encodedName}`, { signal })
         // Fallback for cache compatibility (LRUCache rejects null/undefined)
         ?? {}
+      logger.info(`[${name}] fetching replacement done!`)
+      return r
     } catch (err) {
-      logger.warn('fetching replacement error: ', err)
+      logger.warn(`[${name}] fetching replacement error: `, err)
     }
   },
 })

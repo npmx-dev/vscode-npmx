@@ -33,29 +33,34 @@ const cache = new LRUCache<string, ResolvedPackument>({
   fetchMethod: async (name, staleValue, { signal }) => {
     const encodedName = encodePackageName(name)
 
-    logger.info(`fetching package info for ${name}...`)
-    const pkg = await ofetch<Packument>(`${NPM_REGISTRY}/${encodedName}`, { signal })
+    try {
+      logger.info(`[${name}] fetching package info...`)
+      const pkg = await ofetch<Packument>(`${NPM_REGISTRY}/${encodedName}`, { signal })
+      logger.info(`[${name}] fetching package info done!`)
 
-    const resolvedVersions = Object.fromEntries(
-      Object.keys(pkg.versions)
-        .filter((v) => pkg.time[v])
-        .map<[string, ResolvedPackumentVersion]>((v) => [
-          v,
-          {
-            version: v,
-            // @ts-expect-error present if published with provenance
-            hasProvenance: !!pkg.versions[v].dist.attestations,
-            deprecated: pkg.versions[v].deprecated,
-          },
-        ]),
-    )
+      const resolvedVersions = Object.fromEntries(
+        Object.keys(pkg.versions)
+          .filter((v) => pkg.time[v])
+          .map<[string, ResolvedPackumentVersion]>((v) => [
+            v,
+            {
+              version: v,
+              // @ts-expect-error present if published with provenance
+              hasProvenance: !!pkg.versions[v].dist.attestations,
+              deprecated: pkg.versions[v].deprecated,
+            },
+          ]),
+      )
 
-    Object.entries(pkg['dist-tags']).forEach(([tag, version]) => {
-      resolvedVersions[version].tag = tag
-    })
+      Object.entries(pkg['dist-tags']).forEach(([tag, version]) => {
+        resolvedVersions[version].tag = tag
+      })
 
-    return {
-      versions: resolvedVersions,
+      return {
+        versions: resolvedVersions,
+      }
+    } catch (err) {
+      logger.warn(`[${name}] fetching package info error: `, err)
     }
   },
 })
