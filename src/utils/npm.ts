@@ -1,5 +1,6 @@
 import type { Packument, PackumentVersion } from '@npm/types'
 import { NPM_REGISTRY } from '#constants'
+import { logger } from '#state'
 import { LRUCache } from 'lru-cache'
 import { ofetch } from 'ofetch'
 
@@ -32,6 +33,7 @@ const cache = new LRUCache<string, ResolvedPackument>({
   fetchMethod: async (name, staleValue, { signal }) => {
     const encodedName = encodePackageName(name)
 
+    logger.info(`fetching ${name}...`)
     const pkg = await ofetch<Packument>(`${NPM_REGISTRY}/${encodedName}`, { signal })
 
     const resolvedVersions = Object.fromEntries(
