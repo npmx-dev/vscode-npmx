@@ -25,12 +25,12 @@ export function encodePackageName(name: string): string {
   return encodeURIComponent(name)
 }
 
-export const getPackageInfo = createCachedFetch<ResolvedPackument>(
-  'package info',
-  async (name, { signal }) => {
+export const getPackageInfo = createCachedFetch<string, ResolvedPackument>({
+  namespace: 'package',
+  fetcher: async (name) => {
     const encodedName = encodePackageName(name)
 
-    const pkg = await ofetch<Packument>(`${NPM_REGISTRY}/${encodedName}`, { signal })
+    const pkg = await ofetch<Packument>(`${NPM_REGISTRY}/${encodedName}`)
 
     const resolvedVersions = Object.fromEntries(
       Object.keys(pkg.versions)
@@ -54,4 +54,4 @@ export const getPackageInfo = createCachedFetch<ResolvedPackument>(
       versions: resolvedVersions,
     }
   },
-)
+})

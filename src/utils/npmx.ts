@@ -5,13 +5,13 @@ import { encodePackageName } from './npm'
 
 export const NPMX_DEV_API = 'https://npmx.dev/api'
 
-export const getReplacement = createCachedFetch<ModuleReplacement>(
-  'replacement',
-  async (name, { signal }) => {
+export const getReplacement = createCachedFetch<string, ModuleReplacement>({
+  namespace: 'replacement',
+  fetcher: async (name) => {
     const encodedName = encodePackageName(name)
 
-    return await ofetch<ModuleReplacement>(`${NPMX_DEV_API}/replacements/${encodedName}`, { signal })
+    return await ofetch<ModuleReplacement>(`${NPMX_DEV_API}/replacements/${encodedName}`)
       // Fallback for cache compatibility (LRUCache rejects null/undefined)
       ?? {}
   },
-)
+})

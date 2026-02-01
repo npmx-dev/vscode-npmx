@@ -15,7 +15,6 @@ export default defineConfig({
     'jsonc-parser',
     'yaml',
     'ofetch',
-    'lru-cache',
   ],
   minify: 'dce-only',
 })
