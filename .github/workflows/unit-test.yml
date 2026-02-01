@@ -16,3 +16,5 @@ concurrency:
 jobs:
   unit-test:
     uses: sxzz/workflows/.github/workflows/unit-test.yml@v1
+    with:
+      node-versions: 22,"lts/*"

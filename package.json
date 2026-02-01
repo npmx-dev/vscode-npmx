@@ -63,6 +63,7 @@
     "postinstall": "npm run update",
     "update": "vscode-ext-gen --scope npmx",
     "check": "npm run lint:fix && npm run typecheck",
+    "test": "vitest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
