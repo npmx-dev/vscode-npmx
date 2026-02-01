@@ -1,4 +1,5 @@
 import type { Packument, PackumentVersion } from '@npm/types'
+import { logger } from '#state'
 import { ofetch } from 'ofetch'
 import { memoize } from './memoize'
 
@@ -26,9 +27,11 @@ export function encodePackageName(name: string): string {
 }
 
 export const getPackageInfo = memoize<string, Promise<ResolvedPackument>>(async (name) => {
+  logger.info(`Fetching package info for ${name}`)
   const encodedName = encodePackageName(name)
 
   const pkg = await ofetch<Packument>(`${NPM_REGISTRY}/${encodedName}`)
+  logger.info(`Fetched package info for ${name}`)
 
   const resolvedVersions = Object.fromEntries(
     Object.keys(pkg.versions)
