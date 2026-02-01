@@ -1,17 +1,17 @@
 import type { ModuleReplacement } from 'module-replacements'
+import { CACHE_TTL_ONE_DAY } from '#constants'
 import { ofetch } from 'ofetch'
-import { createCachedFetch } from './cache'
+import { memoize } from './memoize'
 import { encodePackageName } from './npm'
 
 export const NPMX_DEV_API = 'https://npmx.dev/api'
 
-export const getReplacement = createCachedFetch<string, ModuleReplacement>({
-  namespace: 'replacement',
-  fetcher: async (name) => {
-    const encodedName = encodePackageName(name)
+export const getReplacement = memoize<string, Promise<ModuleReplacement>>(async (name) => {
+  const encodedName = encodePackageName(name)
 
-    return await ofetch<ModuleReplacement>(`${NPMX_DEV_API}/replacements/${encodedName}`)
-      // Fallback for cache compatibility (LRUCache rejects null/undefined)
-      ?? {}
-  },
+  return await ofetch<ModuleReplacement>(`${NPMX_DEV_API}/replacements/${encodedName}`)
+    // Fallback for cache compatibility (LRUCache rejects null/undefined)
+    ?? {}
+}, {
+  ttl: CACHE_TTL_ONE_DAY,
 })

@@ -1,6 +1,7 @@
 import type { Packument, PackumentVersion } from '@npm/types'
+import { CACHE_TTL_ONE_DAY } from '#constants'
 import { ofetch } from 'ofetch'
-import { createCachedFetch } from './cache'
+import { memoize } from './memoize'
 
 const NPM_REGISTRY = 'https://registry.npmjs.org'
 
@@ -25,33 +26,32 @@ export function encodePackageName(name: string): string {
   return encodeURIComponent(name)
 }
 
-export const getPackageInfo = createCachedFetch<string, ResolvedPackument>({
-  namespace: 'package',
-  fetcher: async (name) => {
-    const encodedName = encodePackageName(name)
+export const getPackageInfo = memoize<string, Promise<ResolvedPackument>>(async (name) => {
+  const encodedName = encodePackageName(name)
 
-    const pkg = await ofetch<Packument>(`${NPM_REGISTRY}/${encodedName}`)
+  const pkg = await ofetch<Packument>(`${NPM_REGISTRY}/${encodedName}`)
 
-    const resolvedVersions = Object.fromEntries(
-      Object.keys(pkg.versions)
-        .filter((v) => pkg.time[v])
-        .map<[string, ResolvedPackumentVersion]>((v) => [
-          v,
-          {
-            version: v,
-            // @ts-expect-error present if published with provenance
-            hasProvenance: !!pkg.versions[v].dist.attestations,
-            deprecated: pkg.versions[v].deprecated,
-          },
-        ]),
-    )
+  const resolvedVersions = Object.fromEntries(
+    Object.keys(pkg.versions)
+      .filter((v) => pkg.time[v])
+      .map<[string, ResolvedPackumentVersion]>((v) => [
+        v,
+        {
+          version: v,
+          // @ts-expect-error present if published with provenance
+          hasProvenance: !!pkg.versions[v].dist.attestations,
+          deprecated: pkg.versions[v].deprecated,
+        },
+      ]),
+  )
 
-    Object.entries(pkg['dist-tags']).forEach(([tag, version]) => {
-      resolvedVersions[version].tag = tag
-    })
+  Object.entries(pkg['dist-tags']).forEach(([tag, version]) => {
+    resolvedVersions[version].tag = tag
+  })
 
-    return {
-      versions: resolvedVersions,
-    }
-  },
+  return {
+    versions: resolvedVersions,
+  }
+}, {
+  ttl: CACHE_TTL_ONE_DAY,
 })
