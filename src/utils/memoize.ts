@@ -1,26 +1,29 @@
+import type { Uri } from 'vscode'
 import { CACHE_TTL_ONE_DAY } from '#constants'
 
-export interface CachedOptions<K> {
-  getKey?: (params: K) => string
+type MemoizeKey = string | Uri
+
+export interface MemoizeOptions<K> {
+  getKey?: (params: K) => MemoizeKey
   ttl?: number
 }
 
-interface CacheEntry<V> {
+interface MemoizeEntry<V> {
   value: Awaited<V>
   expiresAt?: number
 }
 
-export function memoize<P, V>(fn: (params: P) => V, options: CachedOptions<P> = {}): (params: P) => V {
+export function memoize<P, V>(fn: (params: P) => V, options: MemoizeOptions<P> = {}): (params: P) => V {
   const {
     getKey = String,
     ttl = CACHE_TTL_ONE_DAY,
   } = options
 
-  const cache = new Map<string, CacheEntry<V>>()
-  const pending = new Map<string, V>()
+  const cache = new Map<MemoizeKey, MemoizeEntry<V>>()
+  const pending = new Map<MemoizeKey, V>()
 
-  function get(params: P): Awaited<V> | undefined {
-    const entry = cache.get(getKey(params))
+  function get(key: MemoizeKey): Awaited<V> | undefined {
+    const entry = cache.get(key)
     if (!entry)
       return
     if (entry.expiresAt && entry.expiresAt <= Date.now())
@@ -37,11 +40,12 @@ export function memoize<P, V>(fn: (params: P) => V, options: CachedOptions<P> = 
   }
 
   return function cachedFn(params: P): V {
-    const hit = get(params)
+    const key = getKey(params)
+
+    const hit = get(key)
     if (hit !== undefined)
       return hit
 
-    const key = getKey(params)
     const inflight = pending.get(key)
     if (inflight)
       return inflight
