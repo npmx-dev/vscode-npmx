@@ -7,12 +7,110 @@ import { encodePackageName } from './npm'
 export const NPMX_DEV_API = 'https://npmx.dev/api'
 
 export const getReplacement = memoize<string, Promise<ModuleReplacement>>(async (name) => {
-  logger.info(`Fetching replacement for ${name}`)
+  logger.info(`Fetching replacements for ${name}`)
   const encodedName = encodePackageName(name)
 
   const result = await ofetch<ModuleReplacement>(`${NPMX_DEV_API}/replacements/${encodedName}`)
-    // Fallback for cache compatibility (LRUCache rejects null/undefined)
-    ?? {}
-  logger.info(`Fetched replacement for ${name}`)
+  logger.info(`Fetched replacements for ${name}`)
+
   return result
+})
+
+/**
+ * Severity levels in priority order (highest first)
+ */
+export const SEVERITY_LEVELS = ['critical', 'high', 'moderate', 'low'] as const
+
+/**
+ * Severity level derived from CVSS score
+ */
+export type OsvSeverityLevel = (typeof SEVERITY_LEVELS)[number] | 'unknown'
+
+/**
+ * Simplified vulnerability info for display
+ */
+export interface VulnerabilitySummary {
+  id: string
+  summary: string
+  severity: OsvSeverityLevel
+  aliases: string[]
+  url: string
+}
+
+/** Depth in dependency tree */
+export type DependencyDepth = 'root' | 'direct' | 'transitive'
+
+/**
+ * Vulnerability info for a single package in the tree
+ */
+export interface PackageVulnerabilityInfo {
+  name: string
+  version: string
+  /** Depth in dependency tree: root (0), direct (1), transitive (2+) */
+  depth: DependencyDepth
+  /** Dependency path from root package */
+  path: string[]
+  vulnerabilities: VulnerabilitySummary[]
+  counts: {
+    total: number
+    critical: number
+    high: number
+    moderate: number
+    low: number
+  }
+}
+
+/**
+ * Deprecated package info in the dependency tree
+ */
+export interface DeprecatedPackageInfo {
+  name: string
+  version: string
+  /** Depth in dependency tree: root (0), direct (1), transitive (2+) */
+  depth: DependencyDepth
+  /** Dependency path from root package */
+  path: string[]
+  /** Deprecation message */
+  message: string
+}
+
+/**
+ * Result of dependency tree analysis
+ */
+export interface VulnerabilityTreeResult {
+  /** Root package name */
+  package: string
+  /** Root package version */
+  version: string
+  /** All packages with vulnerabilities in the tree */
+  vulnerablePackages: PackageVulnerabilityInfo[]
+  /** All deprecated packages in the tree */
+  deprecatedPackages: DeprecatedPackageInfo[]
+  /** Total packages analyzed */
+  totalPackages: number
+  /** Number of packages that could not be checked (OSV query failed) */
+  failedQueries: number
+  /** Aggregated counts across all packages */
+  totalCounts: {
+    total: number
+    critical: number
+    high: number
+    moderate: number
+    low: number
+  }
+}
+
+export const getVulnerability = memoize<{
+  name: string
+  version: string
+}, Promise<VulnerabilityTreeResult>>(async ({ name, version }) => {
+  logger.info(`Fetching vulnerabilities for ${name}`)
+  const encodedName = encodePackageName(name)
+
+  const result = await ofetch(`${NPMX_DEV_API}/registry/vulnerabilities/${encodedName}/v/${version}`)
+  logger.info(`Fetched vulnerabilities for ${name}`)
+
+  return result
+}, {
+  getKey: ({ name: packageName, version }) => `${packageName}:${version}`,
 })
