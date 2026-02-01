@@ -1,5 +1,4 @@
 import type { Packument, PackumentVersion } from '@npm/types'
-import { CACHE_TTL_ONE_DAY } from '#constants'
 import { ofetch } from 'ofetch'
 import { memoize } from './memoize'
 
@@ -52,6 +51,4 @@ export const getPackageInfo = memoize<string, Promise<ResolvedPackument>>(async 
   return {
     versions: resolvedVersions,
   }
-}, {
-  ttl: CACHE_TTL_ONE_DAY,
 })

@@ -1,5 +1,4 @@
 import type { ModuleReplacement } from 'module-replacements'
-import { CACHE_TTL_ONE_DAY } from '#constants'
 import { ofetch } from 'ofetch'
 import { memoize } from './memoize'
 import { encodePackageName } from './npm'
@@ -12,6 +11,4 @@ export const getReplacement = memoize<string, Promise<ModuleReplacement>>(async 
   return await ofetch<ModuleReplacement>(`${NPMX_DEV_API}/replacements/${encodedName}`)
     // Fallback for cache compatibility (LRUCache rejects null/undefined)
     ?? {}
-}, {
-  ttl: CACHE_TTL_ONE_DAY,
 })

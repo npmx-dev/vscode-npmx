@@ -2,7 +2,7 @@ import type { DependencyInfo, Extractor } from '#types/extractor'
 import type { Node } from 'jsonc-parser'
 import type { TextDocument } from 'vscode'
 import { isInRange } from '#utils/ast'
-import { createCachedParse } from '#utils/data'
+import { createCachedParse } from '#utils/parse'
 import { findNodeAtLocation, findNodeAtOffset, parseTree } from 'jsonc-parser'
 import { Range } from 'vscode'
 

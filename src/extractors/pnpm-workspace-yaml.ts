@@ -2,7 +2,7 @@ import type { DependencyInfo, Extractor } from '#types/extractor'
 import type { TextDocument } from 'vscode'
 import type { Node, Pair, Scalar, YAMLMap } from 'yaml'
 import { isInRange } from '#utils/ast'
-import { createCachedParse } from '#utils/data'
+import { createCachedParse } from '#utils/parse'
 import { Range } from 'vscode'
 import { isMap, isPair, isScalar, parseDocument } from 'yaml'
 

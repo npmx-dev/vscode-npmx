@@ -26,14 +26,15 @@ export function memoize<P, V>(fn: (params: P) => V, options: MemoizeOptions<P> =
     const entry = cache.get(key)
     if (!entry)
       return
+
     if (entry.expiresAt && entry.expiresAt <= Date.now())
       return
 
     return entry.value
   }
 
-  function set(params: P, value: Awaited<V>): void {
-    cache.set(getKey(params), {
+  function set(key: MemoizeKey, value: Awaited<V>): void {
+    cache.set(key, {
       value,
       expiresAt: ttl ? Date.now() + ttl : undefined,
     })
@@ -55,7 +56,7 @@ export function memoize<P, V>(fn: (params: P) => V, options: MemoizeOptions<P> =
     if (result instanceof Promise) {
       const promise = result
         .then((value) => {
-          set(params, value)
+          set(key, value)
           return value
         })
         .catch(() => cache.get(key)?.value)
@@ -65,7 +66,7 @@ export function memoize<P, V>(fn: (params: P) => V, options: MemoizeOptions<P> =
       pending.set(key, promise)
       return promise
     } else {
-      set(params, result as Awaited<V>)
+      set(key, result as Awaited<V>)
       return result
     }
   }
