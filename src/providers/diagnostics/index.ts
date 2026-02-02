@@ -1,5 +1,5 @@
 import type { DependencyInfo, Extractor, ValidNode } from '#types/extractor'
-import type { ResolvedPackument } from '#utils/npm'
+import type { PackageVersionsInfoWithMetadata } from 'fast-npm-meta'
 import type { Awaitable } from 'reactive-vscode'
 import type { Diagnostic, TextDocument } from 'vscode'
 import { basename } from 'node:path'
@@ -15,7 +15,7 @@ import { checkVulnerability } from './rules/vulnerability'
 export interface NodeDiagnosticInfo extends Pick<Diagnostic, 'message' | 'severity'> {
   node: ValidNode
 }
-export type DiagnosticRule = (dep: DependencyInfo, pkg: ResolvedPackument) => Awaitable<NodeDiagnosticInfo | undefined>
+export type DiagnosticRule = (dep: DependencyInfo, pkg: PackageVersionsInfoWithMetadata) => Awaitable<NodeDiagnosticInfo | undefined>
 
 function getEnabledRules(): DiagnosticRule[] {
   const rules: DiagnosticRule[] = []

@@ -15,6 +15,7 @@ export default defineConfig({
     'jsonc-parser',
     'yaml',
     'ofetch',
+    'fast-npm-meta',
   ],
   minify: 'dce-only',
 })

@@ -32,21 +32,27 @@ export class VersionCompletionItemProvider<T extends Extractor> implements Compl
 
     const prefix = extractVersionPrefix(version)
 
-    let versionsKV = Object.values(pkg.versions)
+    const items: CompletionItem[] = []
 
-    if (config.completion.version === 'provenance-only')
-      versionsKV = versionsKV.filter(({ hasProvenance }) => hasProvenance)
+    for (const version in pkg.versionsMeta) {
+      const meta = pkg.versionsMeta[version]
 
-    return versionsKV.map(({ version, tag }) => {
+      if (config.completion.version === 'provenance-only' && !meta.provenance)
+        continue
+
       const text = `${prefix}${version}`
       const item = new CompletionItem(text, CompletionItemKind.Value)
 
       item.range = this.extractor.getNodeRange(document, versionNode)
       item.insertText = text
+
+      const tag = pkg.versionToTag.get(version)
       if (tag)
         item.detail = tag
 
-      return item
-    })
+      items.push(item)
+    }
+
+    return items
   }
 }

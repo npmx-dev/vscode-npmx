@@ -1,19 +1,7 @@
-import type { Packument, PackumentVersion } from '@npm/types'
+import type { PackageVersionsInfoWithMetadata } from 'fast-npm-meta'
 import { logger } from '#state'
-import { ofetch } from 'ofetch'
+import { getVersions } from 'fast-npm-meta'
 import { memoize } from './memoize'
-
-const NPM_REGISTRY = 'https://registry.npmjs.org'
-
-interface ResolvedPackumentVersion extends Pick<PackumentVersion, 'version'> {
-  tag?: string
-  hasProvenance: boolean
-  deprecated?: string
-}
-
-export interface ResolvedPackument {
-  versions: Record<string, ResolvedPackumentVersion>
-}
 
 /**
  * Encode a package name for use in npm registry URLs.
@@ -26,32 +14,24 @@ export function encodePackageName(name: string): string {
   return encodeURIComponent(name)
 }
 
-export const getPackageInfo = memoize<string, Promise<ResolvedPackument>>(async (name) => {
-  logger.info(`Fetching package info for ${name}`)
-  const encodedName = encodePackageName(name)
+export interface PackageInfo extends PackageVersionsInfoWithMetadata {
+  versionToTag: Map<string, string>
+}
 
-  const pkg = await ofetch<Packument>(`${NPM_REGISTRY}/${encodedName}`)
+export const getPackageInfo = memoize<string, Promise<PackageInfo>>(async (name) => {
+  logger.info(`Fetching package info for ${name}`)
+
+  const pkg = await getVersions(name, {
+    metadata: true,
+  })
   logger.info(`Fetched package info for ${name}`)
 
-  const resolvedVersions = Object.fromEntries(
-    Object.keys(pkg.versions)
-      .filter((v) => pkg.time[v])
-      .map<[string, ResolvedPackumentVersion]>((v) => [
-        v,
-        {
-          version: v,
-          // @ts-expect-error present if published with provenance
-          hasProvenance: !!pkg.versions[v].dist.attestations,
-          deprecated: pkg.versions[v].deprecated,
-        },
-      ]),
-  )
-
-  Object.entries(pkg['dist-tags']).forEach(([tag, version]) => {
-    resolvedVersions[version].tag = tag
-  })
-
-  return {
-    versions: resolvedVersions,
+  const versionToTag = new Map<string, string>()
+  if (pkg.distTags) {
+    for (const [tag, ver] of Object.entries(pkg.distTags)) {
+      versionToTag.set(ver, tag)
+    }
   }
+
+  return { ...pkg, versionToTag }
 })

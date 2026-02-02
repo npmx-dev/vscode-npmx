@@ -27,10 +27,10 @@ export class NpmxHoverProvider<T extends Extractor> implements HoverProvider {
     md.isTrusted = true
 
     const pkg = await getPackageInfo(name)
-    const currentVersion = pkg.versions[coercedVersion]
+    const currentVersion = pkg.versionsMeta[coercedVersion]
     if (currentVersion) {
-      if (currentVersion.hasProvenance)
-        md.appendMarkdown(`[$(verified) Verified provenance](https://www.npmjs.com/package/${name}/v/${currentVersion.version}#provenance)\n\n`)
+      if (currentVersion.provenance)
+        md.appendMarkdown(`[$(verified) Verified provenance](https://www.npmjs.com/package/${name}/v/${version}#provenance)\n\n`)
     }
 
     const footer = [
