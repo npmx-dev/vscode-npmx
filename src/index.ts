@@ -5,8 +5,8 @@ import {
   PNPM_WORKSPACE_PATTERN,
   VERSION_TRIGGER_CHARACTERS,
 } from '#constants'
-import { defineExtension } from 'reactive-vscode'
-import { languages } from 'vscode'
+import { defineExtension, watchEffect } from 'reactive-vscode'
+import { Disposable, languages } from 'vscode'
 import { PackageJsonExtractor } from './extractors/package-json'
 import { PnpmWorkspaceYamlExtractor } from './extractors/pnpm-workspace-yaml'
 import { displayName, version } from './generated-meta'
@@ -15,14 +15,17 @@ import { registerDiagnosticCollection } from './providers/diagnostics'
 import { NpmxHoverProvider } from './providers/hover/npmx'
 import { config, logger } from './state'
 
-export const { activate, deactivate } = defineExtension((ctx) => {
+export const { activate, deactivate } = defineExtension(() => {
   logger.info(`${displayName} Activated, v${version}`)
 
   const packageJsonExtractor = new PackageJsonExtractor()
   const pnpmWorkspaceYamlExtractor = new PnpmWorkspaceYamlExtractor()
 
-  if (config.hover.enabled) {
-    ctx.subscriptions.push(
+  watchEffect((onCleanup) => {
+    if (!config.hover.enabled)
+      return
+
+    const disposables = [
       languages.registerHoverProvider(
         { pattern: PACKAGE_JSON_PATTERN },
         new NpmxHoverProvider(packageJsonExtractor),
@@ -31,11 +34,16 @@ export const { activate, deactivate } = defineExtension((ctx) => {
         { pattern: PNPM_WORKSPACE_PATTERN },
         new NpmxHoverProvider(pnpmWorkspaceYamlExtractor),
       ),
-    )
-  }
+    ]
 
-  if (config.completion.version !== 'off') {
-    ctx.subscriptions.push(
+    onCleanup(() => Disposable.from(...disposables).dispose())
+  })
+
+  watchEffect((onCleanup) => {
+    if (config.completion.version === 'off')
+      return
+
+    const disposables = [
       languages.registerCompletionItemProvider(
         { pattern: PACKAGE_JSON_PATTERN },
         new VersionCompletionItemProvider(packageJsonExtractor),
@@ -46,8 +54,10 @@ export const { activate, deactivate } = defineExtension((ctx) => {
         new VersionCompletionItemProvider(pnpmWorkspaceYamlExtractor),
         ...VERSION_TRIGGER_CHARACTERS,
       ),
-    )
-  }
+    ]
+
+    onCleanup(() => Disposable.from(...disposables).dispose())
+  })
 
   registerDiagnosticCollection({
     [PACKAGE_JSON_BASENAME]: packageJsonExtractor,
