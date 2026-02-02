@@ -10,6 +10,7 @@ import { languages } from 'vscode'
 import { displayName } from '../../generated-meta'
 import { checkDeprecation } from './rules/deprecation'
 import { checkReplacement } from './rules/replacement'
+import { checkVulnerability } from './rules/vulnerability'
 
 export interface NodeDiagnosticInfo extends Pick<Diagnostic, 'message' | 'severity'> {
   node: ValidNode
@@ -19,6 +20,7 @@ export type DiagnosticRule = (dep: DependencyInfo, pkg: ResolvedPackument) => Aw
 const rules: DiagnosticRule[] = [
   checkDeprecation,
   checkReplacement,
+  checkVulnerability,
 ]
 
 export function registerDiagnosticCollection(mapping: Record<string, Extractor | undefined>) {
