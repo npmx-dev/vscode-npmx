@@ -1,7 +1,7 @@
 import type { Extractor } from '#types/extractor'
 import type { HoverProvider, Position, TextDocument } from 'vscode'
-import { getPackageInfo } from '#utils/npm'
-import { extractVersion } from '#utils/version'
+import { getPackageInfo } from '#utils/api/package'
+import { extractVersion } from '#utils/package'
 import { Hover, MarkdownString } from 'vscode'
 
 export class NpmxHoverProvider<T extends Extractor> implements HoverProvider {

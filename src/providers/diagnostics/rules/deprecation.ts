@@ -1,5 +1,5 @@
 import type { DiagnosticRule } from '..'
-import { extractVersion } from '#utils/version'
+import { extractVersion } from '#utils/package'
 import { DiagnosticSeverity } from 'vscode'
 
 export const checkDeprecation: DiagnosticRule = (dep, pkg) => {

@@ -1,8 +1,8 @@
 import type { Extractor } from '#types/extractor'
 import type { CompletionItemProvider, Position, TextDocument } from 'vscode'
 import { config } from '#state'
-import { getPackageInfo } from '#utils/npm'
-import { extractVersionPrefix } from '#utils/version'
+import { getPackageInfo } from '#utils/api/package'
+import { extractVersionPrefix } from '#utils/package'
 import { CompletionItem, CompletionItemKind } from 'vscode'
 
 export class VersionCompletionItemProvider<T extends Extractor> implements CompletionItemProvider {
