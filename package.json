@@ -3,7 +3,7 @@
   "name": "vscode-npmx",
   "displayName": "npmx",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "packageManager": "pnpm@10.28.2",
   "description": "A better browser for the npm registry",
   "author": {
@@ -71,7 +71,7 @@
     "vscode:prepublish": "npm run build",
     "publish": "vsce publish --no-dependencies",
     "package": "vsce package --no-dependencies",
-    "release": "bumpp"
+    "release": "npx bumpp"
   },
   "nano-staged": {
     "*": "eslint --fix"
