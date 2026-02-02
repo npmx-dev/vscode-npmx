@@ -5,15 +5,16 @@ import {
   PNPM_WORKSPACE_PATTERN,
   VERSION_TRIGGER_CHARACTERS,
 } from '#constants'
-import { defineExtension } from 'reactive-vscode'
-import { languages } from 'vscode'
+import { defineExtension, useCommand } from 'reactive-vscode'
+import { languages, window } from 'vscode'
 import { PackageJsonExtractor } from './extractors/package-json'
 import { PnpmWorkspaceYamlExtractor } from './extractors/pnpm-workspace-yaml'
-import { displayName, version } from './generated-meta'
+import { commands, displayName, version } from './generated-meta'
 import { VersionCompletionItemProvider } from './providers/completion-item/version'
 import { registerDiagnosticCollection } from './providers/diagnostics'
 import { NpmxHoverProvider } from './providers/hover/npmx'
 import { config, logger } from './state'
+import { clearAllCaches } from './utils/memoize'
 
 export const { activate, deactivate } = defineExtension((ctx) => {
   logger.info(`${displayName} Activated, v${version}`)
@@ -52,5 +53,11 @@ export const { activate, deactivate } = defineExtension((ctx) => {
   registerDiagnosticCollection({
     [PACKAGE_JSON_BASENAME]: packageJsonExtractor,
     [PNPM_WORKSPACE_BASENAME]: pnpmWorkspaceYamlExtractor,
+  })
+
+  useCommand(commands.clearCache, () => {
+    clearAllCaches()
+    logger.info('Cache cleared')
+    window.showInformationMessage('npmx: Cache cleared')
   })
 })

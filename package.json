@@ -76,7 +76,14 @@
           "description": "Show warnings for packages with known vulnerabilities"
         }
       }
-    }
+    },
+    "commands": [
+      {
+        "command": "npmx.clearCache",
+        "title": "Clear Cache",
+        "category": "npmx"
+      }
+    ]
   },
   "scripts": {
     "dev": "tsdown --watch",

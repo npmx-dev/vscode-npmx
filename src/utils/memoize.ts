@@ -13,6 +13,14 @@ interface MemoizeEntry<V> {
   expiresAt?: number
 }
 
+const cacheRegistry: Map<MemoizeKey, unknown>[] = []
+
+export function clearAllCaches(): void {
+  for (const cache of cacheRegistry) {
+    cache.clear()
+  }
+}
+
 export function memoize<P, V>(fn: (params: P) => V, options: MemoizeOptions<P> = {}): (params: P) => V {
   const {
     getKey = String,
@@ -21,6 +29,8 @@ export function memoize<P, V>(fn: (params: P) => V, options: MemoizeOptions<P> =
 
   const cache = new Map<MemoizeKey, MemoizeEntry<V>>()
   const pending = new Map<MemoizeKey, V>()
+
+  cacheRegistry.push(cache as Map<MemoizeKey, unknown>)
 
   function get(key: MemoizeKey): Awaited<V> | undefined {
     const entry = cache.get(key)
