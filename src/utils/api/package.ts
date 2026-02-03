@@ -17,12 +17,20 @@ export const getPackageInfo = memoize<string, Promise<PackageInfo | null>>(async
 
   const pkg = await getVersions(name, {
     metadata: true,
-  }).catch((err) => {
-    logger.warn(`Fetching package info for ${name} error: `, err)
-
-    if (typeof err === 'string' && err.includes('404 Not Found'))
-      return null
+    throw: false,
   })
+
+  if ('error' in pkg) {
+    logger.warn(`Fetching package info for ${name} error: ${JSON.stringify(pkg)}`)
+
+    // TODO: waiting https://github.com/antfu/fast-npm-meta/pull/27
+    // Return null to trigger a cache hit
+    if (pkg.error.includes('404'))
+      return null
+
+    throw pkg
+  }
+
   logger.info(`Fetched package info for ${name}`)
 
   if (!pkg)
