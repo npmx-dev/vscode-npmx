@@ -9,11 +9,11 @@ export type {
   ModuleReplacement,
 }
 
-export const getReplacement = memoize<string, Promise<ModuleReplacement>>(async (name) => {
+export const getReplacement = memoize<string, Promise<ModuleReplacement | null>>(async (name) => {
   logger.info(`Fetching replacements for ${name}`)
   const encodedName = encodePackageName(name)
 
-  const result = await ofetch<ModuleReplacement>(`${NPMX_DEV_API}/replacements/${encodedName}`)
+  const result = await ofetch<ModuleReplacement | undefined>(`${NPMX_DEV_API}/replacements/${encodedName}`) ?? null
   logger.info(`Fetched replacements for ${name}`)
 
   return result
