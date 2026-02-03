@@ -7,6 +7,11 @@ export interface PackageInfo extends PackageVersionsInfoWithMetadata {
   versionToTag: Map<string, string>
 }
 
+/**
+ * Fetch npm package versions and build a version-to-tag lookup map.
+ *
+ * @see https://github.com/antfu/fast-npm-meta
+ */
 export const getPackageInfo = memoize<string, Promise<PackageInfo>>(async (name) => {
   logger.info(`Fetching package info for ${name}`)
 

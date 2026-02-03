@@ -3,7 +3,11 @@ import type { DiagnosticRule } from '..'
 import { getReplacement } from '#utils/api/replacement'
 import { DiagnosticSeverity } from 'vscode'
 
-// https://github.com/npmx-dev/npmx.dev/blob/main/app/components/PackageReplacement.vue#L8-L30
+/**
+ * Keep messages in sync with npmx.dev wording.
+ *
+ * https://github.com/npmx-dev/npmx.dev/blob/main/app/components/PackageReplacement.vue#L8-L30
+ */
 function generateMessage(replacement: ModuleReplacement) {
   switch (replacement.type) {
     case 'native':
