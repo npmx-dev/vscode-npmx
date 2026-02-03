@@ -27,6 +27,9 @@ export class NpmxHoverProvider<T extends Extractor> implements HoverProvider {
     md.isTrusted = true
 
     const pkg = await getPackageInfo(name)
+    if (!pkg)
+      return
+
     const currentVersion = pkg.versionsMeta[coercedVersion]
     if (currentVersion) {
       if (currentVersion.provenance)

@@ -12,13 +12,21 @@ export interface PackageInfo extends PackageVersionsInfoWithMetadata {
  *
  * @see https://github.com/antfu/fast-npm-meta
  */
-export const getPackageInfo = memoize<string, Promise<PackageInfo>>(async (name) => {
+export const getPackageInfo = memoize<string, Promise<PackageInfo | null>>(async (name) => {
   logger.info(`Fetching package info for ${name}`)
 
   const pkg = await getVersions(name, {
     metadata: true,
+  }).catch((err) => {
+    logger.warn(`Fetching package info for ${name} error: `, err)
+
+    if (typeof err === 'string' && err.includes('404 Not Found'))
+      return null
   })
   logger.info(`Fetched package info for ${name}`)
+
+  if (!pkg)
+    return null
 
   const versionToTag = new Map<string, string>()
   if (pkg.distTags) {
