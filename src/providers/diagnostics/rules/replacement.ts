@@ -23,8 +23,7 @@ function generateMessage(replacement: ModuleReplacement) {
 
 export const checkReplacement: DiagnosticRule = async (dep) => {
   const replacement = await getReplacement(dep.name)
-  // Fallback for cache compatibility (LRUCache rejects null/undefined)
-  if (!replacement || !('type' in replacement))
+  if (!replacement)
     return
 
   return {

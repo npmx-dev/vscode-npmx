@@ -5,7 +5,7 @@ import type { Diagnostic, TextDocument } from 'vscode'
 import { basename } from 'node:path'
 import { config, logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
-import { useActiveTextEditor, useDocumentText, watch } from 'reactive-vscode'
+import { computed, useActiveTextEditor, useDocumentText, watch } from 'reactive-vscode'
 import { languages } from 'vscode'
 import { displayName } from '../../generated-meta'
 import { checkDeprecation } from './rules/deprecation'
@@ -17,7 +17,7 @@ export interface NodeDiagnosticInfo extends Pick<Diagnostic, 'message' | 'severi
 }
 export type DiagnosticRule = (dep: DependencyInfo, pkg: PackageInfo) => Awaitable<NodeDiagnosticInfo | undefined>
 
-function getEnabledRules(): DiagnosticRule[] {
+const enabledRules = computed<DiagnosticRule[]>(() => {
   const rules: DiagnosticRule[] = []
   if (config.diagnostics.deprecation)
     rules.push(checkDeprecation)
@@ -26,7 +26,7 @@ function getEnabledRules(): DiagnosticRule[] {
   if (config.diagnostics.vulnerability)
     rules.push(checkVulnerability)
   return rules
-}
+})
 
 export function registerDiagnosticCollection(mapping: Record<string, Extractor | undefined>) {
   const diagnosticCollection = languages.createDiagnosticCollection(displayName)
@@ -49,7 +49,7 @@ export function registerDiagnosticCollection(mapping: Record<string, Extractor |
         try {
           const pkg = await getPackageInfo(dep.name)
 
-          for (const rule of getEnabledRules()) {
+          for (const rule of enabledRules.value) {
             const diagnostic = await rule(dep, pkg)
 
             if (diagnostic) {

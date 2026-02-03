@@ -76,7 +76,14 @@
           "description": "Show warnings for packages with known vulnerabilities"
         }
       }
-    }
+    },
+    "commands": [
+      {
+        "command": "npmx.openInBrowser",
+        "title": "Open npmx.dev in external browser",
+        "category": "npmx"
+      }
+    ]
   },
   "scripts": {
     "dev": "tsdown --watch",
