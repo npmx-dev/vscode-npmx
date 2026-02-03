@@ -14,7 +14,7 @@ const DEPENDENCY_SECTIONS = [
 ]
 
 export class PackageJsonExtractor implements Extractor<Node> {
-  parse = createCachedParse(parseTree)
+  parse = createCachedParse((text) => parseTree(text) ?? null)
 
   getNodeRange(doc: TextDocument, node: Node) {
     const start = doc.positionAt(node.offset + 1)
