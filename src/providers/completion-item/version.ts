@@ -2,7 +2,7 @@ import type { Extractor } from '#types/extractor'
 import type { CompletionItemProvider, Position, TextDocument } from 'vscode'
 import { config } from '#state'
 import { getPackageInfo } from '#utils/api/package'
-import { extractVersionPrefix } from '#utils/package'
+import { parseVersion } from '#utils/package'
 import { CompletionItem, CompletionItemKind } from 'vscode'
 
 export class VersionCompletionItemProvider<T extends Extractor> implements CompletionItemProvider {
@@ -32,7 +32,11 @@ export class VersionCompletionItemProvider<T extends Extractor> implements Compl
     if (!pkg)
       return
 
-    const prefix = extractVersionPrefix(version)
+    const parsed = parseVersion(version)
+    if (!parsed)
+      return
+
+    const { prefix } = parsed
 
     const items: CompletionItem[] = []
 

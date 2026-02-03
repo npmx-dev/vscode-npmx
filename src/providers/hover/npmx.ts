@@ -2,7 +2,7 @@ import type { Extractor } from '#types/extractor'
 import type { HoverProvider, Position, TextDocument } from 'vscode'
 import { getPackageInfo } from '#utils/api/package'
 import { npmPacakgeUrl, npmxDocsUrl, npmxPackageUrl } from '#utils/links'
-import { extractVersion } from '#utils/package'
+import { parseVersion } from '#utils/package'
 import { Hover, MarkdownString } from 'vscode'
 
 export class NpmxHoverProvider<T extends Extractor> implements HoverProvider {
@@ -22,24 +22,30 @@ export class NpmxHoverProvider<T extends Extractor> implements HoverProvider {
     if (!dep)
       return
 
-    const { name, version } = dep
-    const coercedVersion = extractVersion(version)
-    const md = new MarkdownString('', true)
-    md.isTrusted = true
+    const parsed = parseVersion(dep.version)
+    if (!parsed)
+      return
+
+    const { name } = dep
 
     const pkg = await getPackageInfo(name)
     if (!pkg)
       return
 
-    const currentVersion = pkg.versionsMeta[coercedVersion]
+    const md = new MarkdownString('', true)
+    md.isTrusted = true
+
+    const { version } = parsed
+
+    const currentVersion = pkg.versionsMeta[version]
     if (currentVersion) {
       if (currentVersion.provenance)
-        md.appendMarkdown(`[$(verified) Verified provenance](${npmPacakgeUrl(name, coercedVersion)}#provenance)\n\n`)
+        md.appendMarkdown(`[$(verified) Verified provenance](${npmPacakgeUrl(name, version)}#provenance)\n\n`)
     }
 
     const footer = [
       `[View on npmx](${npmxPackageUrl(name)})`,
-      `[View docs on npmx](${npmxDocsUrl(name, coercedVersion)})`,
+      `[View docs on npmx](${npmxDocsUrl(name, version)})`,
     ]
 
     md.appendMarkdown(`${footer.join(' | ')}\n`)
