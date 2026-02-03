@@ -13,14 +13,16 @@ interface MemoizeEntry<V> {
   expiresAt?: number
 }
 
-export function memoize<P, V>(fn: (params: P) => V, options: MemoizeOptions<P> = {}): (params: P) => V {
+type MemoizeReturn<R> = R extends Promise<infer V> ? Promise<V | undefined> : R | undefined
+
+export function memoize<P, V>(fn: (params: P) => V, options: MemoizeOptions<P> = {}): (params: P) => MemoizeReturn<V> {
   const {
     getKey = String,
     ttl = CACHE_TTL_ONE_DAY,
   } = options
 
   const cache = new Map<MemoizeKey, MemoizeEntry<V>>()
-  const pending = new Map<MemoizeKey, V>()
+  const pending = new Map<MemoizeKey, Promise<any>>()
 
   function get(key: MemoizeKey): Awaited<V> | undefined {
     const entry = cache.get(key)
@@ -40,7 +42,7 @@ export function memoize<P, V>(fn: (params: P) => V, options: MemoizeOptions<P> =
     })
   }
 
-  return function cachedFn(params: P): V {
+  return function cachedFn(params: P) {
     const key = getKey(params)
 
     const hit = get(key)
@@ -62,10 +64,10 @@ export function memoize<P, V>(fn: (params: P) => V, options: MemoizeOptions<P> =
         .catch(() => cache.get(key)?.value)
         .finally(() => {
           pending.delete(key)
-        }) as V
+        }) as any
       pending.set(key, promise)
       return promise
-    } else {
+    } else if (result !== undefined) {
       set(key, result as Awaited<V>)
       return result
     }

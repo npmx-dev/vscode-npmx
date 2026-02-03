@@ -29,6 +29,8 @@ export class VersionCompletionItemProvider<T extends Extractor> implements Compl
     } = info
 
     const pkg = await getPackageInfo(name)
+    if (!pkg)
+      return
 
     const prefix = extractVersionPrefix(version)
 

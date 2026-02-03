@@ -48,6 +48,8 @@ export function registerDiagnosticCollection(mapping: Record<string, Extractor |
       dependencies.map(async (dep) => {
         try {
           const pkg = await getPackageInfo(dep.name)
+          if (!pkg)
+            return
 
           for (const rule of enabledRules.value) {
             const diagnostic = await rule(dep, pkg)
