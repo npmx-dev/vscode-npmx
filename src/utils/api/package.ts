@@ -32,9 +32,6 @@ export const getPackageInfo = memoize<string, Promise<PackageInfo | null>>(async
 
   logger.info(`Fetched package info for ${name}`)
 
-  if (!pkg)
-    return null
-
   const versionToTag = new Map<string, string>()
   if (pkg.distTags) {
     for (const [tag, ver] of Object.entries(pkg.distTags)) {
