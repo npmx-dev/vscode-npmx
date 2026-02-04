@@ -12,7 +12,7 @@ import { checkDeprecation } from './rules/deprecation'
 import { checkReplacement } from './rules/replacement'
 import { checkVulnerability } from './rules/vulnerability'
 
-export interface NodeDiagnosticInfo extends Pick<Diagnostic, 'message' | 'severity'> {
+export interface NodeDiagnosticInfo extends Pick<Diagnostic, 'message' | 'severity' | 'code'> {
   node: ValidNode
 }
 export type DiagnosticRule = (dep: DependencyInfo, pkg: PackageInfo) => Awaitable<NodeDiagnosticInfo | undefined>
@@ -59,6 +59,7 @@ export function registerDiagnosticCollection(mapping: Record<string, Extractor |
                 source: displayName,
                 message: diagnostic.message,
                 severity: diagnostic.severity,
+                code: diagnostic.code,
                 range: extractor.getNodeRange(document, diagnostic.node),
               })
             }
