@@ -8,7 +8,6 @@ export const VERSION_TRIGGER_CHARACTERS = ['.', '^', '~', ...Array.from({ length
 
 export const CACHE_TTL_ONE_DAY = 1000 * 60 * 60 * 24
 
+export const NPMJS_COM = 'https://npmjs.com'
 export const NPMX_DEV = 'https://npmx.dev'
-
-export const NPM_REGISTRY = 'https://registry.npmjs.org'
 export const NPMX_DEV_API = `${NPMX_DEV}/api`
