@@ -1,5 +1,6 @@
 import type { Extractor } from '#types/extractor'
 import type { HoverProvider, Position, TextDocument } from 'vscode'
+import { SPACER } from '#constants'
 import { getPackageInfo } from '#utils/api/package'
 import { npmPacakgeUrl, npmxDocsUrl, npmxPackageUrl } from '#utils/links'
 import { extractVersion } from '#utils/package'
@@ -37,12 +38,11 @@ export class NpmxHoverProvider<T extends Extractor> implements HoverProvider {
         md.appendMarkdown(`[$(verified) Verified provenance](${npmPacakgeUrl(name, coercedVersion)}#provenance)\n\n`)
     }
 
-    const footer = [
-      `[View on npmx](${npmxPackageUrl(name)})`,
-      `[View docs on npmx](${npmxDocsUrl(name, coercedVersion)})`,
-    ]
+    const packageLink = `[$(package)${SPACER}View on npmx](${npmxPackageUrl(name)})`
+    const docsLink = `[$(book)${SPACER}View docs on npmx](${npmxDocsUrl(name, coercedVersion)})`
+    const footerLinks = [packageLink, docsLink]
 
-    md.appendMarkdown(`${footer.join(' | ')}\n`)
+    md.appendMarkdown(`${footerLinks.join(' | ')}\n\n---\n`)
 
     return new Hover(md)
   }
