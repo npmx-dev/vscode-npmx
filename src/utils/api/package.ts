@@ -23,9 +23,8 @@ export const getPackageInfo = memoize<string, Promise<PackageInfo | null>>(async
   if ('error' in pkg) {
     logger.warn(`Fetching package info for ${name} error: ${JSON.stringify(pkg)}`)
 
-    // TODO: waiting https://github.com/antfu/fast-npm-meta/pull/27
     // Return null to trigger a cache hit
-    if (pkg.error.includes('404'))
+    if (pkg.status === 404)
       return null
 
     throw pkg
