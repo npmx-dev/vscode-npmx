@@ -40,9 +40,8 @@ export class NpmxHoverProvider<T extends Extractor> implements HoverProvider {
 
     const packageLink = `[$(package)${SPACER}View on npmx](${npmxPackageUrl(name)})`
     const docsLink = `[$(book)${SPACER}View docs on npmx](${npmxDocsUrl(name, coercedVersion)})`
-    const footerLinks = [packageLink, docsLink]
 
-    md.appendMarkdown(`${footerLinks.join(' | ')}\n\n---\n`)
+    md.appendMarkdown(`${packageLink} | ${docsLink}`)
 
     return new Hover(md)
   }
