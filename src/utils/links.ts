@@ -1,7 +1,9 @@
 import { NPMJS_COM, NPMX_DEV } from '#constants'
 
 export function npmPacakgeUrl(name: string, version?: string): string {
-  return `${NPMJS_COM}/package/${name}/v/${version}`
+  return version
+    ? `${NPMJS_COM}/package/${name}/v/${version}`
+    : `${NPMJS_COM}/package/${name}`
 }
 
 export function npmxPackageUrl(name: string, version?: string): string {
