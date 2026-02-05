@@ -28,12 +28,12 @@ export class VersionCompletionItemProvider<T extends Extractor> implements Compl
       version,
     } = info
 
-    const pkg = await getPackageInfo(name)
-    if (!pkg)
-      return
-
     const parsed = parseVersion(version)
     if (!parsed)
+      return
+
+    const pkg = await getPackageInfo(name)
+    if (!pkg)
       return
 
     const items: CompletionItem[] = []
