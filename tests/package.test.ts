@@ -14,41 +14,41 @@ describe('encodePackageName', () => {
 describe('parseVersion', () => {
   it('should parse plain version', () => {
     expect(parseVersion('1.0.0')).toEqual({
-      prefix: '',
-      version: '1.0.0',
       protocol: null,
+      prefix: '',
+      semver: '1.0.0',
     })
   })
 
   it('should parse version with ^ prefix', () => {
     expect(parseVersion('^1.2.3')).toEqual({
-      prefix: '^',
-      version: '1.2.3',
       protocol: null,
+      prefix: '^',
+      semver: '1.2.3',
     })
   })
 
   it('should parse version with ~ prefix', () => {
     expect(parseVersion('~2.0.0')).toEqual({
-      prefix: '~',
-      version: '2.0.0',
       protocol: null,
+      prefix: '~',
+      semver: '2.0.0',
     })
   })
 
   it('should parse npm: protocol', () => {
     expect(parseVersion('npm:1.0.0')).toEqual({
-      prefix: '',
-      version: '1.0.0',
       protocol: 'npm',
+      prefix: '',
+      semver: '1.0.0',
     })
   })
 
   it('should parse npm: protocol with prefix', () => {
     expect(parseVersion('npm:^1.0.0')).toEqual({
-      prefix: '^',
-      version: '1.0.0',
       protocol: 'npm',
+      prefix: '^',
+      semver: '1.0.0',
     })
   })
 

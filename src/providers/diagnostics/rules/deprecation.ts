@@ -8,19 +8,19 @@ export const checkDeprecation: DiagnosticRule = (dep, pkg) => {
   if (!parsed)
     return
 
-  const { version } = parsed
-  const versionInfo = pkg.versionsMeta[version]
+  const { semver } = parsed
+  const versionInfo = pkg.versionsMeta[semver]
 
   if (!versionInfo?.deprecated)
     return
 
   return {
     node: dep.versionNode,
-    message: `${dep.name} v${version} has been deprecated: ${versionInfo.deprecated}`,
+    message: `${dep.name} v${semver} has been deprecated: ${versionInfo.deprecated}`,
     severity: DiagnosticSeverity.Error,
     code: {
       value: 'deprecation',
-      target: Uri.parse(npmxPackageUrl(dep.name, version)),
+      target: Uri.parse(npmxPackageUrl(dep.name, semver)),
     },
     tags: [DiagnosticTag.Deprecated],
   }
