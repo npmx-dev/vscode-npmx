@@ -1,7 +1,7 @@
 import type { DiagnosticRule } from '..'
 import { npmxPackageUrl } from '#utils/links'
 import { parseVersion } from '#utils/package'
-import { DiagnosticSeverity, Uri } from 'vscode'
+import { DiagnosticSeverity, DiagnosticTag, Uri } from 'vscode'
 
 export const checkDeprecation: DiagnosticRule = (dep, pkg) => {
   const parsed = parseVersion(dep.version)
@@ -22,5 +22,6 @@ export const checkDeprecation: DiagnosticRule = (dep, pkg) => {
       value: 'deprecation',
       target: Uri.parse(npmxPackageUrl(dep.name, version)),
     },
+    tags: [DiagnosticTag.Deprecated],
   }
 }

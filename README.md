@@ -42,6 +42,10 @@
 
 <!-- configs -->
 
+## Contributing
+
+Contributions are welcome! Please review our [contribution guide](./CONTRIBUTING.md) for more details.
+
 ## License
 
 [MIT](./LICENSE) License &copy; 2026-PRESENT [Vida Xie](https://github.com/9romise)
