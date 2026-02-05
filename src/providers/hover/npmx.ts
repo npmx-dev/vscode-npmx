@@ -65,8 +65,8 @@ export class NpmxHoverProvider<T extends Extractor> implements HoverProvider {
         md.appendMarkdown(`[$(verified)${SPACER}Verified provenance](${npmPackageUrl(name, semver)}#provenance)\n\n`)
     }
 
-    const packageLink = `[$(package)${SPACER}View on npmx](${npmxPackageUrl(name)})`
-    const docsLink = `[$(book)${SPACER}View docs on npmx](${npmxDocsUrl(name, semver)})`
+    const packageLink = `[$(package)${SPACER}View on npmx.dev](${npmxPackageUrl(name)})`
+    const docsLink = `[$(book)${SPACER}View docs on npmx.dev](${npmxDocsUrl(name, semver)})`
 
     md.appendMarkdown(`${packageLink} | ${docsLink}`)
 
