@@ -32,13 +32,14 @@
 
 <!-- configs -->
 
-| Key                              | Description                                           | Type      | Default             |
-| -------------------------------- | ----------------------------------------------------- | --------- | ------------------- |
-| `npmx.hover.enabled`             | Enable hover information for packages                 | `boolean` | `true`              |
-| `npmx.completion.version`        | Version completion behavior                           | `string`  | `"provenance-only"` |
-| `npmx.diagnostics.deprecation`   | Show warnings for deprecated packages                 | `boolean` | `true`              |
-| `npmx.diagnostics.replacement`   | Show suggestions for package replacements             | `boolean` | `true`              |
-| `npmx.diagnostics.vulnerability` | Show warnings for packages with known vulnerabilities | `boolean` | `true`              |
+| Key                                 | Description                                                                       | Type      | Default             |
+| ----------------------------------- | --------------------------------------------------------------------------------- | --------- | ------------------- |
+| `npmx.hover.enabled`                | Enable hover information for packages                                             | `boolean` | `true`              |
+| `npmx.completion.version`           | Version completion behavior                                                       | `string`  | `"provenance-only"` |
+| `npmx.completion.excludePrerelease` | Exclude prerelease versions (alpha, beta, rc, canary) from completion suggestions | `boolean` | `true`              |
+| `npmx.diagnostics.deprecation`      | Show warnings for deprecated packages                                             | `boolean` | `true`              |
+| `npmx.diagnostics.replacement`      | Show suggestions for package replacements                                         | `boolean` | `true`              |
+| `npmx.diagnostics.vulnerability`    | Show warnings for packages with known vulnerabilities                             | `boolean` | `true`              |
 
 <!-- configs -->
 

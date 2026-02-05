@@ -51,7 +51,11 @@
         },
         "npmx.completion.version": {
           "type": "string",
-          "enum": ["all", "provenance-only", "off"],
+          "enum": [
+            "all",
+            "provenance-only",
+            "off"
+          ],
           "enumDescriptions": [
             "Show all versions",
             "Show only versions with provenance",
@@ -59,6 +63,11 @@
           ],
           "default": "provenance-only",
           "description": "Version completion behavior"
+        },
+        "npmx.completion.excludePrerelease": {
+          "type": "boolean",
+          "default": true,
+          "description": "Exclude prerelease versions (alpha, beta, rc, canary) from completion suggestions"
         },
         "npmx.diagnostics.deprecation": {
           "type": "boolean",
