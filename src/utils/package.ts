@@ -9,18 +9,20 @@ export function encodePackageName(name: string): string {
   return encodeURIComponent(name)
 }
 
-const WORKSPACE_PREFIX = 'workspace:'
-const CATALOG_PREFIX = 'catalog:'
-const NPM_PREFIX = 'npm:'
-const JSR_PREFIX = 'jsr:'
-const URL_PREFIXES = ['http://', 'https://', 'git://', 'git+']
+export type VersionProtocol = 'workspace' | 'catalog' | 'npm' | 'jsr' | null
 
-export type VersionProtocol = 'npm' | null
+const KNOWN_PROTOCOLS = new Set<VersionProtocol>(['workspace', 'catalog', 'npm', 'jsr'])
+const URL_PREFIXES = ['http://', 'https://', 'git://', 'git+']
+const UNSUPPORTED_PROTOCOLS = new Set<VersionProtocol>(['workspace', 'catalog', 'jsr'])
 
 export interface ParsedVersion {
   protocol: VersionProtocol
   prefix: '' | '^' | '~'
   semver: string
+}
+
+export function isSupportedProtocol(protocol: VersionProtocol): boolean {
+  return !UNSUPPORTED_PROTOCOLS.has(protocol)
 }
 
 export function formatVersion(parsed: ParsedVersion): string {
@@ -29,25 +31,23 @@ export function formatVersion(parsed: ParsedVersion): string {
 }
 
 export function parseVersion(rawVersion: string): ParsedVersion | null {
-  // Skip special protocols that aren't standard npm versions
-  if (
-    [
-      WORKSPACE_PREFIX,
-      CATALOG_PREFIX,
-      JSR_PREFIX,
-      ...URL_PREFIXES,
-    ].some((p) => rawVersion.startsWith(p))
-  ) {
+  rawVersion = rawVersion.trim()
+  // Skip URL-based versions
+  if (URL_PREFIXES.some((p) => rawVersion.startsWith(p)))
     return null
-  }
 
   let protocol: VersionProtocol = null
   let versionStr = rawVersion
 
-  // Handle npm: protocol (e.g., npm:^1.0.0)
-  if (rawVersion.startsWith(NPM_PREFIX)) {
-    protocol = 'npm'
-    versionStr = rawVersion.slice(4 /* NPM_PREFIX.length */)
+  // Parse protocol if present (e.g., npm:^1.0.0 -> protocol: 'npm')
+  const colonIndex = rawVersion.indexOf(':')
+  if (colonIndex !== -1) {
+    protocol = rawVersion.slice(0, colonIndex) as VersionProtocol
+
+    if (!KNOWN_PROTOCOLS.has(protocol))
+      return null
+
+    versionStr = rawVersion.slice(colonIndex + 1)
   }
 
   const firstChar = versionStr[0]
