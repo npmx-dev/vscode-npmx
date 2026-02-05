@@ -47,7 +47,7 @@ export function parseVersion(rawVersion: string): ParsedVersion | null {
   // Handle npm: protocol (e.g., npm:^1.0.0)
   if (rawVersion.startsWith(NPM_PREFIX)) {
     protocol = 'npm'
-    versionStr = rawVersion.slice(NPM_PREFIX.length)
+    versionStr = rawVersion.slice(4 /* NPM_PREFIX.length */)
   }
 
   const firstChar = versionStr[0]
