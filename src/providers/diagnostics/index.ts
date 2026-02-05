@@ -11,6 +11,7 @@ import { languages } from 'vscode'
 import { displayName } from '../../generated-meta'
 import { checkDeprecation } from './rules/deprecation'
 import { checkReplacement } from './rules/replacement'
+import { checkUpgrade } from './rules/upgrade'
 import { checkVulnerability } from './rules/vulnerability'
 
 export interface NodeDiagnosticInfo extends Omit<Diagnostic, 'range' | 'source'> {
@@ -19,7 +20,7 @@ export interface NodeDiagnosticInfo extends Omit<Diagnostic, 'range' | 'source'>
 export type DiagnosticRule = (dep: DependencyInfo, pkg: PackageInfo) => Awaitable<NodeDiagnosticInfo | undefined>
 
 const enabledRules = computed<DiagnosticRule[]>(() => {
-  const rules: DiagnosticRule[] = []
+  const rules: DiagnosticRule[] = [checkUpgrade]
   if (config.diagnostics.deprecation)
     rules.push(checkDeprecation)
   if (config.diagnostics.replacement)
