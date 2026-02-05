@@ -1,8 +1,8 @@
 {
   "dependencies": {
     "@deno/doc": "jsr:^0.189.1",
-    "nuxt": "npm:4.3.0",
-    "@prismicio/client": "~7.21.0-canary.147e3f2"
+    "@prismicio/client": "~7.21.0-canary.147e3f2",
+    "nuxt": "npm:4.3.0"
   },
   "devDependencies": {
     "array-includes": "",
