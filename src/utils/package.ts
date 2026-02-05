@@ -13,6 +13,7 @@ const WORKSPACE_PREFIX = 'workspace:'
 const CATALOG_PREFIX = 'catalog:'
 const NPM_PREFIX = 'npm:'
 const JSR_PREFIX = 'jsr:'
+const URL_PREFIXES = ['http://', 'https://', 'git://', 'git+']
 
 export type VersionProtocol = 'npm' | null
 
@@ -30,9 +31,12 @@ export function formatVersion(parsed: ParsedVersion): string {
 export function parseVersion(rawVersion: string): ParsedVersion | null {
   // Skip special protocols that aren't standard npm versions
   if (
-    rawVersion.startsWith(WORKSPACE_PREFIX)
-    || rawVersion.startsWith(CATALOG_PREFIX)
-    || rawVersion.startsWith(JSR_PREFIX)
+    [
+      WORKSPACE_PREFIX,
+      CATALOG_PREFIX,
+      JSR_PREFIX,
+      ...URL_PREFIXES,
+    ].some((p) => rawVersion.startsWith(p))
   ) {
     return null
   }
