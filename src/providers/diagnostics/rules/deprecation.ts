@@ -1,11 +1,11 @@
 import type { DiagnosticRule } from '..'
 import { npmxPackageUrl } from '#utils/links'
-import { parseVersion } from '#utils/package'
+import { isSupportedProtocol, parseVersion } from '#utils/package'
 import { DiagnosticSeverity, DiagnosticTag, Uri } from 'vscode'
 
 export const checkDeprecation: DiagnosticRule = (dep, pkg) => {
   const parsed = parseVersion(dep.version)
-  if (!parsed)
+  if (!parsed || !isSupportedProtocol(parsed.protocol))
     return
 
   const { semver } = parsed
