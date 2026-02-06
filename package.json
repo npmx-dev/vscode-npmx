@@ -67,7 +67,7 @@
         "npmx.completion.excludePrerelease": {
           "type": "boolean",
           "default": true,
-          "description": "Exclude prerelease versions (alpha, beta, rc, canary) from completion suggestions"
+          "description": "Exclude prerelease versions (alpha, beta, rc, canary, etc.) from completion suggestions"
         },
         "npmx.diagnostics.deprecation": {
           "type": "boolean",
