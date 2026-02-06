@@ -1,10 +1,4 @@
-import { NPMJS_COM, NPMX_DEV } from '#constants'
-
-export function npmPackageUrl(name: string, version?: string): string {
-  return version
-    ? `${NPMJS_COM}/package/${name}/v/${version}`
-    : `${NPMJS_COM}/package/${name}`
-}
+import { NPMX_DEV } from '#constants'
 
 export function npmxPackageUrl(name: string, version?: string): string {
   return version

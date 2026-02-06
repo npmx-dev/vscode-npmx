@@ -9,7 +9,6 @@ export const PRERELEASE_PATTERN = /-.+/
 
 export const CACHE_TTL_ONE_DAY = 1000 * 60 * 60 * 24
 
-export const NPMJS_COM = 'https://npmjs.com'
 export const NPMX_DEV = 'https://npmx.dev'
 export const NPMX_DEV_API = `${NPMX_DEV}/api`
 

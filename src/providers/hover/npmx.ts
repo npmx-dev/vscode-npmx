@@ -2,7 +2,7 @@ import type { Extractor } from '#types/extractor'
 import type { HoverProvider, Position, TextDocument } from 'vscode'
 import { SPACER } from '#constants'
 import { getPackageInfo } from '#utils/api/package'
-import { jsrPackageUrl, npmPackageUrl, npmxDocsUrl, npmxPackageUrl } from '#utils/links'
+import { jsrPackageUrl, npmxDocsUrl, npmxPackageUrl } from '#utils/links'
 import { isSupportedProtocol, parseVersion } from '#utils/package'
 import { Hover, MarkdownString } from 'vscode'
 
@@ -62,7 +62,7 @@ export class NpmxHoverProvider<T extends Extractor> implements HoverProvider {
     const currentVersion = pkg.versionsMeta[semver]
     if (currentVersion) {
       if (currentVersion.provenance)
-        md.appendMarkdown(`[$(verified)${SPACER}Verified provenance](${npmPackageUrl(name, semver)}#provenance)\n\n`)
+        md.appendMarkdown(`[$(verified)${SPACER}Verified provenance](${npmxPackageUrl(name, semver)}#provenance)\n\n`)
     }
 
     const packageLink = `[$(package)${SPACER}View on npmx.dev](${npmxPackageUrl(name)})`
