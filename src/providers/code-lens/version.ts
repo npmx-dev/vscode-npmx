@@ -3,10 +3,9 @@ import type { CodeLensProvider, Range, TextDocument } from 'vscode'
 import { getPackageInfo } from '#utils/api/package'
 import { formatVersion, isSupportedProtocol, parseVersion } from '#utils/package'
 import { getUpdateType } from '#utils/semver'
-import { CodeLens } from 'vscode'
+import { debounce } from 'perfect-debounce'
+import { CodeLens, EventEmitter } from 'vscode'
 import { commands } from '../../generated-meta'
-
-const latestCache = new Map<string, string>()
 
 interface LensData {
   dep: DependencyInfo
@@ -18,12 +17,17 @@ const dataMap = new WeakMap<CodeLens, LensData>()
 
 export class VersionCodeLensProvider<T extends Extractor> implements CodeLensProvider {
   extractor: T
+  private readonly onDidChangeCodeLensesEmitter = new EventEmitter<void>()
+  readonly onDidChangeCodeLenses = this.onDidChangeCodeLensesEmitter.event
+  private readonly scheduleRefresh = debounce(() => {
+    this.onDidChangeCodeLensesEmitter.fire()
+  }, 100, { leading: false, trailing: true })
 
   constructor(extractor: T) {
     this.extractor = extractor
   }
 
-  provideCodeLenses(document: TextDocument) {
+  provideCodeLenses(document: TextDocument): CodeLens[] {
     const root = this.extractor.parse(document)
     if (!root)
       return []
@@ -45,23 +49,29 @@ export class VersionCodeLensProvider<T extends Extractor> implements CodeLensPro
     return lenses
   }
 
-  async resolveCodeLens(lens: CodeLens) {
+  resolveCodeLens(lens: CodeLens) {
     const data = dataMap.get(lens)
     if (!data)
       return lens
 
     const { dep, versionRange, uri } = data
-    const parsed = parseVersion(dep.version)!
+    const parsed = parseVersion(dep.version)
+    if (!parsed) {
+      lens.command = { title: '$(question) unknown', command: '' }
+      return lens
+    }
 
-    let latest = latestCache.get(dep.name)
+    const pkg = getPackageInfo(dep.name)
+    if (pkg instanceof Promise) {
+      lens.command = { title: '$(sync~spin) checking...', command: '' }
+      void pkg.finally(() => this.scheduleRefresh())
+      return lens
+    }
+
+    const latest = pkg?.distTags.latest
     if (!latest) {
-      const pkg = await getPackageInfo(dep.name)
-      if (!pkg?.distTags?.latest) {
-        lens.command = { title: '$(question) unknown', command: '' }
-        return lens
-      }
-      latest = pkg.distTags.latest
-      latestCache.set(dep.name, latest)
+      lens.command = { title: '$(question) unknown', command: '' }
+      return lens
     }
 
     const updateType = getUpdateType(parsed.semver, latest)
