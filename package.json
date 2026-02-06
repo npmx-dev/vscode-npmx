@@ -83,6 +83,11 @@
           "type": "boolean",
           "default": true,
           "description": "Show warnings for packages with known vulnerabilities"
+        },
+        "npmx.versionLens.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show version lens (CodeLens) for package dependencies"
         }
       }
     },
@@ -90,6 +95,11 @@
       {
         "command": "npmx.openInBrowser",
         "title": "Open npmx.dev in external browser",
+        "category": "npmx"
+      },
+      {
+        "command": "npmx.updateVersion",
+        "title": "Update package version",
         "category": "npmx"
       }
     ]
