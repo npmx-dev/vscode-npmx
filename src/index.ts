@@ -7,8 +7,9 @@ import {
   PNPM_WORKSPACE_PATTERN,
   VERSION_TRIGGER_CHARACTERS,
 } from '#constants'
+import { debounce } from 'perfect-debounce'
 import { defineExtension, useCommands, watchEffect } from 'reactive-vscode'
-import { Disposable, env, languages, Uri, workspace, WorkspaceEdit } from 'vscode'
+import { Disposable, env, languages, Uri, commands as vscodeCommands, workspace, WorkspaceEdit } from 'vscode'
 import { PackageJsonExtractor } from './extractors/package-json'
 import { PnpmWorkspaceYamlExtractor } from './extractors/pnpm-workspace-yaml'
 import { commands, displayName, version } from './generated-meta'
@@ -89,10 +90,11 @@ export const { activate, deactivate } = defineExtension(() => {
     [commands.openInBrowser]: () => {
       env.openExternal(Uri.parse(NPMX_DEV))
     },
-    [commands.updateVersion]: async (uri: Uri, range: Range, newVersion: string) => {
+    [commands.updateVersion]: debounce(async (uri: Uri, range: Range, newVersion: string) => {
       const edit = new WorkspaceEdit()
       edit.replace(uri, range, newVersion)
       await workspace.applyEdit(edit)
-    },
+      vscodeCommands.executeCommand('editor.action.codeLens.refresh')
+    }, 300, { leading: true, trailing: false }),
   })
 })

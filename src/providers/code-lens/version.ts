@@ -64,7 +64,7 @@ export class VersionCodeLensProvider<T extends Extractor> implements CodeLensPro
     const pkg = getPackageInfo(dep.name)
     if (pkg instanceof Promise) {
       lens.command = { title: '$(sync~spin) checking...', command: '' }
-      void pkg.finally(() => this.scheduleRefresh())
+      pkg.finally(() => this.scheduleRefresh())
       return lens
     }
 
