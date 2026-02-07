@@ -1,3 +1,4 @@
+import type { Range } from 'vscode'
 import {
   NPMX_DEV,
   PACKAGE_JSON_BASENAME,
@@ -6,11 +7,13 @@ import {
   PNPM_WORKSPACE_PATTERN,
   VERSION_TRIGGER_CHARACTERS,
 } from '#constants'
+import { debounce } from 'perfect-debounce'
 import { defineExtension, useCommands, watchEffect } from 'reactive-vscode'
-import { Disposable, env, languages, Uri } from 'vscode'
+import { Disposable, env, languages, Uri, commands as vscodeCommands, workspace, WorkspaceEdit } from 'vscode'
 import { PackageJsonExtractor } from './extractors/package-json'
 import { PnpmWorkspaceYamlExtractor } from './extractors/pnpm-workspace-yaml'
 import { commands, displayName, version } from './generated-meta'
+import { VersionCodeLensProvider } from './providers/code-lens/version'
 import { VersionCompletionItemProvider } from './providers/completion-item/version'
 import { registerDiagnosticCollection } from './providers/diagnostics'
 import { NpmxHoverProvider } from './providers/hover/npmx'
@@ -60,6 +63,24 @@ export const { activate, deactivate } = defineExtension(() => {
     onCleanup(() => Disposable.from(...disposables).dispose())
   })
 
+  watchEffect((onCleanup) => {
+    if (!config.versionLens.enabled)
+      return
+
+    const disposables = [
+      languages.registerCodeLensProvider(
+        { pattern: PACKAGE_JSON_PATTERN },
+        new VersionCodeLensProvider(packageJsonExtractor),
+      ),
+      languages.registerCodeLensProvider(
+        { pattern: PNPM_WORKSPACE_PATTERN },
+        new VersionCodeLensProvider(pnpmWorkspaceYamlExtractor),
+      ),
+    ]
+
+    onCleanup(() => Disposable.from(...disposables).dispose())
+  })
+
   registerDiagnosticCollection({
     [PACKAGE_JSON_BASENAME]: packageJsonExtractor,
     [PNPM_WORKSPACE_BASENAME]: pnpmWorkspaceYamlExtractor,
@@ -69,5 +90,11 @@ export const { activate, deactivate } = defineExtension(() => {
     [commands.openInBrowser]: () => {
       env.openExternal(Uri.parse(NPMX_DEV))
     },
+    [commands.updateVersion]: debounce(async (uri: Uri, range: Range, newVersion: string) => {
+      const edit = new WorkspaceEdit()
+      edit.replace(uri, range, newVersion)
+      await workspace.applyEdit(edit)
+      vscodeCommands.executeCommand('editor.action.codeLens.refresh')
+    }, 300, { leading: true, trailing: false }),
   })
 })
