@@ -11,7 +11,8 @@ export default defineConfig({
       '#state': join(rootDir, '/src/state.ts'),
       '#types/*': join(rootDir, '/src/types/*'),
       '#utils/*': join(rootDir, '/src/utils/*'),
+      'vscode': join(rootDir, '/tests/__mocks__/vscode.ts'),
     },
-    include: ['tests/**/*.ts'],
+    include: ['tests/**/*.test.ts'],
   },
 })
