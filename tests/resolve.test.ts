@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Uri } from 'vscode'
 import { resolvePackageRelativePath } from '../src/utils/resolve'
 import { mockFileSystem } from './filesystem'

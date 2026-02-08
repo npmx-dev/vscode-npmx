@@ -1,6 +1,6 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { mockFileSystem } from './filesystem'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Uri, workspace } from 'vscode'
+import { mockFileSystem } from './filesystem'
 
 describe('mockFileSystem', () => {
   beforeEach(() => {
@@ -10,7 +10,7 @@ describe('mockFileSystem', () => {
   describe('`readFile`', () => {
     it('should mock matched paths', async () => {
       mockFileSystem({
-        '/test/file.txt': 'hello world'
+        '/test/file.txt': 'hello world',
       })
 
       const uri = Uri.file('/test/file.txt')
@@ -29,7 +29,7 @@ describe('mockFileSystem', () => {
     it('should handle multiple files', async () => {
       mockFileSystem({
         '/a.js': 'content a',
-        '/b.js': 'content b'
+        '/b.js': 'content b',
       })
 
       const contentA = await workspace.fs.readFile(Uri.file('/a.js'))
