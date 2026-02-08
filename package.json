@@ -114,7 +114,7 @@
       "explorer/context": [
         {
           "command": "npmx.openFileInNpmx",
-          "when": "resourceScheme == file && resourcePath =~ /[\\/]node_modules[\\/]/"
+          "when": "resourceScheme == file && resourcePath =~ /[\\/]node_modules[\\/]/ && !explorerResourceIsFolder"
         }
       ],
       "commandPalette": [
