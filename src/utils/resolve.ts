@@ -7,8 +7,7 @@ import { Uri, workspace } from 'vscode'
  * @returns A promise that resolves to the package manifest and relative path,
  *     or `undefined` if not found.
  */
-export async function resolvePackageRelativePath(uri: Uri):
-Promise<[PackageManifest, string] | undefined> {
+export async function resolvePackageRelativePath(uri: Uri): Promise<[PackageManifest, string] | undefined> {
   const result = await findPackageJson(uri)
   if (!result)
     return undefined
@@ -35,8 +34,7 @@ interface PackageManifest {
  * @returns The URI and parsed content of the package.json, or `undefined` if
  *     not found.
  */
-async function findPackageJson(file: Uri):
-Promise<[Uri, PackageManifest] | undefined> {
+async function findPackageJson(file: Uri): Promise<[Uri, PackageManifest] | undefined> {
   // Start from the directory, so we don't look for
   // `node_modules/foo/bar.js/package.json`
   const startDir = Uri.joinPath(file, '..')
@@ -64,13 +62,14 @@ function* walkAncestors(start: Uri): Generator<Uri, void, void> {
   while (true) {
     yield currentUri
 
+    if (currentUri.path.endsWith('/node_modules'))
+      return
+
     const parentUri = Uri.joinPath(currentUri, '..')
     if (parentUri.toString() === currentUri.toString())
       return
 
     currentUri = parentUri
-    if (currentUri.path.endsWith('/node_modules'))
-      return
   }
 }
 
