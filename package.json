@@ -91,8 +91,39 @@
         "command": "npmx.openInBrowser",
         "title": "Open npmx.dev in external browser",
         "category": "npmx"
+      },
+      {
+        "command": "npmx.openFileInNpmx",
+        "title": "Open file on npmx.dev",
+        "category": "npmx"
       }
-    ]
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "npmx.openFileInNpmx",
+          "when": "resourceScheme == file && resourcePath =~ /[\\/]node_modules[\\/]/"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "npmx.openFileInNpmx",
+          "when": "resourceScheme == file && resourcePath =~ /[\\/]node_modules[\\/]/"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "npmx.openFileInNpmx",
+          "when": "resourceScheme == file && resourcePath =~ /[\\/]node_modules[\\/]/"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "npmx.openFileInNpmx",
+          "when": "resourceScheme == file && resourcePath =~ /[\\/]node_modules[\\/]/"
+        }
+      ]
+    }
   },
   "scripts": {
     "dev": "tsdown --watch",
