@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Uri, workspace } from 'vscode'
-import { mockFileSystem } from './filesystem'
+import { mockFileSystem } from './__mocks__/filesystem'
 
 describe('mockFileSystem', () => {
   beforeEach(() => {

@@ -4,12 +4,12 @@ import { resolvePackageRelativePath } from '#utils/resolve'
 import { useActiveTextEditor } from 'reactive-vscode'
 import { env, Uri, window } from 'vscode'
 
-export async function openFileInNpmx(fileUri: Uri) {
+export async function openFileInNpmx(fileUri?: Uri) {
   const textEditor = useActiveTextEditor()
 
   // If triggered from context menu, fileUri is provided.
   // If triggered from command palette, use active text editor.
-  const uri = fileUri || textEditor.value?.document.uri
+  const uri = fileUri ?? textEditor.value?.document.uri
   if (!uri) {
     window.showErrorMessage('npmx: No active file selected.')
     return
