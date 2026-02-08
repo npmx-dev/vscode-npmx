@@ -29,7 +29,7 @@ export async function openFileInNpmx(fileUri: Uri) {
     window.showWarningMessage(`npmx: Could not find package.json for ${uri.toString()}`)
     return
   }
-  const [manifest, relativePath] = result
+  const { manifest, relativePath } = result
 
   // Use line number only if the user is actively looking at the relevant file
   const openingActiveFile = !fileUri || fileUri.toString() === textEditor.value?.document.uri.toString()
