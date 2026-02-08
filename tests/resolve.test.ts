@@ -21,8 +21,8 @@ describe('resolvePackageRelativePath', () => {
 
     expect(result).toBeDefined()
 
-    const [pkg, relativePath] = result!
-    expect(pkg).toEqual({ name: 'pkg', version: '1.0.0' })
+    const { manifest, relativePath } = result!
+    expect(manifest).toEqual({ name: 'pkg', version: '1.0.0' })
     expect(relativePath).toBe('src/index.js')
   })
 
@@ -43,8 +43,8 @@ describe('resolvePackageRelativePath', () => {
 
     expect(result).toBeDefined()
 
-    const [pkg, relativePath] = result!
-    expect(pkg).toEqual({ name: 'child', version: '2.0.0' })
+    const { manifest, relativePath } = result!
+    expect(manifest).toEqual({ name: 'child', version: '2.0.0' })
     expect(relativePath).toBe('index.js')
   })
 
@@ -61,8 +61,8 @@ describe('resolvePackageRelativePath', () => {
 
     expect(result).toBeDefined()
 
-    const [pkg, relativePath] = result!
-    expect(pkg).toEqual({ name: 'pkg', version: '1.0.0' })
+    const { manifest, relativePath } = result!
+    expect(manifest).toEqual({ name: 'pkg', version: '1.0.0' })
     expect(relativePath).toBe('src/index.js')
   })
 
@@ -79,8 +79,8 @@ describe('resolvePackageRelativePath', () => {
 
     expect(result).toBeDefined()
 
-    const [pkg, relativePath] = result!
-    expect(pkg).toEqual({ name: '@scope/pkg', version: '1.0.0' })
+    const { manifest, relativePath } = result!
+    expect(manifest).toEqual({ name: '@scope/pkg', version: '1.0.0' })
     expect(relativePath).toBe('src/index.js')
   })
 
@@ -123,8 +123,8 @@ describe('resolvePackageRelativePath', () => {
     const result = await resolvePackageRelativePath(uri)
     expect(result).toBeDefined()
 
-    const [pkg, relativePath] = result!
-    expect(pkg).toEqual({ name: 'pkg', version: '1.0.0' })
+    const { manifest, relativePath } = result!
+    expect(manifest).toEqual({ name: 'pkg', version: '1.0.0' })
     expect(relativePath).toBe('src/index.js')
   })
 })
