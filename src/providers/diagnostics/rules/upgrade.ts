@@ -1,5 +1,5 @@
 import type { DiagnosticRule } from '..'
-import { isSupportedProtocol, parseVersion } from '#utils/package'
+import { formatVersion, isSupportedProtocol, parseVersion } from '#utils/package'
 import { DiagnosticSeverity } from 'vscode'
 
 export const checkUpgrade: DiagnosticRule = (dep, pkg) => {
@@ -8,12 +8,15 @@ export const checkUpgrade: DiagnosticRule = (dep, pkg) => {
     return
 
   const { semver } = parsed
-  if (pkg.distTags.latest === semver)
+  const latest = pkg.distTags.latest
+  if (latest === semver)
     return
+
+  const target = formatVersion({ ...parsed, semver: latest })
 
   return {
     node: dep.versionNode,
     severity: DiagnosticSeverity.Hint,
-    message: 'New version is avaliable',
+    message: `New version available: ${target}`,
   }
 }

@@ -69,6 +69,11 @@
           "default": true,
           "description": "Exclude prerelease versions (alpha, beta, rc, canary, etc.) from completion suggestions"
         },
+        "npmx.diagnostics.upgrade": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show hints when a newer version of a package is available"
+        },
         "npmx.diagnostics.deprecation": {
           "type": "boolean",
           "default": true,

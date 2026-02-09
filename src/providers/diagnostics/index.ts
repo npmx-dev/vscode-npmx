@@ -20,7 +20,9 @@ export interface NodeDiagnosticInfo extends Omit<Diagnostic, 'range' | 'source'>
 export type DiagnosticRule = (dep: DependencyInfo, pkg: PackageInfo) => Awaitable<NodeDiagnosticInfo | undefined>
 
 const enabledRules = computed<DiagnosticRule[]>(() => {
-  const rules: DiagnosticRule[] = [checkUpgrade]
+  const rules: DiagnosticRule[] = []
+  if (config.diagnostics.upgrade)
+    rules.push(checkUpgrade)
   if (config.diagnostics.deprecation)
     rules.push(checkDeprecation)
   if (config.diagnostics.replacement)
