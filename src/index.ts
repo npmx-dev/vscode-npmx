@@ -1,5 +1,4 @@
 import {
-  NPMX_DEV,
   PACKAGE_JSON_BASENAME,
   PACKAGE_JSON_PATTERN,
   PNPM_WORKSPACE_BASENAME,
@@ -7,8 +6,9 @@ import {
   VERSION_TRIGGER_CHARACTERS,
 } from '#constants'
 import { defineExtension, useCommands, watchEffect } from 'reactive-vscode'
-import { Disposable, env, languages, Uri } from 'vscode'
+import { Disposable, languages } from 'vscode'
 import { openFileInNpmx } from './commands/open-file-in-npmx'
+import { openInBrowser } from './commands/open-in-browser'
 import { PackageJsonExtractor } from './extractors/package-json'
 import { PnpmWorkspaceYamlExtractor } from './extractors/pnpm-workspace-yaml'
 import { commands, displayName, version } from './generated-meta'
@@ -67,9 +67,7 @@ export const { activate, deactivate } = defineExtension(() => {
   })
 
   useCommands({
-    [commands.openInBrowser]: () => {
-      env.openExternal(Uri.parse(NPMX_DEV))
-    },
+    [commands.openInBrowser]: openInBrowser,
     [commands.openFileInNpmx]: openFileInNpmx,
   })
 })
