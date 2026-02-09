@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseVersion } from '../src/utils/version'
+import { getPrereleaseId, lt, parseVersion } from '../src/utils/version'
 
 describe('parseVersion', () => {
   it('should parse plain version', () => {
@@ -70,5 +70,60 @@ describe('parseVersion', () => {
     expect(parseVersion('https://github.com/user/repo')).toBeNull()
     expect(parseVersion('git://github.com/user/repo')).toBeNull()
     expect(parseVersion('git+https://github.com/user/repo')).toBeNull()
+  })
+})
+
+describe('getPrereleaseId', () => {
+  it('should return null for stable versions', () => {
+    expect(getPrereleaseId('1.0.0')).toBeNull()
+  })
+
+  it('should extract identifier', () => {
+    expect(getPrereleaseId('2.0.0-beta.1')).toBe('beta')
+  })
+
+  it('should handle prerelease without dots', () => {
+    expect(getPrereleaseId('1.0.0-canary')).toBe('canary')
+  })
+})
+
+describe('lt', () => {
+  it('should compare major versions', () => {
+    expect(lt('1.0.0', '2.0.0')).toBe(true)
+    expect(lt('2.0.0', '1.0.0')).toBe(false)
+  })
+
+  it('should compare minor versions', () => {
+    expect(lt('1.0.0', '1.1.0')).toBe(true)
+    expect(lt('1.1.0', '1.0.0')).toBe(false)
+  })
+
+  it('should compare patch versions', () => {
+    expect(lt('1.0.0', '1.0.1')).toBe(true)
+    expect(lt('1.0.1', '1.0.0')).toBe(false)
+  })
+
+  it('should return false for equal versions', () => {
+    expect(lt('1.0.0', '1.0.0')).toBe(false)
+  })
+
+  it('should treat prerelease as less than release', () => {
+    expect(lt('1.0.0-beta.1', '1.0.0')).toBe(true)
+    expect(lt('1.0.0', '1.0.0-beta.1')).toBe(false)
+  })
+
+  it('should compare prerelease versions numerically', () => {
+    expect(lt('1.0.0-beta.1', '1.0.0-beta.2')).toBe(true)
+    expect(lt('1.0.0-beta.2', '1.0.0-beta.1')).toBe(false)
+  })
+
+  it('should compare different prerelease identifiers', () => {
+    expect(lt('1.0.0-alpha.1', '1.0.0-beta.1')).toBe(true)
+    expect(lt('1.0.0-beta.1', '1.0.0-alpha.1')).toBe(false)
+  })
+
+  it('should handle prerelease with fewer segments', () => {
+    expect(lt('1.0.0-beta', '1.0.0-beta.1')).toBe(true)
+    expect(lt('1.0.0-beta.1', '1.0.0-beta')).toBe(false)
   })
 })

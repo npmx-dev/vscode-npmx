@@ -66,8 +66,7 @@ function comparePrerelease(a: string, b: string): number {
     if (!Number.isNaN(na) && !Number.isNaN(nb)) {
       if (na !== nb)
         return na - nb
-    }
-    else if (pa[i] !== pb[i]) {
+    } else if (pa[i] !== pb[i]) {
       return pa[i] < pb[i] ? -1 : 1
     }
   }
