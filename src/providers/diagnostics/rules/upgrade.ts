@@ -1,15 +1,9 @@
 import type { DependencyInfo } from '#types/extractor'
-import type { ParsedVersion } from '#utils/package'
+import type { ParsedVersion } from '#utils/version'
 import type { DiagnosticRule, NodeDiagnosticInfo } from '..'
 import { UPGRADE_MESSAGE_PREFIX } from '#constants'
-import { formatVersion, isSupportedProtocol, parseVersion } from '#utils/package'
-import { lt, prerelease } from 'semver'
+import { formatVersion, getPrereleaseId, isSupportedProtocol, lt, parseVersion } from '#utils/version'
 import { DiagnosticSeverity } from 'vscode'
-
-function getPrereleaseId(version: string): string | null {
-  const pre = prerelease(version)
-  return (pre?.length && typeof pre[0] === 'string') ? pre[0] : null
-}
 
 function createUpgradeDiagnostic(dep: DependencyInfo, parsed: ParsedVersion, upgradeVersion: string): NodeDiagnosticInfo {
   const target = formatVersion({ ...parsed, semver: upgradeVersion })

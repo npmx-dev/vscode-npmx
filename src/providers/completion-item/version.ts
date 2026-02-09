@@ -3,7 +3,7 @@ import type { CompletionItemProvider, Position, TextDocument } from 'vscode'
 import { PRERELEASE_PATTERN } from '#constants'
 import { config } from '#state'
 import { getPackageInfo } from '#utils/api/package'
-import { formatVersion, isSupportedProtocol, parseVersion } from '#utils/package'
+import { formatVersion, isSupportedProtocol, parseVersion } from '#utils/version'
 import { CompletionItem, CompletionItemKind } from 'vscode'
 
 export class VersionCompletionItemProvider<T extends Extractor> implements CompletionItemProvider {

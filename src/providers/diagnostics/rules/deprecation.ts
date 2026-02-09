@@ -1,6 +1,6 @@
 import type { DiagnosticRule } from '..'
 import { npmxPackageUrl } from '#utils/links'
-import { isSupportedProtocol, parseVersion } from '#utils/package'
+import { isSupportedProtocol, parseVersion } from '#utils/version'
 import { DiagnosticSeverity, DiagnosticTag, Uri } from 'vscode'
 
 export const checkDeprecation: DiagnosticRule = (dep, pkg) => {
