@@ -11,7 +11,7 @@ export class UpgradeProvider implements CodeActionProvider {
       const target = d.message.slice(UPGRADE_MESSAGE_PREFIX.length)
       const fix = new CodeAction(`Update to ${target}`, CodeActionKind.QuickFix)
       fix.edit = new WorkspaceEdit()
-      fix.edit.replace(document.uri, d.range, `"${target}"`)
+      fix.edit.replace(document.uri, d.range, `${target}`)
       fix.diagnostics = [d]
       return [fix]
     })
