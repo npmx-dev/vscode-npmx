@@ -1,4 +1,5 @@
 import type { DiagnosticRule } from '..'
+import { UPGRADE_MESSAGE_PREFIX } from '#constants'
 import { formatVersion, isSupportedProtocol, parseVersion } from '#utils/package'
 import { DiagnosticSeverity } from 'vscode'
 
@@ -17,6 +18,6 @@ export const checkUpgrade: DiagnosticRule = (dep, pkg) => {
   return {
     node: dep.versionNode,
     severity: DiagnosticSeverity.Hint,
-    message: `New version available: ${target}`,
+    message: `${UPGRADE_MESSAGE_PREFIX}${target}`,
   }
 }
