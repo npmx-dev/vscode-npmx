@@ -6,12 +6,13 @@ import {
   VERSION_TRIGGER_CHARACTERS,
 } from '#constants'
 import { defineExtension, useCommands, watchEffect } from 'reactive-vscode'
-import { Disposable, languages } from 'vscode'
+import { CodeActionKind, Disposable, languages } from 'vscode'
 import { openFileInNpmx } from './commands/open-file-in-npmx'
 import { openInBrowser } from './commands/open-in-browser'
 import { PackageJsonExtractor } from './extractors/package-json'
 import { PnpmWorkspaceYamlExtractor } from './extractors/pnpm-workspace-yaml'
 import { commands, displayName, version } from './generated-meta'
+import { VulnerabilityCodeActionProvider } from './providers/code-actions/vulnerability'
 import { VersionCompletionItemProvider } from './providers/completion-item/version'
 import { registerDiagnosticCollection } from './providers/diagnostics'
 import { NpmxHoverProvider } from './providers/hover/npmx'
@@ -59,6 +60,20 @@ export const { activate, deactivate } = defineExtension(() => {
     ]
 
     onCleanup(() => Disposable.from(...disposables).dispose())
+  })
+
+  watchEffect((onCleanup) => {
+    if (!config.diagnostics.vulnerability)
+      return
+
+    const provider = new VulnerabilityCodeActionProvider()
+    const options = { providedCodeActionKinds: [CodeActionKind.QuickFix] }
+    const disposable = Disposable.from(
+      languages.registerCodeActionsProvider({ pattern: PACKAGE_JSON_PATTERN }, provider, options),
+      languages.registerCodeActionsProvider({ pattern: PNPM_WORKSPACE_PATTERN }, provider, options),
+    )
+
+    onCleanup(() => disposable.dispose())
   })
 
   registerDiagnosticCollection({
