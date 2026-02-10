@@ -8,7 +8,7 @@ function getMdnUrl(path: string): string {
 }
 
 function getReplacementsDocUrl(path: string): string {
-  return `https://github.com/es-tooling/module-replacements/blob/main/docs/modules/${path}.md`
+  return `https://e18e.dev/docs/replacements/${path}.html`
 }
 
 /**

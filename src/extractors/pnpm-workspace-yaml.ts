@@ -82,7 +82,10 @@ export class PnpmWorkspaceYamlExtractor implements Extractor<Node> {
     let result: DependencyInfo<Node> | undefined
 
     this.traverseCatalogs(root, (item) => {
-      if (isInRange(offset, item.value!.range!)) {
+      if (
+        isInRange(offset, item.value!.range!)
+        || isInRange(offset, item.key.range!)
+      ) {
         result = {
           nameNode: item.key,
           versionNode: item.value!,

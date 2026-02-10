@@ -16,12 +16,16 @@
 
 ## Features
 
-- **Hover Information** - Quick links to [npmx.dev](https://npmx.dev) for package info and documentation, with provenance verification status
-- **Version Completion** - Autocomplete package versions with provenance filtering support
+- **Hover Information** &ndash; Quick links to package details and documentation on [npmx.dev](https://npmx.dev), with provenance verification status.
+- **Version Completion** &ndash; Autocomplete package versions with provenance filtering and prerelease exclusion support.
 - **Diagnostics**
-  - Deprecated package warnings
+  - Deprecated package warnings with deprecation messages
   - Package replacement suggestions (via [module-replacements](https://github.com/es-tooling/module-replacements))
-  - Vulnerability detection
+  - Vulnerability detection powered by the [OSV](https://osv.dev/) database, with severity levels (critical, high, moderate, low)
+  - Upgrade hints when a newer version is available, with quick-fix code actions
+- **Commands**
+  - Open [npmx.dev](https://npmx.dev) in external browser
+  - Open `node_modules` files on [npmx.dev](https://npmx.dev) code viewer with syntax highlighting (from editor title, context menu, or command palette)
 
 ## Supported Files
 
@@ -37,12 +41,18 @@
 | `npmx.hover.enabled`                | Enable hover information for packages                                                   | `boolean` | `true`              |
 | `npmx.completion.version`           | Version completion behavior                                                             | `string`  | `"provenance-only"` |
 | `npmx.completion.excludePrerelease` | Exclude prerelease versions (alpha, beta, rc, canary, etc.) from completion suggestions | `boolean` | `true`              |
+| `npmx.diagnostics.upgrade`          | Show hints when a newer version of a package is available                               | `boolean` | `true`              |
 | `npmx.diagnostics.deprecation`      | Show warnings for deprecated packages                                                   | `boolean` | `true`              |
 | `npmx.diagnostics.replacement`      | Show suggestions for package replacements                                               | `boolean` | `true`              |
 | `npmx.diagnostics.vulnerability`    | Show warnings for packages with known vulnerabilities                                   | `boolean` | `true`              |
 | `npmx.versionLens.enabled`          | Show version lens (CodeLens) for package dependencies                                   | `boolean` | `true`              |
 
 <!-- configs -->
+
+## Related
+
+- [npmx.dev](https://npmx.dev) &ndash; A fast, modern browser for the npm registry
+- [npmx-replace-extension](https://github.com/tylersayshi/npmx-replace-extension) &ndash; Browser extension to redirect npmjs.com to npmx.dev
 
 ## Contributing
 

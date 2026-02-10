@@ -1,6 +1,5 @@
-import type { Range } from 'vscode'
+import type { Range, Uri } from 'vscode'
 import {
-  NPMX_DEV,
   PACKAGE_JSON_BASENAME,
   PACKAGE_JSON_PATTERN,
   PNPM_WORKSPACE_BASENAME,
@@ -9,10 +8,13 @@ import {
 } from '#constants'
 import { debounce } from 'perfect-debounce'
 import { defineExtension, useCommands, watchEffect } from 'reactive-vscode'
-import { Disposable, env, languages, Uri, commands as vscodeCommands, workspace, WorkspaceEdit } from 'vscode'
+import { CodeActionKind, Disposable, languages, commands as vscodeCommands, workspace, WorkspaceEdit } from 'vscode'
+import { openFileInNpmx } from './commands/open-file-in-npmx'
+import { openInBrowser } from './commands/open-in-browser'
 import { PackageJsonExtractor } from './extractors/package-json'
 import { PnpmWorkspaceYamlExtractor } from './extractors/pnpm-workspace-yaml'
 import { commands, displayName, version } from './generated-meta'
+import { UpgradeProvider } from './providers/code-actions/upgrade'
 import { VersionCodeLensProvider } from './providers/code-lens/version'
 import { VersionCompletionItemProvider } from './providers/completion-item/version'
 import { registerDiagnosticCollection } from './providers/diagnostics'
@@ -64,6 +66,20 @@ export const { activate, deactivate } = defineExtension(() => {
   })
 
   watchEffect((onCleanup) => {
+    if (!config.diagnostics.upgrade)
+      return
+
+    const provider = new UpgradeProvider()
+    const options = { providedCodeActionKinds: [CodeActionKind.QuickFix] }
+    const disposable = Disposable.from(
+      languages.registerCodeActionsProvider({ pattern: PACKAGE_JSON_PATTERN }, provider, options),
+      languages.registerCodeActionsProvider({ pattern: PNPM_WORKSPACE_PATTERN }, provider, options),
+    )
+
+    onCleanup(() => disposable.dispose())
+  })
+
+  watchEffect((onCleanup) => {
     if (!config.versionLens.enabled)
       return
 
@@ -87,9 +103,8 @@ export const { activate, deactivate } = defineExtension(() => {
   })
 
   useCommands({
-    [commands.openInBrowser]: () => {
-      env.openExternal(Uri.parse(NPMX_DEV))
-    },
+    [commands.openInBrowser]: openInBrowser,
+    [commands.openFileInNpmx]: openFileInNpmx,
     [commands.updateVersion]: debounce(async (uri: Uri, range: Range, newVersion: string) => {
       const edit = new WorkspaceEdit()
       edit.replace(uri, range, newVersion)

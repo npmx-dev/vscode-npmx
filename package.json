@@ -3,8 +3,8 @@
   "name": "vscode-npmx",
   "displayName": "npmx",
   "type": "module",
-  "version": "0.3.0",
-  "packageManager": "pnpm@10.28.2",
+  "version": "0.4.0",
+  "packageManager": "pnpm@10.29.2",
   "description": "A better browser for the npm registry",
   "author": {
     "name": "Vida Xie",
@@ -12,7 +12,7 @@
     "url": "https://github.com/9romise"
   },
   "license": "MIT",
-  "homepage": "https://github.com/npmx-dev/vscode-npmx#readme",
+  "homepage": "https://docs.npmx.dev/guide/vscode-extension",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/npmx-dev/vscode-npmx.git"
@@ -69,6 +69,11 @@
           "default": true,
           "description": "Exclude prerelease versions (alpha, beta, rc, canary, etc.) from completion suggestions"
         },
+        "npmx.diagnostics.upgrade": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show hints when a newer version of a package is available"
+        },
         "npmx.diagnostics.deprecation": {
           "type": "boolean",
           "default": true,
@@ -98,11 +103,42 @@
         "category": "npmx"
       },
       {
+        "command": "npmx.openFileInNpmx",
+        "title": "Open file on npmx.dev",
+        "category": "npmx"
+      },
+      {
         "command": "npmx.updateVersion",
         "title": "Update package version",
         "category": "npmx"
       }
-    ]
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "npmx.openFileInNpmx",
+          "when": "resourceScheme == file && resourcePath =~ /[\\/]node_modules[\\/]/"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "npmx.openFileInNpmx",
+          "when": "resourceScheme == file && resourcePath =~ /[\\/]node_modules[\\/]/"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "npmx.openFileInNpmx",
+          "when": "resourceScheme == file && resourcePath =~ /[\\/]node_modules[\\/]/ && !explorerResourceIsFolder"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "npmx.openFileInNpmx",
+          "when": "resourceScheme == file && resourcePath =~ /[\\/]node_modules[\\/]/"
+        }
+      ]
+    }
   },
   "scripts": {
     "dev": "tsdown --watch",
@@ -123,20 +159,21 @@
     "*": "eslint --fix"
   },
   "devDependencies": {
-    "@types/node": "^25.2.0",
+    "@types/node": "^25.2.2",
     "@types/vscode": "1.101.0",
     "@vida0905/eslint-config": "^2.10.0",
     "@vscode/vsce": "^3.7.1",
     "eslint": "^9.39.2",
-    "fast-npm-meta": "^1.2.0",
+    "fast-npm-meta": "^1.2.1",
     "husky": "^9.1.7",
+    "jest-mock-vscode": "^4.10.0",
     "jsonc-parser": "^3.3.1",
     "module-replacements": "^2.11.0",
     "nano-staged": "^0.9.0",
     "ofetch": "^2.0.0-alpha.3",
     "perfect-debounce": "^2.1.0",
     "reactive-vscode": "^1.0.0-beta.2",
-    "tsdown": "^0.20.1",
+    "tsdown": "^0.20.3",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18",
     "vscode-ext-gen": "1.3.0",
