@@ -3,7 +3,7 @@
   "name": "vscode-npmx",
   "displayName": "npmx",
   "type": "module",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "packageManager": "pnpm@10.29.2",
   "description": "A better browser for the npm registry",
   "author": {
