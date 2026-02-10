@@ -17,7 +17,6 @@ export default defineConfig({
     'ofetch',
     'fast-npm-meta',
     'perfect-debounce',
-    'semver',
   ],
   minify: 'dce-only',
 })
