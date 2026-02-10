@@ -57,23 +57,31 @@ export function getPrereleaseId(version: string): string | null {
   return pre || null
 }
 
-function comparePrerelease(a: string, b: string): number {
-  const pa = a.split('.')
-  const pb = b.split('.')
-  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
-    if (i >= pa.length)
+/**
+ * Compare two pre-release strings part by part following SemVer precedence rules.
+ *
+ * Numeric parts are compared as numbers, string parts are compared lexicographically.
+ * A version with fewer parts is less than one with more parts when all preceding parts are equal.
+ */
+function comparePrereleasePrecedence(a: string, b: string): number {
+  const partsA = a.split('.')
+  const partsB = b.split('.')
+
+  for (let i = 0; i < Math.max(partsA.length, partsB.length); i++) {
+    if (i >= partsA.length)
       return -1
-    if (i >= pb.length)
+    if (i >= partsB.length)
       return 1
-    const na = Number(pa[i])
-    const nb = Number(pb[i])
-    if (!Number.isNaN(na) && !Number.isNaN(nb)) {
-      if (na !== nb)
-        return na - nb
-    } else if (pa[i] !== pb[i]) {
-      return pa[i] < pb[i] ? -1 : 1
+
+    const numA = Number(partsA[i])
+    const numB = Number(partsB[i])
+    if (!Number.isNaN(numA) && !Number.isNaN(numB)) {
+      return numA - numB
+    } else if (partsA[i] !== partsB[i]) {
+      return partsA[i] < partsB[i] ? -1 : 1
     }
   }
+
   return 0
 }
 
@@ -91,5 +99,5 @@ export function lt(a: string, b: string): boolean {
     return true
   if (!preA || !preB)
     return false
-  return comparePrerelease(preA, preB) < 0
+  return comparePrereleasePrecedence(preA, preB) < 0
 }
