@@ -6,6 +6,8 @@ type MemoizeKey = string | Uri
 export interface MemoizeOptions<K> {
   getKey?: (params: K) => MemoizeKey
   ttl?: number
+  /** Max number of entries to keep; evicts one when exceeded (prefer null/undefined values, else oldest). */
+  maxSize?: number
 }
 
 interface MemoizeEntry<V> {
@@ -19,6 +21,7 @@ export function memoize<P, V>(fn: (params: P) => V, options: MemoizeOptions<P> =
   const {
     getKey = String,
     ttl = CACHE_TTL_ONE_DAY,
+    maxSize,
   } = options
 
   const cache = new Map<MemoizeKey, MemoizeEntry<V>>()
@@ -35,7 +38,21 @@ export function memoize<P, V>(fn: (params: P) => V, options: MemoizeOptions<P> =
     return entry.value
   }
 
+  function evictOne(): void {
+    for (const [k, entry] of cache) {
+      if (entry.value == null) {
+        cache.delete(k)
+        return
+      }
+    }
+    const firstKey = cache.keys().next().value
+    if (firstKey !== undefined)
+      cache.delete(firstKey)
+  }
+
   function set(key: MemoizeKey, value: Awaited<V>): void {
+    if (maxSize !== undefined && cache.size >= maxSize && !cache.has(key))
+      evictOne()
     cache.set(key, {
       value,
       expiresAt: ttl ? Date.now() + ttl : undefined,
