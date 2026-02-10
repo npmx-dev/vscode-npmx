@@ -1,4 +1,3 @@
-import type { Range, Uri } from 'vscode'
 import {
   PACKAGE_JSON_BASENAME,
   PACKAGE_JSON_PATTERN,
@@ -6,11 +5,11 @@ import {
   PNPM_WORKSPACE_PATTERN,
   VERSION_TRIGGER_CHARACTERS,
 } from '#constants'
-import { debounce } from 'perfect-debounce'
 import { defineExtension, useCommands, watchEffect } from 'reactive-vscode'
-import { CodeActionKind, Disposable, languages, commands as vscodeCommands, workspace, WorkspaceEdit } from 'vscode'
+import { CodeActionKind, Disposable, languages } from 'vscode'
 import { openFileInNpmx } from './commands/open-file-in-npmx'
 import { openInBrowser } from './commands/open-in-browser'
+import { updateVersion } from './commands/update-version'
 import { PackageJsonExtractor } from './extractors/package-json'
 import { PnpmWorkspaceYamlExtractor } from './extractors/pnpm-workspace-yaml'
 import { commands, displayName, version } from './generated-meta'
@@ -105,11 +104,6 @@ export const { activate, deactivate } = defineExtension(() => {
   useCommands({
     [commands.openInBrowser]: openInBrowser,
     [commands.openFileInNpmx]: openFileInNpmx,
-    [commands.updateVersion]: debounce(async (uri: Uri, range: Range, newVersion: string) => {
-      const edit = new WorkspaceEdit()
-      edit.replace(uri, range, newVersion)
-      await workspace.applyEdit(edit)
-      vscodeCommands.executeCommand('editor.action.codeLens.refresh')
-    }, 300, { leading: true, trailing: false }),
+    [commands.updateVersion]: updateVersion,
   })
 })
