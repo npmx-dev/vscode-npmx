@@ -1,8 +1,8 @@
-export type VersionProtocol = 'workspace' | 'catalog' | 'npm' | 'jsr' | null
+type VersionProtocol = 'workspace' | 'catalog' | 'npm' | 'jsr' | null
 
-const KNOWN_PROTOCOLS = new Set<VersionProtocol>(['workspace', 'catalog', 'npm', 'jsr'])
 const URL_PREFIXES = ['http://', 'https://', 'git://', 'git+']
-const UNSUPPORTED_PROTOCOLS = new Set<VersionProtocol>(['workspace', 'catalog', 'jsr'])
+const UNSUPPORTED_PROTOCOLS = new Set(['workspace', 'catalog', 'jsr'])
+const KNOWN_PROTOCOLS = new Set([...UNSUPPORTED_PROTOCOLS, 'npm'])
 
 export interface ParsedVersion {
   protocol: VersionProtocol
@@ -11,7 +11,7 @@ export interface ParsedVersion {
 }
 
 export function isSupportedProtocol(protocol: VersionProtocol): boolean {
-  return !UNSUPPORTED_PROTOCOLS.has(protocol)
+  return !protocol || !UNSUPPORTED_PROTOCOLS.has(protocol)
 }
 
 export function formatVersion(parsed: ParsedVersion): string {
@@ -19,19 +19,23 @@ export function formatVersion(parsed: ParsedVersion): string {
   return `${protocol}${parsed.prefix}${parsed.semver}`
 }
 
+function isKnownProtocol(protocol: string): protocol is NonNullable<VersionProtocol> {
+  return KNOWN_PROTOCOLS.has(protocol)
+}
+
 export function parseVersion(rawVersion: string): ParsedVersion | null {
   rawVersion = rawVersion.trim()
   if (URL_PREFIXES.some((p) => rawVersion.startsWith(p)))
     return null
 
-  let protocol: VersionProtocol = null
+  let protocol: string | null = null
   let versionStr = rawVersion
 
   const colonIndex = rawVersion.indexOf(':')
   if (colonIndex !== -1) {
-    protocol = rawVersion.slice(0, colonIndex) as VersionProtocol
+    protocol = rawVersion.slice(0, colonIndex)
 
-    if (!KNOWN_PROTOCOLS.has(protocol))
+    if (!isKnownProtocol(protocol))
       return null
 
     versionStr = rawVersion.slice(colonIndex + 1)
