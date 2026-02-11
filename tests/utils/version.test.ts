@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getPrereleaseId, lt, parseVersion } from '../src/utils/version'
+import { getPrereleaseId, lt, parseVersion } from '../../src/utils/version'
 
 describe('parseVersion', () => {
   it('should parse plain version', () => {

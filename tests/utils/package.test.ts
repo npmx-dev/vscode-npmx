@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { encodePackageName } from '../src/utils/package'
+import { encodePackageName } from '../../src/utils/package'
 
 describe('encodePackageName', () => {
   it('should encode regular package name', () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { memoize } from '../src/utils/memoize'
+import { memoize } from '../../src/utils/memoize'
 
 describe('memoize', () => {
   it('should cache sync function result', () => {
