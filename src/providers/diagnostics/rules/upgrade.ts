@@ -2,7 +2,7 @@ import type { DependencyInfo } from '#types/extractor'
 import type { ParsedVersion } from '#utils/version'
 import type { DiagnosticRule, NodeDiagnosticInfo } from '..'
 import { UPGRADE_MESSAGE_PREFIX } from '#constants'
-import { formatVersion, getPrereleaseId, isSupportedProtocol, lt, parseVersion } from '#utils/version'
+import { formatVersion, getPrereleaseId, isSupportedProtocol, lt } from '#utils/version'
 import { DiagnosticSeverity } from 'vscode'
 
 function createUpgradeDiagnostic(dep: DependencyInfo, parsed: ParsedVersion, upgradeVersion: string): NodeDiagnosticInfo {
@@ -14,9 +14,8 @@ function createUpgradeDiagnostic(dep: DependencyInfo, parsed: ParsedVersion, upg
   }
 }
 
-export const checkUpgrade: DiagnosticRule = (dep, pkg) => {
-  const parsed = parseVersion(dep.version)
-  if (!parsed || !isSupportedProtocol(parsed.protocol))
+export const checkUpgrade: DiagnosticRule = (dep, pkg, parsed) => {
+  if (!isSupportedProtocol(parsed.protocol))
     return
 
   const { semver } = parsed

@@ -3,7 +3,8 @@ import type { CompletionItemProvider, Position, TextDocument } from 'vscode'
 import { PRERELEASE_PATTERN } from '#constants'
 import { config } from '#state'
 import { getPackageInfo } from '#utils/api/package'
-import { formatVersion, isSupportedProtocol, parseVersion } from '#utils/version'
+import { resolvePackage } from '#utils/package'
+import { formatVersion, isSupportedProtocol } from '#utils/version'
 import { CompletionItem, CompletionItemKind } from 'vscode'
 
 export class VersionCompletionItemProvider<T extends Extractor> implements CompletionItemProvider {
@@ -23,14 +24,14 @@ export class VersionCompletionItemProvider<T extends Extractor> implements Compl
     if (!info)
       return
 
-    const {
-      versionNode,
-      name,
-      version,
-    } = info
+    const result = await resolvePackage(document.uri, info)
+    if (!result)
+      return
 
-    const parsed = parseVersion(version)
-    if (!parsed || !isSupportedProtocol(parsed.protocol))
+    const { name, versionNode } = info
+    const { protocol } = result
+
+    if (!isSupportedProtocol(protocol))
       return
 
     const pkg = await getPackageInfo(name)
@@ -51,7 +52,7 @@ export class VersionCompletionItemProvider<T extends Extractor> implements Compl
       if (config.completion.version === 'provenance-only' && !meta.provenance)
         continue
 
-      const text = formatVersion({ ...parsed, semver })
+      const text = formatVersion({ ...result, semver })
       const item = new CompletionItem(text, CompletionItemKind.Value)
 
       item.range = this.extractor.getNodeRange(document, versionNode)

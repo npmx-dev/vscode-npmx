@@ -1,10 +1,12 @@
 import type { DependencyInfo, Extractor, ValidNode } from '#types/extractor'
 import type { PackageInfo } from '#utils/api/package'
+import type { ResolvedPackage } from '#utils/package'
 import type { Awaitable } from 'reactive-vscode'
 import type { Diagnostic, TextDocument } from 'vscode'
 import { basename } from 'node:path'
 import { config, logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
+import { resolvePackage } from '#utils/package'
 import { debounce } from 'perfect-debounce'
 import { computed, useActiveTextEditor, useDocumentText, watch } from 'reactive-vscode'
 import { languages } from 'vscode'
@@ -17,7 +19,7 @@ import { checkVulnerability } from './rules/vulnerability'
 export interface NodeDiagnosticInfo extends Omit<Diagnostic, 'range' | 'source'> {
   node: ValidNode
 }
-export type DiagnosticRule = (dep: DependencyInfo, pkg: PackageInfo) => Awaitable<NodeDiagnosticInfo | undefined>
+export type DiagnosticRule = (dep: DependencyInfo, pkg: PackageInfo, parsed: ResolvedPackage) => Awaitable<NodeDiagnosticInfo | undefined>
 
 const enabledRules = computed<DiagnosticRule[]>(() => {
   const rules: DiagnosticRule[] = []
@@ -54,12 +56,16 @@ export function registerDiagnosticCollection(mapping: Record<string, Extractor |
 
     dependencies.forEach(async (dep) => {
       try {
+        const result = await resolvePackage(document.uri, dep)
+        if (!result)
+          return
+
         const pkg = await getPackageInfo(dep.name)
         if (!pkg)
           return
 
         enabledRules.value.forEach(async (rule) => {
-          const diagnostic = await rule(dep, pkg)
+          const diagnostic = await rule(dep, pkg, result)
 
           if (diagnostic) {
             diagnostics.push({
