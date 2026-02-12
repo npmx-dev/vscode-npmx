@@ -8,6 +8,6 @@
     "array-includes": "",
     "axios": "",
     "is-number": "",
-    "lodash": "^2.4.2"
+    "lodash": "catalog:"
   }
 }

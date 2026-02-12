@@ -15,3 +15,4 @@ export const NPMX_DEV_API = `${NPMX_DEV}/api`
 export const SPACER = '&nbsp;'
 
 export const UPGRADE_MESSAGE_PREFIX = 'New version available: '
+export const CATALOG_DIAGNOSTIC_RELATED_INFO_PREFIX = 'catalog:'

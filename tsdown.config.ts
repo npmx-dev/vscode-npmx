@@ -10,6 +10,11 @@ export default defineConfig({
   },
   external: ['vscode'],
   inlineOnly: [
+    '@pnpm/catalogs.config',
+    '@pnpm/catalogs.resolver',
+    '@pnpm/constants',
+    '@pnpm/error',
+    '@pnpm/catalogs.protocol-parser',
     'reactive-vscode',
     '@reactive-vscode/reactivity',
     'jsonc-parser',
@@ -19,4 +24,7 @@ export default defineConfig({
     'perfect-debounce',
   ],
   minify: 'dce-only',
+  outputOptions: {
+    codeSplitting: false,
+  },
 })

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Uri } from 'vscode'
-import { resolvePackageRelativePath } from '../src/utils/resolve'
+import { resolveNearestPackageJson } from '../src/utils/resolve'
 import { mockFileSystem } from './__mocks__/filesystem'
 
 describe('resolvePackageRelativePath', () => {
@@ -17,7 +17,7 @@ describe('resolvePackageRelativePath', () => {
     })
 
     const uri = Uri.file('/root/node_modules/pkg/src/index.js')
-    const result = await resolvePackageRelativePath(uri)
+    const result = await resolveNearestPackageJson(uri)
 
     expect(result).toBeDefined()
 
@@ -39,7 +39,7 @@ describe('resolvePackageRelativePath', () => {
     })
 
     const uri = Uri.file('/root/node_modules/parent/node_modules/child/index.js')
-    const result = await resolvePackageRelativePath(uri)
+    const result = await resolveNearestPackageJson(uri)
 
     expect(result).toBeDefined()
 
@@ -57,7 +57,7 @@ describe('resolvePackageRelativePath', () => {
     })
 
     const uri = Uri.file('/root/.pnpm/pkg@1.0.0/node_modules/pkg/src/index.js')
-    const result = await resolvePackageRelativePath(uri)
+    const result = await resolveNearestPackageJson(uri)
 
     expect(result).toBeDefined()
 
@@ -75,7 +75,7 @@ describe('resolvePackageRelativePath', () => {
     })
 
     const uri = Uri.file('/root/node_modules/@scope/pkg/src/index.js')
-    const result = await resolvePackageRelativePath(uri)
+    const result = await resolveNearestPackageJson(uri)
 
     expect(result).toBeDefined()
 
@@ -88,7 +88,7 @@ describe('resolvePackageRelativePath', () => {
     mockFileSystem({})
 
     const uri = Uri.file('/root/no-pkg/file.js')
-    const result = await resolvePackageRelativePath(uri)
+    const result = await resolveNearestPackageJson(uri)
     expect(result).toBeUndefined()
   })
 
@@ -101,7 +101,7 @@ describe('resolvePackageRelativePath', () => {
     })
 
     const uri = Uri.file('/root/node_modules/pkg/file.js')
-    const result = await resolvePackageRelativePath(uri)
+    const result = await resolveNearestPackageJson(uri)
     expect(result).toBeUndefined()
   })
 
@@ -120,7 +120,7 @@ describe('resolvePackageRelativePath', () => {
     })
 
     const uri = Uri.file('/root/node_modules/pkg/src/index.js')
-    const result = await resolvePackageRelativePath(uri)
+    const result = await resolveNearestPackageJson(uri)
     expect(result).toBeDefined()
 
     const { manifest, relativePath } = result!

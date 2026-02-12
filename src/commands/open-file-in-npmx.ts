@@ -1,6 +1,6 @@
 import { logger } from '#state'
 import { npmxFileUrl } from '#utils/links'
-import { resolvePackageRelativePath } from '#utils/resolve'
+import { resolveNearestPackageJson } from '#utils/resolve'
 import { useActiveTextEditor } from 'reactive-vscode'
 import { env, Uri, window } from 'vscode'
 
@@ -23,7 +23,7 @@ export async function openFileInNpmx(fileUri?: Uri) {
   }
 
   // Find the associated package manifest and the relative path to the given file.
-  const result = await resolvePackageRelativePath(uri)
+  const result = await resolveNearestPackageJson(uri)
   if (!result) {
     logger.warn(`Could not resolve npmx url: ${uri.toString()}`)
     window.showWarningMessage(`npmx: Could not find package.json for ${uri.toString()}`)

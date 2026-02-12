@@ -5,6 +5,8 @@ import type { Diagnostic, TextDocument } from 'vscode'
 import { basename } from 'node:path'
 import { config, logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
+import { resolveCatalogDependency } from '#utils/catalog'
+import { parseVersion } from '#utils/version'
 import { debounce } from 'perfect-debounce'
 import { computed, useActiveTextEditor, useDocumentText, watch } from 'reactive-vscode'
 import { languages } from 'vscode'
@@ -18,6 +20,12 @@ export interface NodeDiagnosticInfo extends Omit<Diagnostic, 'range' | 'source'>
   node: ValidNode
 }
 export type DiagnosticRule = (dep: DependencyInfo, pkg: PackageInfo) => Awaitable<NodeDiagnosticInfo | undefined>
+
+const versionRules = new Set<DiagnosticRule>([
+  checkUpgrade,
+  checkDeprecation,
+  checkVulnerability,
+])
 
 const enabledRules = computed<DiagnosticRule[]>(() => {
   const rules: DiagnosticRule[] = []
@@ -47,29 +55,57 @@ export function registerDiagnosticCollection(mapping: Record<string, Extractor |
 
     const dependencies = extractor.getDependenciesInfo(root)
     const diagnostics: Diagnostic[] = []
-
     const flush = debounce(() => {
       diagnosticCollection.set(document.uri, [...diagnostics])
     }, 100)
 
     dependencies.forEach(async (dep) => {
       try {
+        const rawParsed = parseVersion(dep.version)
+        let depForRules = dep
+        let shouldSkipVersionRules = false
+
+        if (rawParsed?.protocol === 'catalog') {
+          const resolution = await resolveCatalogDependency({
+            documentUri: document.uri,
+            alias: dep.name,
+            bareSpecifier: dep.version,
+          })
+
+          if (resolution) {
+            depForRules = {
+              ...dep,
+              resolvedVersion: resolution.resolvedSpecifier,
+              catalogResolution: {
+                catalogName: resolution.catalogName,
+                workspaceUri: resolution.workspaceUri,
+                entryLocation: resolution.entryLocation,
+              },
+            }
+          } else {
+            shouldSkipVersionRules = true
+          }
+        }
+
         const pkg = await getPackageInfo(dep.name)
         if (!pkg)
           return
 
         enabledRules.value.forEach(async (rule) => {
-          const diagnostic = await rule(dep, pkg)
+          if (shouldSkipVersionRules && versionRules.has(rule))
+            return
 
-          if (diagnostic) {
-            diagnostics.push({
-              source: displayName,
-              range: extractor.getNodeRange(document, diagnostic.node),
-              ...diagnostic,
-            })
+          const diagnostic = await rule(depForRules, pkg)
+          if (!diagnostic)
+            return
 
-            flush()
-          }
+          diagnostics.push({
+            source: displayName,
+            range: extractor.getNodeRange(document, diagnostic.node),
+            ...diagnostic,
+          })
+
+          flush()
         })
       } catch (err) {
         logger.warn(`Failed to check ${dep.name}: ${err}`)

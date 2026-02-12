@@ -8,6 +8,12 @@ importers:
 
   .:
     devDependencies:
+      '@pnpm/catalogs.config':
+        specifier: ^1000.0.5
+        version: 1000.0.5
+      '@pnpm/catalogs.resolver':
+        specifier: ^1000.0.5
+        version: 1000.0.5
       '@types/node':
         specifier: ^25.2.2
         version: 25.2.2
@@ -541,6 +547,26 @@ packages:
   '@pkgr/core@0.2.7':
     resolution: {integrity: sha512-YLT9Zo3oNPJoBjBc4q8G2mjU4tqIbf5CEOORbUUr48dCD9q3umJ3IPlVqOqDakPfd2HuwccBaqlGhN4Gmr5OWg==}
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
+
+  '@pnpm/catalogs.config@1000.0.5':
+    resolution: {integrity: sha512-PG8LEiI77kXULdwcq6p2uj4T1AjQ2sjBMiL6DHi2eZjGCSWgigoGCGzZ7Rkm2Y/hK0r6CyvbZozGjwjetSOIBA==}
+    engines: {node: '>=18.12'}
+
+  '@pnpm/catalogs.protocol-parser@1001.0.0':
+    resolution: {integrity: sha512-9rHKCMRvhfv7TSAVSCVLI+8OZhi1OcT8lanAGqOPbGgQTkFrPH3PfEWJNxz43xqrXRa4HCFRAMu+g19su5eRLA==}
+    engines: {node: '>=18.12'}
+
+  '@pnpm/catalogs.resolver@1000.0.5':
+    resolution: {integrity: sha512-h6UiDAu/Ztj0LCd9sqmJwSWvJYTMUuxo/+/Iz2WZuWboyUI+2BylWJvokkMG4hNlvroLzBQ5+cz9/e+TDSLpoA==}
+    engines: {node: '>=18.12'}
+
+  '@pnpm/constants@1001.3.1':
+    resolution: {integrity: sha512-2hf0s4pVrVEH8RvdJJ7YRKjQdiG8m0iAT26TTqXnCbK30kKwJW69VLmP5tED5zstmDRXcOeH5eRcrpkdwczQ9g==}
+    engines: {node: '>=18.12'}
+
+  '@pnpm/error@1000.0.5':
+    resolution: {integrity: sha512-GjH0TPjbVNrPnl/BAGoFuBLJ2sFfXNKbS33lll/Ehe9yw0fyc8Kdw7kO9if37yQqn6vaa4dAHKkPllum7f/IPQ==}
+    engines: {node: '>=18.12'}
 
   '@quansync/fs@1.0.0':
     resolution: {integrity: sha512-4TJ3DFtlf1L5LDMaM6CanJ/0lckGNtJcMjQ1NAV6zDmA0tEHKZtxNKin8EgPaVX1YzljbxckyT2tJrpQKAtngQ==}
@@ -3616,6 +3642,23 @@ snapshots:
   '@oxc-project/types@0.112.0': {}
 
   '@pkgr/core@0.2.7': {}
+
+  '@pnpm/catalogs.config@1000.0.5':
+    dependencies:
+      '@pnpm/error': 1000.0.5
+
+  '@pnpm/catalogs.protocol-parser@1001.0.0': {}
+
+  '@pnpm/catalogs.resolver@1000.0.5':
+    dependencies:
+      '@pnpm/catalogs.protocol-parser': 1001.0.0
+      '@pnpm/error': 1000.0.5
+
+  '@pnpm/constants@1001.3.1': {}
+
+  '@pnpm/error@1000.0.5':
+    dependencies:
+      '@pnpm/constants': 1001.3.1
 
   '@quansync/fs@1.0.0':
     dependencies:

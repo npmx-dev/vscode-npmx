@@ -1,21 +1,32 @@
 import type { DependencyInfo } from '#types/extractor'
 import type { ParsedVersion } from '#utils/version'
 import type { DiagnosticRule, NodeDiagnosticInfo } from '..'
-import { UPGRADE_MESSAGE_PREFIX } from '#constants'
+import { CATALOG_DIAGNOSTIC_RELATED_INFO_PREFIX, UPGRADE_MESSAGE_PREFIX } from '#constants'
 import { formatVersion, getPrereleaseId, isSupportedProtocol, lt, parseVersion } from '#utils/version'
-import { DiagnosticSeverity } from 'vscode'
+import { DiagnosticRelatedInformation, DiagnosticSeverity } from 'vscode'
 
 function createUpgradeDiagnostic(dep: DependencyInfo, parsed: ParsedVersion, upgradeVersion: string): NodeDiagnosticInfo {
   const target = formatVersion({ ...parsed, semver: upgradeVersion })
+
+  const relatedInformation = dep.catalogResolution
+    ? [
+        new DiagnosticRelatedInformation(
+          dep.catalogResolution.entryLocation,
+          `${CATALOG_DIAGNOSTIC_RELATED_INFO_PREFIX}${dep.catalogResolution.catalogName}`,
+        ),
+      ]
+    : undefined
+
   return {
     node: dep.versionNode,
     severity: DiagnosticSeverity.Hint,
     message: `${UPGRADE_MESSAGE_PREFIX}${target}`,
+    relatedInformation,
   }
 }
 
 export const checkUpgrade: DiagnosticRule = (dep, pkg) => {
-  const parsed = parseVersion(dep.version)
+  const parsed = parseVersion(dep.resolvedVersion ?? dep.version)
   if (!parsed || !isSupportedProtocol(parsed.protocol))
     return
 
