@@ -1,8 +1,8 @@
 type VersionProtocol = 'workspace' | 'catalog' | 'npm' | 'jsr' | null
 
 const URL_PREFIXES = ['http://', 'https://', 'git://', 'git+']
-const UNSUPPORTED_PROTOCOLS = new Set(['workspace', 'catalog', 'jsr'])
-const KNOWN_PROTOCOLS = new Set([...UNSUPPORTED_PROTOCOLS, 'npm'])
+const UNSUPPORTED_PROTOCOLS = new Set<string>(['workspace', 'jsr'])
+const KNOWN_PROTOCOLS = new Set(['workspace', 'catalog', 'jsr', 'npm'])
 
 export interface ParsedVersion {
   protocol: VersionProtocol
