@@ -22,7 +22,7 @@ export function memoize<P, V>(fn: (params: P) => V, options: MemoizeOptions<P> =
   const {
     getKey = String,
     ttl = CACHE_TTL_ONE_DAY,
-    maxSize,
+    maxSize = 200,
   } = options
 
   const cache = new Map<MemoizeKey, MemoizeEntry<V>>()
@@ -53,7 +53,7 @@ export function memoize<P, V>(fn: (params: P) => V, options: MemoizeOptions<P> =
   }
 
   function set(key: MemoizeKey, value: Awaited<V>): void {
-    if (maxSize !== undefined && cache.size >= maxSize && !cache.has(key))
+    if (cache.size >= maxSize && !cache.has(key))
       evictOne()
     cache.set(key, {
       value,
