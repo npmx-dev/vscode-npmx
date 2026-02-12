@@ -66,6 +66,24 @@ describe('checkDistTag', () => {
     expect(result).toBeUndefined()
   })
 
+  it('should not flag pinned semver with v prefix', async () => {
+    const dependency = createDependency('lodash', 'v1.2.3')
+    const packageInfo = createPackageInfo({ latest: '2.0.0' })
+
+    const result = await checkDistTag(dependency, packageInfo)
+
+    expect(result).toBeUndefined()
+  })
+
+  it('should not flag npm protocol pinned semver with v prefix', async () => {
+    const dependency = createDependency('lodash', 'npm:v1.2.3')
+    const packageInfo = createPackageInfo({ latest: '2.0.0' })
+
+    const result = await checkDistTag(dependency, packageInfo)
+
+    expect(result).toBeUndefined()
+  })
+
   it('should flag unknown tag-like versions', async () => {
     const dependency = createDependency('lodash', 'edge-channel')
     const packageInfo = createPackageInfo({})
