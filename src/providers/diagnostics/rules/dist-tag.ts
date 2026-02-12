@@ -1,7 +1,6 @@
 import type { DiagnosticRule } from '..'
-import { COMMON_DIST_TAGS } from '#constants'
 import { npmxPackageUrl } from '#utils/links'
-import { isSupportedProtocol, parseVersion } from '#utils/package'
+import { isDistTagLike, isSupportedProtocol, parseVersion } from '#utils/version'
 import { DiagnosticSeverity, Uri } from 'vscode'
 
 export const checkDistTag: DiagnosticRule = (dep, pkg) => {
@@ -11,8 +10,8 @@ export const checkDistTag: DiagnosticRule = (dep, pkg) => {
 
   const tag = parsed.semver
   const isPublishedDistTag = tag in (pkg.distTags ?? {})
-  const isCommonDistTag = COMMON_DIST_TAGS.has(tag.toLowerCase())
-  if (!isPublishedDistTag && !isCommonDistTag)
+  const isDistTag = isPublishedDistTag || isDistTagLike(tag)
+  if (!isDistTag)
     return
 
   return {

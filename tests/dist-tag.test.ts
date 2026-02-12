@@ -66,17 +66,26 @@ describe('checkDistTag', () => {
     expect(result).toBeUndefined()
   })
 
-  it('should not flag unknown tag-like versions', async () => {
+  it('should flag unknown tag-like versions', async () => {
     const dependency = createDependency('lodash', 'edge-channel')
     const packageInfo = createPackageInfo({})
 
     const result = await checkDistTag(dependency, packageInfo)
 
-    expect(result).toBeUndefined()
+    expect(result).toBeDefined()
   })
 
-  it('should not flag non-common tags when package metadata does not include them', async () => {
+  it('should flag uncommon tags when package metadata does not include them', async () => {
     const dependency = createDependency('lodash', 'preview')
+    const packageInfo = createPackageInfo({ latest: '1.0.0' })
+
+    const result = await checkDistTag(dependency, packageInfo)
+
+    expect(result).toBeDefined()
+  })
+
+  it('should not flag wildcard ranges', async () => {
+    const dependency = createDependency('lodash', '*')
     const packageInfo = createPackageInfo({ latest: '1.0.0' })
 
     const result = await checkDistTag(dependency, packageInfo)

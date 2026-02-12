@@ -6,19 +6,6 @@ export const PNPM_WORKSPACE_PATTERN = `**/${PNPM_WORKSPACE_BASENAME}`
 
 export const VERSION_TRIGGER_CHARACTERS = [':', '^', '~', '.', ...Array.from({ length: 10 }).map((_, i) => `${i}`)]
 export const PRERELEASE_PATTERN = /-.+/
-export const COMMON_DIST_TAGS = new Set([
-  'latest',
-  'next',
-  'beta',
-  'alpha',
-  'rc',
-  'canary',
-  'stable',
-  'experimental',
-  'nightly',
-  'snapshot',
-  'dev',
-])
 
 export const CACHE_TTL_ONE_DAY = 1000 * 60 * 60 * 24
 

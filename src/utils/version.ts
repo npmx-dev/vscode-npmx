@@ -3,6 +3,7 @@ type VersionProtocol = 'workspace' | 'catalog' | 'npm' | 'jsr' | null
 const URL_PREFIXES = ['http://', 'https://', 'git://', 'git+']
 const UNSUPPORTED_PROTOCOLS = new Set(['workspace', 'catalog', 'jsr'])
 const KNOWN_PROTOCOLS = new Set([...UNSUPPORTED_PROTOCOLS, 'npm'])
+const DIST_TAG_PATTERN = /^[a-z][\w.-]*$/i
 
 export interface ParsedVersion {
   protocol: VersionProtocol
@@ -12,6 +13,10 @@ export interface ParsedVersion {
 
 export function isSupportedProtocol(protocol: VersionProtocol): boolean {
   return !protocol || !UNSUPPORTED_PROTOCOLS.has(protocol)
+}
+
+export function isDistTagLike(version: string): boolean {
+  return DIST_TAG_PATTERN.test(version)
 }
 
 export function formatVersion(parsed: ParsedVersion): string {
