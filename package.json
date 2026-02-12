@@ -170,7 +170,6 @@
     "reactive-vscode": "^1.0.0-beta.2",
     "tsdown": "^0.20.3",
     "typescript": "^5.9.3",
-    "vite-tsconfig-paths": "^6.1.0",
     "vitest": "^4.0.18",
     "vscode-ext-gen": "1.3.0",
     "yaml": "^2.8.2"

@@ -1,15 +1,19 @@
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import tsconfigPaths from 'vite-tsconfig-paths'
 import { defineConfig } from 'vitest/config'
 
 const rootDir = fileURLToPath(new URL('.', import.meta.url))
 
 export default defineConfig({
-  plugins: [tsconfigPaths()],
   resolve: {
     alias: {
-      vscode: join(rootDir, '/tests/__mocks__/vscode.ts'),
+      '#constants': join(rootDir, '/src/constants.ts'),
+      '#state': join(rootDir, '/src/state.ts'),
+      '#types': join(rootDir, '/src/types'),
+      '#types/*': join(rootDir, '/src/types/*'),
+      '#utils': join(rootDir, '/src/utils'),
+      '#utils/*': join(rootDir, '/src/utils/*'),
+      'vscode': join(rootDir, '/tests/__mocks__/vscode.ts'),
     },
   },
   test: {
