@@ -9,6 +9,7 @@ export default defineConfig({
     alias: {
       '#constants': join(rootDir, '/src/constants.ts'),
       '#state': join(rootDir, '/src/state.ts'),
+      '#utils': join(rootDir, '/src/utils'),
       '#types/*': join(rootDir, '/src/types/*'),
       '#utils/*': join(rootDir, '/src/utils/*'),
       'vscode': join(rootDir, '/tests/__mocks__/vscode.ts'),
