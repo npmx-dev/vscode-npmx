@@ -1,130 +1,77 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Uri } from 'vscode'
-import { resolvePackageRelativePath } from '../src/utils/resolve'
+import { findNearestFile, walkAncestors } from '../src/utils/resolve'
 import { mockFileSystem } from './__mocks__/filesystem'
 
-describe('resolvePackageRelativePath', () => {
+describe('walkAncestors', () => {
+  it('should yield all ancestor directories', () => {
+    const uri = Uri.file('/a/b/c/file.js')
+    const ancestors = [...walkAncestors(uri)]
+    expect(ancestors.map((u) => u.path)).toEqual([
+      '/a/b/c/file.js',
+      '/a/b/c',
+      '/a/b',
+      '/a',
+      '/',
+    ])
+  })
+
+  it('should stop when shouldStop returns true', () => {
+    const uri = Uri.file('/a/b/c/file.js')
+    const ancestors = [...walkAncestors(uri, (u) => u.path === '/a/b')]
+    expect(ancestors.map((u) => u.path)).toEqual([
+      '/a/b/c/file.js',
+      '/a/b/c',
+      '/a/b',
+    ])
+  })
+
+  it('should handle root URI', () => {
+    const uri = Uri.file('/')
+    const ancestors = [...walkAncestors(uri)]
+    expect(ancestors.map((u) => u.path)).toEqual(['/'])
+  })
+})
+
+describe('findNearestFile', () => {
   beforeEach(() => {
     vi.resetAllMocks()
   })
 
-  it('should resolve simple package file', async () => {
+  it('should find a file in a parent directory', async () => {
     mockFileSystem({
-      '/root/node_modules/pkg/package.json': JSON.stringify({
-        name: 'pkg',
-        version: '1.0.0',
-      }),
+      '/a/b/target.txt': '',
     })
 
-    const uri = Uri.file('/root/node_modules/pkg/src/index.js')
-    const result = await resolvePackageRelativePath(uri)
-
+    const result = await findNearestFile('target.txt', Uri.file('/a/b/c/d'))
     expect(result).toBeDefined()
-
-    const { manifest, relativePath } = result!
-    expect(manifest).toEqual({ name: 'pkg', version: '1.0.0' })
-    expect(relativePath).toBe('src/index.js')
+    expect(result!.path).toBe('/a/b/target.txt')
   })
 
-  it('should handle bundled dependencies', async () => {
+  it('should return the closest match', async () => {
     mockFileSystem({
-      '/root/node_modules/parent/package.json': JSON.stringify({
-        name: 'parent',
-        version: '1.0.0',
-      }),
-      '/root/node_modules/parent/node_modules/child/package.json': JSON.stringify({
-        name: 'child',
-        version: '2.0.0',
-      }),
+      '/a/target.txt': '',
+      '/a/b/c/target.txt': '',
     })
 
-    const uri = Uri.file('/root/node_modules/parent/node_modules/child/index.js')
-    const result = await resolvePackageRelativePath(uri)
-
+    const result = await findNearestFile('target.txt', Uri.file('/a/b/c/d'))
     expect(result).toBeDefined()
-
-    const { manifest, relativePath } = result!
-    expect(manifest).toEqual({ name: 'child', version: '2.0.0' })
-    expect(relativePath).toBe('index.js')
+    expect(result!.path).toBe('/a/b/c/target.txt')
   })
 
-  it('should handle pnpm structure', async () => {
-    mockFileSystem({
-      '/root/.pnpm/pkg@1.0.0/node_modules/pkg/package.json': JSON.stringify({
-        name: 'pkg',
-        version: '1.0.0',
-      }),
-    })
-
-    const uri = Uri.file('/root/.pnpm/pkg@1.0.0/node_modules/pkg/src/index.js')
-    const result = await resolvePackageRelativePath(uri)
-
-    expect(result).toBeDefined()
-
-    const { manifest, relativePath } = result!
-    expect(manifest).toEqual({ name: 'pkg', version: '1.0.0' })
-    expect(relativePath).toBe('src/index.js')
-  })
-
-  it('should handle scoped packages', async () => {
-    mockFileSystem({
-      '/root/node_modules/@scope/pkg/package.json': JSON.stringify({
-        name: '@scope/pkg',
-        version: '1.0.0',
-      }),
-    })
-
-    const uri = Uri.file('/root/node_modules/@scope/pkg/src/index.js')
-    const result = await resolvePackageRelativePath(uri)
-
-    expect(result).toBeDefined()
-
-    const { manifest, relativePath } = result!
-    expect(manifest).toEqual({ name: '@scope/pkg', version: '1.0.0' })
-    expect(relativePath).toBe('src/index.js')
-  })
-
-  it('should return undefined if no package.json found', async () => {
+  it('should return undefined when file is not found', async () => {
     mockFileSystem({})
 
-    const uri = Uri.file('/root/no-pkg/file.js')
-    const result = await resolvePackageRelativePath(uri)
+    const result = await findNearestFile('target.txt', Uri.file('/a/b/c'))
     expect(result).toBeUndefined()
   })
 
-  it('should return undefined even when a package.json exists outside the node_modules directory', async () => {
+  it('should respect shouldStop', async () => {
     mockFileSystem({
-      '/root/package.json': JSON.stringify({
-        name: 'root',
-        version: '1.0.0',
-      }),
+      '/a/target.txt': '',
     })
 
-    const uri = Uri.file('/root/node_modules/pkg/file.js')
-    const result = await resolvePackageRelativePath(uri)
+    const result = await findNearestFile('target.txt', Uri.file('/a/b/c'), (u) => u.path === '/a/b')
     expect(result).toBeUndefined()
-  })
-
-  it('should skip invalid manifests', async () => {
-    mockFileSystem({
-      '/root/node_modules/pkg/package.json': JSON.stringify({
-        name: 'pkg',
-        version: '1.0.0',
-      }),
-
-      // Context: Side effects is often configured per-directory as the only key
-      // in a `package.json`, but it does not actually represent a real package.
-      '/root/node_modules/pkg/src/package.json': JSON.stringify({
-        sideEffects: false,
-      }),
-    })
-
-    const uri = Uri.file('/root/node_modules/pkg/src/index.js')
-    const result = await resolvePackageRelativePath(uri)
-    expect(result).toBeDefined()
-
-    const { manifest, relativePath } = result!
-    expect(manifest).toEqual({ name: 'pkg', version: '1.0.0' })
-    expect(relativePath).toBe('src/index.js')
   })
 })

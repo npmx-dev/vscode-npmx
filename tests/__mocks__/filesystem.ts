@@ -16,6 +16,14 @@ export function mockFileSystem(files: Record<string, string>) {
     }
   }
 
+  vi.mocked(workspace.fs.stat).mockImplementation(async (uri) => {
+    const path = uri.path
+    if (files[path] === undefined) {
+      throw new Error(`File not found: ${uri.toString()}`)
+    }
+    return {} as any
+  })
+
   vi.mocked(workspace.fs.readFile).mockImplementation(async (uri) => {
     const path = uri.path
     const content = files[path]

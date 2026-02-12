@@ -1,6 +1,7 @@
+import { PACKAGE_JSON_BASENAME } from '#constants'
 import { logger } from '#state'
 import { npmxFileUrl } from '#utils/links'
-import { resolvePackageRelativePath } from '#utils/resolve'
+import { findNearestFile, resolvePackageJson } from '#utils/resolve'
 import { useActiveTextEditor } from 'reactive-vscode'
 import { env, Uri, window } from 'vscode'
 
@@ -23,14 +24,15 @@ export async function openFileInNpmx(fileUri?: Uri) {
   }
 
   // Find the associated package manifest and the relative path to the given file.
-  const result = await resolvePackageRelativePath(uri)
-  if (!result) {
+  const pkgJsonUri = await findNearestFile(PACKAGE_JSON_BASENAME, uri, (u) => u.path.endsWith('/node_modules'))
+  const manifest = pkgJsonUri ? await resolvePackageJson(pkgJsonUri) : undefined
+  if (!pkgJsonUri || !manifest) {
     logger.warn(`Could not resolve npmx url: ${uri.toString()}`)
     window.showWarningMessage(`npmx: Could not find package.json for ${uri.toString()}`)
     return
   }
-  const { manifest, relativePath } = result
 
+  const relativePath = uri.path.slice(pkgJsonUri.path.lastIndexOf('/') + 1)
   // Use line number only if the user is actively looking at the relevant file
   const openingActiveFile = !fileUri || fileUri.toString() === textEditor.value?.document.uri.toString()
 
