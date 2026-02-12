@@ -2,7 +2,7 @@ import type { DependencyInfo, Extractor } from '#types/extractor'
 import type { Node } from 'jsonc-parser'
 import type { TextDocument } from 'vscode'
 import { isInRange } from '#utils/ast'
-import { createCachedParse } from '#utils/parse'
+import { createMemoizedParse } from '#utils/memoize'
 import { findNodeAtLocation, findNodeAtOffset, parseTree } from 'jsonc-parser'
 import { Range } from 'vscode'
 
@@ -14,7 +14,7 @@ const DEPENDENCY_SECTIONS = [
 ]
 
 export class PackageJsonExtractor implements Extractor<Node> {
-  parse = createCachedParse((text) => parseTree(text) ?? null)
+  parse = createMemoizedParse((text) => parseTree(text) ?? null)
 
   getNodeRange(doc: TextDocument, node: Node) {
     const start = doc.positionAt(node.offset + 1)

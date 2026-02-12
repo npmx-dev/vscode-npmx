@@ -1,4 +1,5 @@
-import type { Uri } from 'vscode'
+import type { ValidNode } from '#types/extractor'
+import type { TextDocument, Uri } from 'vscode'
 import { CACHE_TTL_ONE_DAY } from '#constants'
 
 type MemoizeKey = string | Uri
@@ -89,4 +90,14 @@ export function memoize<P, V>(fn: (params: P) => V, options: MemoizeOptions<P> =
       return result
     }
   }
+}
+
+export function createMemoizedParse<T extends ValidNode>(parse: (text: string) => T | null) {
+  return memoize(
+    (doc: TextDocument) => parse(doc.getText()),
+    {
+      getKey: (doc) => `${doc.uri}:${doc.version}`,
+      maxSize: 1,
+    },
+  )
 }
