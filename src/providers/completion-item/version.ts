@@ -1,69 +1,65 @@
 import type { Extractor } from '#types/extractor'
-import type { CompletionItemProvider, Position, TextDocument } from 'vscode'
+import type { CompletionItemProvider } from 'vscode'
 import { PRERELEASE_PATTERN } from '#constants'
 import { config } from '#state'
 import { getPackageInfo } from '#utils/api/package'
 import { formatVersion, isSupportedProtocol, parseVersion } from '#utils/version'
 import { CompletionItem, CompletionItemKind } from 'vscode'
 
-export class VersionCompletionItemProvider<T extends Extractor> implements CompletionItemProvider {
-  extractor: T
+export function createVersionCompletionItemProvider(extractor: Extractor): CompletionItemProvider {
+  return {
+    async provideCompletionItems(document, position) {
+      const root = extractor.parse(document)
+      if (!root)
+        return
 
-  constructor(extractor: T) {
-    this.extractor = extractor
-  }
+      const offset = document.offsetAt(position)
+      const info = extractor.getDependencyInfoByOffset(root, offset)
+      if (!info)
+        return
 
-  async provideCompletionItems(document: TextDocument, position: Position) {
-    const root = this.extractor.parse(document)
-    if (!root)
-      return
+      const {
+        versionNode,
+        name,
+        version,
+      } = info
 
-    const offset = document.offsetAt(position)
-    const info = this.extractor.getDependencyInfoByOffset(root, offset)
-    if (!info)
-      return
+      const parsed = parseVersion(version)
+      if (!parsed || !isSupportedProtocol(parsed.protocol))
+        return
 
-    const {
-      versionNode,
-      name,
-      version,
-    } = info
+      const pkg = await getPackageInfo(name)
+      if (!pkg)
+        return
 
-    const parsed = parseVersion(version)
-    if (!parsed || !isSupportedProtocol(parsed.protocol))
-      return
+      const items: CompletionItem[] = []
 
-    const pkg = await getPackageInfo(name)
-    if (!pkg)
-      return
+      for (const semver in pkg.versionsMeta) {
+        const meta = pkg.versionsMeta[semver]
 
-    const items: CompletionItem[] = []
+        if (meta.deprecated != null)
+          continue
 
-    for (const semver in pkg.versionsMeta) {
-      const meta = pkg.versionsMeta[semver]
+        if (config.completion.excludePrerelease && PRERELEASE_PATTERN.test(semver))
+          continue
 
-      if (meta.deprecated != null)
-        continue
+        if (config.completion.version === 'provenance-only' && !meta.provenance)
+          continue
 
-      if (config.completion.excludePrerelease && PRERELEASE_PATTERN.test(semver))
-        continue
+        const text = formatVersion({ ...parsed, semver })
+        const item = new CompletionItem(text, CompletionItemKind.Value)
 
-      if (config.completion.version === 'provenance-only' && !meta.provenance)
-        continue
+        item.range = extractor.getNodeRange(document, versionNode)
+        item.insertText = text
 
-      const text = formatVersion({ ...parsed, semver })
-      const item = new CompletionItem(text, CompletionItemKind.Value)
+        const tag = pkg.versionToTag.get(semver)
+        if (tag)
+          item.detail = tag
 
-      item.range = this.extractor.getNodeRange(document, versionNode)
-      item.insertText = text
+        items.push(item)
+      }
 
-      const tag = pkg.versionToTag.get(semver)
-      if (tag)
-        item.detail = tag
-
-      items.push(item)
-    }
-
-    return items
+      return items
+    },
   }
 }

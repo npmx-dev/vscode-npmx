@@ -1,3 +1,4 @@
+import type { Extractor } from '#types/extractor'
 import {
   PACKAGE_JSON_BASENAME,
   PACKAGE_JSON_PATTERN,
@@ -9,72 +10,81 @@ import { defineExtension, useCommands, watchEffect } from 'reactive-vscode'
 import { CodeActionKind, Disposable, languages } from 'vscode'
 import { openFileInNpmx } from './commands/open-file-in-npmx'
 import { openInBrowser } from './commands/open-in-browser'
-import { PackageJsonExtractor } from './extractors/package-json'
-import { PnpmWorkspaceYamlExtractor } from './extractors/pnpm-workspace-yaml'
+import { packageJsonExtractor } from './extractors/package-json'
+import { pnpmWorkspaceYamlExtractor } from './extractors/pnpm-workspace-yaml'
 import { commands, displayName, version } from './generated-meta'
-import { UpgradeProvider } from './providers/code-actions/upgrade'
-import { VersionCompletionItemProvider } from './providers/completion-item/version'
+import { createUpgradeProvider } from './providers/code-actions/upgrade'
+import { createVersionCompletionItemProvider } from './providers/completion-item/version'
 import { registerDiagnosticCollection } from './providers/diagnostics'
-import { NpmxHoverProvider } from './providers/hover/npmx'
+import { createNpmxHoverProvider } from './providers/hover/npmx'
 import { config, logger } from './state'
 
-export const { activate, deactivate } = defineExtension(() => {
-  logger.info(`${displayName} Activated, v${version}`)
+interface ExtractorEntry {
+  pattern: string
+  extractor: Extractor
+}
 
-  const packageJsonExtractor = new PackageJsonExtractor()
-  const pnpmWorkspaceYamlExtractor = new PnpmWorkspaceYamlExtractor()
-
+function useHoverProviders(entries: ExtractorEntry[]) {
   watchEffect((onCleanup) => {
     if (!config.hover.enabled)
       return
 
-    const disposables = [
+    const disposables = entries.map(({ pattern, extractor }) =>
       languages.registerHoverProvider(
-        { pattern: PACKAGE_JSON_PATTERN },
-        new NpmxHoverProvider(packageJsonExtractor),
+        { pattern },
+        createNpmxHoverProvider(extractor),
       ),
-      languages.registerHoverProvider(
-        { pattern: PNPM_WORKSPACE_PATTERN },
-        new NpmxHoverProvider(pnpmWorkspaceYamlExtractor),
-      ),
-    ]
+    )
 
     onCleanup(() => Disposable.from(...disposables).dispose())
   })
+}
 
+function useCompletionProviders(entries: ExtractorEntry[]) {
   watchEffect((onCleanup) => {
     if (config.completion.version === 'off')
       return
 
-    const disposables = [
+    const disposables = entries.map(({ pattern, extractor }) =>
       languages.registerCompletionItemProvider(
-        { pattern: PACKAGE_JSON_PATTERN },
-        new VersionCompletionItemProvider(packageJsonExtractor),
+        { pattern },
+        createVersionCompletionItemProvider(extractor),
         ...VERSION_TRIGGER_CHARACTERS,
       ),
-      languages.registerCompletionItemProvider(
-        { pattern: PNPM_WORKSPACE_PATTERN },
-        new VersionCompletionItemProvider(pnpmWorkspaceYamlExtractor),
-        ...VERSION_TRIGGER_CHARACTERS,
-      ),
-    ]
+    )
 
     onCleanup(() => Disposable.from(...disposables).dispose())
   })
+}
 
+function useCodeActionProviders(entries: ExtractorEntry[]) {
   watchEffect((onCleanup) => {
     if (!config.diagnostics.upgrade)
       return
 
-    const provider = new UpgradeProvider()
+    const provider = createUpgradeProvider()
     const options = { providedCodeActionKinds: [CodeActionKind.QuickFix] }
     const disposable = Disposable.from(
-      languages.registerCodeActionsProvider({ pattern: PACKAGE_JSON_PATTERN }, provider, options),
-      languages.registerCodeActionsProvider({ pattern: PNPM_WORKSPACE_PATTERN }, provider, options),
+      ...entries.map(({ pattern }) =>
+        languages.registerCodeActionsProvider({ pattern }, provider, options),
+      ),
     )
 
     onCleanup(() => disposable.dispose())
   })
+}
+
+export const { activate, deactivate } = defineExtension(() => {
+  logger.info(`${displayName} Activated, v${version}`)
+
+  const entries: ExtractorEntry[] = [
+    { pattern: PACKAGE_JSON_PATTERN, extractor: packageJsonExtractor },
+    { pattern: PNPM_WORKSPACE_PATTERN, extractor: pnpmWorkspaceYamlExtractor },
+  ]
+
+  useHoverProviders(entries)
+  useCompletionProviders(entries)
+  useCodeActionProviders(entries)
 
   registerDiagnosticCollection({
     [PACKAGE_JSON_BASENAME]: packageJsonExtractor,

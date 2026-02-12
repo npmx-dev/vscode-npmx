@@ -13,25 +13,61 @@ type CatalogEntry = Pair<Scalar<string>, Scalar<string>>
 
 type CatalogEntryVisitor = (catalog: CatalogEntry) => boolean | void
 
-export class PnpmWorkspaceYamlExtractor implements Extractor<Node> {
-  parse = createMemoizedParse((text) => parseDocument(text).contents)
+const parse = createMemoizedParse((text) => parseDocument(text).contents)
 
-  getNodeRange(doc: TextDocument, node: Node) {
-    const [start, end] = node.range!
+function getNodeRange(doc: TextDocument, node: Node) {
+  const [start, end] = node.range!
 
-    return new Range(
-      doc.positionAt(start),
-      doc.positionAt(end),
-    )
+  return new Range(
+    doc.positionAt(start),
+    doc.positionAt(end),
+  )
+}
+
+function traverseCatalog(catalog: unknown, callback: CatalogEntryVisitor): boolean {
+  if (!isPair(catalog))
+    return false
+  if (!isMap(catalog.value))
+    return false
+
+  for (const item of catalog.value.items) {
+    if (isScalar(item.key) && isScalar(item.value)) {
+      if (callback(item as CatalogEntry))
+        return true
+    }
   }
 
-  getDependenciesInfo(root: Node): DependencyInfo<Node>[] {
+  return false
+}
+
+function traverseCatalogs(root: YAMLMap, callback: CatalogEntryVisitor): boolean {
+  const catalog = root.items.find((i) => isScalar(i.key) && i.key.value === CATALOG_SECTION)
+  if (traverseCatalog(catalog, callback))
+    return true
+
+  const catalogs = root.items.find((i) => isScalar(i.key) && i.key.value === CATALOGS_SECTION)
+  if (isMap(catalogs?.value)) {
+    for (const c of catalogs.value.items) {
+      if (traverseCatalog(c, callback))
+        return true
+    }
+  }
+
+  return false
+}
+
+export const pnpmWorkspaceYamlExtractor: Extractor<Node> = {
+  parse,
+
+  getNodeRange,
+
+  getDependenciesInfo(root): DependencyInfo<Node>[] {
     if (!isMap(root))
       return []
 
     const result: DependencyInfo<Node>[] = []
 
-    this.traverseCatalogs(root, (item) => {
+    traverseCatalogs(root, (item) => {
       result.push({
         nameNode: item.key,
         versionNode: item.value!,
@@ -41,47 +77,15 @@ export class PnpmWorkspaceYamlExtractor implements Extractor<Node> {
     })
 
     return result
-  }
+  },
 
-  private traverseCatalogs(root: YAMLMap, callback: CatalogEntryVisitor): boolean {
-    const catalog = root.items.find((i) => isScalar(i.key) && i.key.value === CATALOG_SECTION)
-    if (this.traverseCatalog(catalog, callback))
-      return true
-
-    const catalogs = root.items.find((i) => isScalar(i.key) && i.key.value === CATALOGS_SECTION)
-    if (isMap(catalogs?.value)) {
-      for (const c of catalogs.value.items) {
-        if (this.traverseCatalog(c, callback))
-          return true
-      }
-    }
-
-    return false
-  }
-
-  private traverseCatalog(catalog: unknown, callback: CatalogEntryVisitor): boolean {
-    if (!isPair(catalog))
-      return false
-    if (!isMap(catalog.value))
-      return false
-
-    for (const item of catalog.value.items) {
-      if (isScalar(item.key) && isScalar(item.value)) {
-        if (callback(item as CatalogEntry))
-          return true
-      }
-    }
-
-    return false
-  }
-
-  getDependencyInfoByOffset(root: Node, offset: number): DependencyInfo<Node> | undefined {
+  getDependencyInfoByOffset(root, offset): DependencyInfo<Node> | undefined {
     if (!isMap(root))
       return
 
     let result: DependencyInfo<Node> | undefined
 
-    this.traverseCatalogs(root, (item) => {
+    traverseCatalogs(root, (item) => {
       if (
         isInRange(offset, item.value!.range!)
         || isInRange(offset, item.key.range!)
@@ -97,5 +101,5 @@ export class PnpmWorkspaceYamlExtractor implements Extractor<Node> {
     })
 
     return result
-  }
+  },
 }

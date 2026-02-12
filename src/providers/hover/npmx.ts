@@ -1,75 +1,71 @@
 import type { Extractor } from '#types/extractor'
-import type { HoverProvider, Position, TextDocument } from 'vscode'
+import type { HoverProvider } from 'vscode'
 import { SPACER } from '#constants'
 import { getPackageInfo } from '#utils/api/package'
 import { jsrPackageUrl, npmxDocsUrl, npmxPackageUrl } from '#utils/links'
 import { isSupportedProtocol, parseVersion } from '#utils/version'
 import { Hover, MarkdownString } from 'vscode'
 
-export class NpmxHoverProvider<T extends Extractor> implements HoverProvider {
-  extractor: T
+export function createNpmxHoverProvider(extractor: Extractor): HoverProvider {
+  return {
+    async provideHover(document, position) {
+      const root = extractor.parse(document)
+      if (!root)
+        return
 
-  constructor(extractor: T) {
-    this.extractor = extractor
-  }
+      const offset = document.offsetAt(position)
+      const dep = extractor.getDependencyInfoByOffset(root, offset)
+      if (!dep)
+        return
 
-  async provideHover(document: TextDocument, position: Position) {
-    const root = this.extractor.parse(document)
-    if (!root)
-      return
+      const parsed = parseVersion(dep.version)
+      if (!parsed)
+        return
 
-    const offset = document.offsetAt(position)
-    const dep = this.extractor.getDependencyInfoByOffset(root, offset)
-    if (!dep)
-      return
+      const { name } = dep
+      const { protocol, semver } = parsed
 
-    const parsed = parseVersion(dep.version)
-    if (!parsed)
-      return
+      if (protocol === 'jsr') {
+        const jsrMd = new MarkdownString('', true)
+        const jsrUrl = jsrPackageUrl(name, semver)
 
-    const { name } = dep
-    const { protocol, semver } = parsed
+        jsrMd.isTrusted = true
 
-    if (protocol === 'jsr') {
-      const jsrMd = new MarkdownString('', true)
-      const jsrUrl = jsrPackageUrl(name, semver)
+        const jsrPackageLink = `[$(package)${SPACER}View on jsr.io](${jsrUrl})`
+        const npmxWarning = '$(warning) Not on npmx'
+        jsrMd.appendMarkdown(`${jsrPackageLink} | ${npmxWarning}`)
 
-      jsrMd.isTrusted = true
+        return new Hover(jsrMd)
+      }
 
-      const jsrPackageLink = `[$(package)${SPACER}View on jsr.io](${jsrUrl})`
-      const npmxWarning = '$(warning) Not on npmx'
-      jsrMd.appendMarkdown(`${jsrPackageLink} | ${npmxWarning}`)
+      if (!isSupportedProtocol(protocol))
+        return
 
-      return new Hover(jsrMd)
-    }
+      const pkg = await getPackageInfo(name)
+      if (!pkg) {
+        const errorMd = new MarkdownString('', true)
 
-    if (!isSupportedProtocol(protocol))
-      return
+        errorMd.isTrusted = true
+        errorMd.appendMarkdown('$(warning) Unable to fetch package information')
 
-    const pkg = await getPackageInfo(name)
-    if (!pkg) {
-      const errorMd = new MarkdownString('', true)
+        return new Hover(errorMd)
+      }
 
-      errorMd.isTrusted = true
-      errorMd.appendMarkdown('$(warning) Unable to fetch package information')
+      const md = new MarkdownString('', true)
+      md.isTrusted = true
 
-      return new Hover(errorMd)
-    }
+      const currentVersion = pkg.versionsMeta[semver]
+      if (currentVersion) {
+        if (currentVersion.provenance)
+          md.appendMarkdown(`[$(verified)${SPACER}Verified provenance](${npmxPackageUrl(name, semver)}#provenance)\n\n`)
+      }
 
-    const md = new MarkdownString('', true)
-    md.isTrusted = true
+      const packageLink = `[$(package)${SPACER}View on npmx.dev](${npmxPackageUrl(name)})`
+      const docsLink = `[$(book)${SPACER}View docs on npmx.dev](${npmxDocsUrl(name, semver)})`
 
-    const currentVersion = pkg.versionsMeta[semver]
-    if (currentVersion) {
-      if (currentVersion.provenance)
-        md.appendMarkdown(`[$(verified)${SPACER}Verified provenance](${npmxPackageUrl(name, semver)}#provenance)\n\n`)
-    }
+      md.appendMarkdown(`${packageLink} | ${docsLink}`)
 
-    const packageLink = `[$(package)${SPACER}View on npmx.dev](${npmxPackageUrl(name)})`
-    const docsLink = `[$(book)${SPACER}View docs on npmx.dev](${npmxDocsUrl(name, semver)})`
-
-    md.appendMarkdown(`${packageLink} | ${docsLink}`)
-
-    return new Hover(md)
+      return new Hover(md)
+    },
   }
 }

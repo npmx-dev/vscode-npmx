@@ -13,50 +13,54 @@ const DEPENDENCY_SECTIONS = [
   'optionalDependencies',
 ]
 
-export class PackageJsonExtractor implements Extractor<Node> {
-  parse = createMemoizedParse((text) => parseTree(text) ?? null)
+const parse = createMemoizedParse((text) => parseTree(text) ?? null)
 
-  getNodeRange(doc: TextDocument, node: Node) {
-    const start = doc.positionAt(node.offset + 1)
-    const end = doc.positionAt(node.offset + node.length - 1)
+function getNodeRange(doc: TextDocument, node: Node) {
+  const start = doc.positionAt(node.offset + 1)
+  const end = doc.positionAt(node.offset + node.length - 1)
 
-    return new Range(start, end)
+  return new Range(start, end)
+}
+
+function isInDependencySection(root: Node, node: Node) {
+  return DEPENDENCY_SECTIONS.some((section) => {
+    const dep = findNodeAtLocation(root, [section])
+    if (!dep || !dep.parent)
+      return false
+
+    const { offset, length } = dep.parent.children![1]
+
+    return isInRange(node.offset, [offset, offset + length])
+  })
+}
+
+function parseDependencyNode(node: Node): DependencyInfo<Node> | undefined {
+  if (!node.children?.length)
+    return
+
+  const [nameNode, versionNode] = node.children
+
+  if (
+    typeof nameNode?.value !== 'string'
+    || typeof versionNode.value !== 'string'
+  ) {
+    return
   }
 
-  isInDependencySection(root: Node, node: Node) {
-    return DEPENDENCY_SECTIONS.some((section) => {
-      const dep = findNodeAtLocation(root, [section])
-      if (!dep || !dep.parent)
-        return false
-
-      const { offset, length } = dep.parent.children![1]
-
-      return isInRange(node.offset, [offset, offset + length])
-    })
+  return {
+    nameNode,
+    versionNode,
+    name: nameNode.value,
+    version: versionNode.value,
   }
+}
 
-  private parseDependencyNode(node: Node): DependencyInfo<Node> | undefined {
-    if (!node.children?.length)
-      return
+export const packageJsonExtractor: Extractor<Node> = {
+  parse,
 
-    const [nameNode, versionNode] = node.children
+  getNodeRange,
 
-    if (
-      typeof nameNode?.value !== 'string'
-      || typeof versionNode.value !== 'string'
-    ) {
-      return
-    }
-
-    return {
-      nameNode,
-      versionNode,
-      name: nameNode.value,
-      version: versionNode.value,
-    }
-  }
-
-  getDependenciesInfo(root: Node) {
+  getDependenciesInfo(root) {
     const result: DependencyInfo<Node>[] = []
 
     DEPENDENCY_SECTIONS.forEach((section) => {
@@ -65,7 +69,7 @@ export class PackageJsonExtractor implements Extractor<Node> {
         return
 
       for (const dep of node.children) {
-        const info = this.parseDependencyNode(dep)
+        const info = parseDependencyNode(dep)
 
         if (info)
           result.push(info)
@@ -73,13 +77,13 @@ export class PackageJsonExtractor implements Extractor<Node> {
     })
 
     return result
-  }
+  },
 
-  getDependencyInfoByOffset(root: Node, offset: number) {
+  getDependencyInfoByOffset(root, offset) {
     const node = findNodeAtOffset(root, offset)
-    if (!node || node.type !== 'string' || !this.isInDependencySection(root, node))
+    if (!node || node.type !== 'string' || !isInDependencySection(root, node))
       return
 
-    return this.parseDependencyNode(node.parent!)
-  }
+    return parseDependencyNode(node.parent!)
+  },
 }
