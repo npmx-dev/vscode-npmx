@@ -149,6 +149,8 @@
     "*": "eslint --fix"
   },
   "devDependencies": {
+    "@pnpm/catalogs.config": "catalog:inline",
+    "@pnpm/catalogs.resolver": "catalog:inline",
     "@types/node": "catalog:dev",
     "@types/vscode": "1.101.0",
     "@vida0905/eslint-config": "catalog:dev",

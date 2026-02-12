@@ -5,6 +5,8 @@ import type { Diagnostic, TextDocument } from 'vscode'
 import { useActiveExtractor } from '#composables/active-extractor'
 import { config, logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
+import { resolveCatalogDependency } from '#utils/catalog'
+import { parseVersion } from '#utils/version'
 import { debounce } from 'perfect-debounce'
 import { computed, useActiveTextEditor, useDisposable, useDocumentText, watch } from 'reactive-vscode'
 import { languages } from 'vscode'
@@ -25,6 +27,12 @@ export function useDiagnostics() {
   const activeEditor = useActiveTextEditor()
   const activeDocumentText = useDocumentText(() => activeEditor.value?.document)
   const activeExtractor = useActiveExtractor()
+
+  const versionRules = new Set<DiagnosticRule>([
+    checkUpgrade,
+    checkDeprecation,
+    checkVulnerability,
+  ])
 
   const enabledRules = computed<DiagnosticRule[]>(() => {
     const rules: DiagnosticRule[] = []
@@ -77,6 +85,32 @@ export function useDiagnostics() {
         return
 
       try {
+        const rawParsed = parseVersion(dep.version)
+        let depForRules = dep
+        let shouldSkipVersionRules = false
+
+        if (rawParsed?.protocol === 'catalog') {
+          const resolution = await resolveCatalogDependency({
+            documentUri: document.uri,
+            alias: dep.name,
+            bareSpecifier: dep.version,
+          })
+
+          if (resolution) {
+            depForRules = {
+              ...dep,
+              resolvedVersion: resolution.resolvedSpecifier,
+              catalogResolution: {
+                catalogName: resolution.catalogName,
+                workspaceUri: resolution.workspaceUri,
+                entryLocation: resolution.entryLocation,
+              },
+            }
+          } else {
+            shouldSkipVersionRules = true
+          }
+        }
+
         const pkg = await getPackageInfo(dep.name)
         if (isDocumentChanged(document, targetUri, targetVersion))
           return
@@ -84,7 +118,10 @@ export function useDiagnostics() {
           continue
 
         for (const rule of rules) {
-          const diagnostic = await rule(dep, pkg)
+          if (shouldSkipVersionRules && versionRules.has(rule))
+            continue
+
+          const diagnostic = await rule(depForRules, pkg)
           if (isDocumentChanged(document, targetUri, targetVersion))
             return
           if (!diagnostic)
