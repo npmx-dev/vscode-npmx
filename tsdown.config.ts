@@ -10,6 +10,7 @@ export default defineConfig({
   },
   external: ['vscode'],
   inlineOnly: [
+    '@pnpm/constants',
     'reactive-vscode',
     '@reactive-vscode/reactivity',
     'jsonc-parser',

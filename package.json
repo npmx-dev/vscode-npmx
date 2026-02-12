@@ -149,6 +149,10 @@
     "*": "eslint --fix"
   },
   "devDependencies": {
+    "@pnpm/catalogs.config": "^1000.0.5",
+    "@pnpm/catalogs.types": "^1000.0.0",
+    "@pnpm/constants": "^1001.3.1",
+    "@pnpm/workspace.read-manifest": "^1000.2.10",
     "@types/node": "^25.2.2",
     "@types/vscode": "1.101.0",
     "@vida0905/eslint-config": "^2.10.0",
