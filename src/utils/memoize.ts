@@ -40,8 +40,9 @@ export function memoize<P, V>(fn: (params: P) => V, options: MemoizeOptions<P> =
   }
 
   function evictOne(): void {
+    const now = Date.now()
     for (const [k, entry] of cache) {
-      if (entry.value == null) {
+      if (entry.value == null || (entry.expiresAt && entry.expiresAt <= now)) {
         cache.delete(k)
         return
       }
