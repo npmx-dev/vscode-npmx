@@ -1,7 +1,7 @@
 import type { DependencyInfo, ValidNode } from '#types/extractor'
 import type { PackageInfo } from '#utils/api/package'
 import type { Awaitable } from 'reactive-vscode'
-import type { Diagnostic, Uri } from 'vscode'
+import type { Diagnostic, TextDocument } from 'vscode'
 import { useActiveExtractor } from '#composables/active-extractor'
 import { config, logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
@@ -23,7 +23,8 @@ export function useDiagnostics() {
   const diagnosticCollection = useDisposable(languages.createDiagnosticCollection(displayName))
 
   const activeEditor = useActiveTextEditor()
-  const activeDocumentText = useDocumentText(() => activeEditor.value?.document)
+  const activeDocument = computed(() => activeEditor.value?.document)
+  const activeDocumentText = useDocumentText(activeDocument)
   const activeExtractor = useActiveExtractor()
 
   const enabledRules = computed<DiagnosticRule[]>(() => {
@@ -39,8 +40,11 @@ export function useDiagnostics() {
     return rules
   })
 
-  const flush = debounce((uri: Uri, diagnostics: Diagnostic[]) => {
-    diagnosticCollection.set(uri, [...diagnostics])
+  const flush = debounce((doc: TextDocument, diagnostics: Diagnostic[]) => {
+    if (doc.version !== activeDocument.value?.version)
+      return
+
+    diagnosticCollection.set(doc.uri, [...diagnostics])
   }, 100)
 
   async function collectDiagnostics() {
@@ -77,7 +81,7 @@ export function useDiagnostics() {
               ...diagnostic,
             })
 
-            flush(document.uri, diagnostics)
+            flush(document, diagnostics)
           }
         })
       } catch (err) {
