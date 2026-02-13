@@ -2,15 +2,14 @@ import { PACKAGE_JSON_BASENAME } from '#constants'
 import { logger } from '#state'
 import { npmxFileUrl } from '#utils/links'
 import { findNearestFile, resolvePackageJson } from '#utils/resolve'
-import { useActiveTextEditor } from 'reactive-vscode'
 import { env, Uri, window } from 'vscode'
 
 export async function openFileInNpmx(fileUri?: Uri) {
-  const textEditor = useActiveTextEditor()
+  const textEditor = window.activeTextEditor
 
   // If triggered from context menu, fileUri is provided.
   // If triggered from command palette, use active text editor.
-  const uri = fileUri ?? textEditor.value?.document.uri
+  const uri = fileUri ?? textEditor?.document.uri
   if (!uri) {
     window.showErrorMessage('npmx: No active file selected.')
     return
@@ -34,10 +33,10 @@ export async function openFileInNpmx(fileUri?: Uri) {
 
   const relativePath = uri.path.slice(pkgJsonUri.path.lastIndexOf('/') + 1)
   // Use line number only if the user is actively looking at the relevant file
-  const openingActiveFile = !fileUri || fileUri.toString() === textEditor.value?.document.uri.toString()
+  const openingActiveFile = !fileUri || fileUri.toString() === textEditor?.document.uri.toString()
 
   // VSCode uses 0-indexed lines, npmx uses 1-indexed lines
-  const vsCodeLine = openingActiveFile ? textEditor.value?.selection.active.line : undefined
+  const vsCodeLine = openingActiveFile ? textEditor?.selection.active.line : undefined
   const npmxLine = vsCodeLine !== undefined ? vsCodeLine + 1 : undefined
 
   // Construct the npmx.dev URL and open it.
