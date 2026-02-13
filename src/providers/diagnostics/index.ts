@@ -40,6 +40,9 @@ export function useDiagnostics() {
   })
 
   async function collectDiagnostics() {
+    if (enabledRules.value.length === 0)
+      return
+
     const extractor = activeExtractor.value
     const document = activeEditor.value?.document
     if (!extractor || !document)
