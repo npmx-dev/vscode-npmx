@@ -45,6 +45,7 @@
 | `npmx.diagnostics.deprecation`      | Show warnings for deprecated packages                                                   | `boolean` | `true`              |
 | `npmx.diagnostics.replacement`      | Show suggestions for package replacements                                               | `boolean` | `true`              |
 | `npmx.diagnostics.vulnerability`    | Show warnings for packages with known vulnerabilities                                   | `boolean` | `true`              |
+| `npmx.diagnostics.distTag`          | Show warnings when a dependency uses a dist tag (e.g. latest, next, beta)               | `boolean` | `true`              |
 
 <!-- configs -->
 

@@ -3,6 +3,7 @@ import { vi } from 'vitest'
 
 const vscode = createVSCodeMock(vi)
 
+export const DiagnosticSeverity = vscode.DiagnosticSeverity
 export const Uri = vscode.Uri
 export const workspace = vscode.workspace
 export const Range = vscode.Range

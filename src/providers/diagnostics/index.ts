@@ -10,6 +10,7 @@ import { languages } from 'vscode'
 import { Utils } from 'vscode-uri'
 import { displayName } from '../../generated-meta'
 import { checkDeprecation } from './rules/deprecation'
+import { checkDistTag } from './rules/dist-tag'
 import { checkReplacement } from './rules/replacement'
 import { checkUpgrade } from './rules/upgrade'
 import { checkVulnerability } from './rules/vulnerability'
@@ -25,6 +26,8 @@ const enabledRules = computed<DiagnosticRule[]>(() => {
     rules.push(checkUpgrade)
   if (config.diagnostics.deprecation)
     rules.push(checkDeprecation)
+  if (config.diagnostics.distTag)
+    rules.push(checkDistTag)
   if (config.diagnostics.replacement)
     rules.push(checkReplacement)
   if (config.diagnostics.vulnerability)
