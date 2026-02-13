@@ -1,5 +1,8 @@
+import { extractorMapping } from '#composables/active-extractor'
 import {
+  PACKAGE_JSON_BASENAME,
   PACKAGE_JSON_PATTERN,
+  PNPM_WORKSPACE_BASENAME,
   PNPM_WORKSPACE_PATTERN,
   VERSION_TRIGGER_CHARACTERS,
 } from '#constants'
@@ -7,8 +10,6 @@ import { defineExtension, useCommands, watchEffect } from 'reactive-vscode'
 import { CodeActionKind, Disposable, languages } from 'vscode'
 import { openFileInNpmx } from './commands/open-file-in-npmx'
 import { openInBrowser } from './commands/open-in-browser'
-import { PackageJsonExtractor } from './extractors/package-json'
-import { PnpmWorkspaceYamlExtractor } from './extractors/pnpm-workspace-yaml'
 import { commands, displayName, version } from './generated-meta'
 import { UpgradeProvider } from './providers/code-actions/upgrade'
 import { VersionCompletionItemProvider } from './providers/completion-item/version'
@@ -19,8 +20,8 @@ import { config, logger } from './state'
 export const { activate, deactivate } = defineExtension(() => {
   logger.info(`${displayName} Activated, v${version}`)
 
-  const packageJsonExtractor = new PackageJsonExtractor()
-  const pnpmWorkspaceYamlExtractor = new PnpmWorkspaceYamlExtractor()
+  const packageJsonExtractor = extractorMapping[PACKAGE_JSON_BASENAME]
+  const pnpmWorkspaceYamlExtractor = extractorMapping[PNPM_WORKSPACE_BASENAME]
 
   watchEffect((onCleanup) => {
     if (!config.hover.enabled)

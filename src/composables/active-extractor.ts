@@ -5,7 +5,7 @@ import { Utils } from 'vscode-uri'
 import { PackageJsonExtractor } from '../extractors/package-json'
 import { PnpmWorkspaceYamlExtractor } from '../extractors/pnpm-workspace-yaml'
 
-const extractorMapping: Record<string, Extractor> = {
+export const extractorMapping: Record<string, Extractor> = {
   [PACKAGE_JSON_BASENAME]: new PackageJsonExtractor(),
   [PNPM_WORKSPACE_BASENAME]: new PnpmWorkspaceYamlExtractor(),
 }
