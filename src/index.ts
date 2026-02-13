@@ -9,10 +9,12 @@ import { defineExtension, useCommands, watchEffect } from 'reactive-vscode'
 import { CodeActionKind, Disposable, languages } from 'vscode'
 import { openFileInNpmx } from './commands/open-file-in-npmx'
 import { openInBrowser } from './commands/open-in-browser'
+import { updateVersion } from './commands/update-version'
 import { PackageJsonExtractor } from './extractors/package-json'
 import { PnpmWorkspaceYamlExtractor } from './extractors/pnpm-workspace-yaml'
 import { commands, displayName, version } from './generated-meta'
 import { UpgradeProvider } from './providers/code-actions/upgrade'
+import { VersionCodeLensProvider } from './providers/code-lens/version'
 import { VersionCompletionItemProvider } from './providers/completion-item/version'
 import { registerDiagnosticCollection } from './providers/diagnostics'
 import { NpmxHoverProvider } from './providers/hover/npmx'
@@ -76,6 +78,24 @@ export const { activate, deactivate } = defineExtension(() => {
     onCleanup(() => disposable.dispose())
   })
 
+  watchEffect((onCleanup) => {
+    if (!config.versionLens.enabled)
+      return
+
+    const disposables = [
+      languages.registerCodeLensProvider(
+        { pattern: PACKAGE_JSON_PATTERN },
+        new VersionCodeLensProvider(packageJsonExtractor),
+      ),
+      languages.registerCodeLensProvider(
+        { pattern: PNPM_WORKSPACE_PATTERN },
+        new VersionCodeLensProvider(pnpmWorkspaceYamlExtractor),
+      ),
+    ]
+
+    onCleanup(() => Disposable.from(...disposables).dispose())
+  })
+
   registerDiagnosticCollection({
     [PACKAGE_JSON_BASENAME]: packageJsonExtractor,
     [PNPM_WORKSPACE_BASENAME]: pnpmWorkspaceYamlExtractor,
@@ -84,5 +104,6 @@ export const { activate, deactivate } = defineExtension(() => {
   useCommands({
     [commands.openInBrowser]: openInBrowser,
     [commands.openFileInNpmx]: openFileInNpmx,
+    [commands.updateVersion]: updateVersion,
   })
 })

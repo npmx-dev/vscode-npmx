@@ -18,16 +18,14 @@ export const getPackageInfo = memoize<string, Promise<PackageInfo | null>>(async
   const pkg = await getVersions(name, {
     metadata: true,
     throw: false,
+    retry: 3,
   })
 
   if ('error' in pkg) {
     logger.warn(`Fetching package info for ${name} error: ${JSON.stringify(pkg)}`)
 
     // Return null to trigger a cache hit
-    if (pkg.status === 404)
-      return null
-
-    throw pkg
+    return null
   }
 
   logger.info(`Fetched package info for ${name}`)

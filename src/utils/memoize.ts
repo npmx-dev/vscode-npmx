@@ -16,7 +16,7 @@ interface MemoizeEntry<V> {
   expiresAt?: number
 }
 
-type MemoizeReturn<R> = R extends Promise<infer V> ? Promise<V | undefined> : R | undefined
+type MemoizeReturn<R> = R extends Promise<infer V> ? Promise<V | undefined> | V | undefined : R | undefined
 
 export function memoize<P, V>(fn: (params: P) => V, options: MemoizeOptions<P> = {}): (params: P) => MemoizeReturn<V> {
   const {

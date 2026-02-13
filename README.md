@@ -45,6 +45,7 @@
 | `npmx.diagnostics.deprecation`      | Show warnings for deprecated packages                                                   | `boolean` | `true`              |
 | `npmx.diagnostics.replacement`      | Show suggestions for package replacements                                               | `boolean` | `true`              |
 | `npmx.diagnostics.vulnerability`    | Show warnings for packages with known vulnerabilities                                   | `boolean` | `true`              |
+| `npmx.versionLens.enabled`          | Show version lens (CodeLens) for package dependencies                                   | `boolean` | `true`              |
 
 <!-- configs -->
 
