@@ -5,10 +5,13 @@ import { Utils } from 'vscode-uri'
 import { PackageJsonExtractor } from '../extractors/package-json'
 import { PnpmWorkspaceYamlExtractor } from '../extractors/pnpm-workspace-yaml'
 
-export const extractorMapping: Record<string, Extractor> = {
+const extractorMapping: Record<string, Extractor> = {
   [PACKAGE_JSON_BASENAME]: new PackageJsonExtractor(),
   [PNPM_WORKSPACE_BASENAME]: new PnpmWorkspaceYamlExtractor(),
 }
+
+export const extractorEntries = Object.entries(extractorMapping)
+  .map(([basename, extractor]) => ({ basename, pattern: `**/${basename}`, extractor }))
 
 export function useActiveExtractor() {
   const activeEditor = useActiveTextEditor()
