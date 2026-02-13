@@ -35,11 +35,14 @@ export async function openFileInNpmx(fileUri?: Uri) {
   // Use line number only if the user is actively looking at the relevant file
   const openingActiveFile = !fileUri || fileUri.toString() === textEditor?.document.uri.toString()
 
-  // VSCode uses 0-indexed lines, npmx uses 1-indexed lines
-  const vsCodeLine = openingActiveFile ? textEditor?.selection.active.line : undefined
-  const npmxLine = vsCodeLine !== undefined ? vsCodeLine + 1 : undefined
-
-  // Construct the npmx.dev URL and open it.
-  const url = npmxFileUrl(manifest.name, manifest.version, relativePath, npmxLine)
+  // Construct the npmx.dev URL and open it. VSCode uses 0-indexed lines, npmx uses 1-indexed.
+  const { selection } = textEditor ?? {}
+  const url = npmxFileUrl(
+    manifest.name,
+    manifest.version,
+    relativePath,
+    openingActiveFile && selection ? selection.start.line + 1 : undefined,
+    openingActiveFile && selection ? selection.end.line + 1 : undefined,
+  )
   await env.openExternal(Uri.parse(url))
 }
