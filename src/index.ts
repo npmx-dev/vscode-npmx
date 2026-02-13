@@ -14,7 +14,7 @@ import { PnpmWorkspaceYamlExtractor } from './extractors/pnpm-workspace-yaml'
 import { commands, displayName, version } from './generated-meta'
 import { UpgradeProvider } from './providers/code-actions/upgrade'
 import { VersionCompletionItemProvider } from './providers/completion-item/version'
-import { registerDiagnosticCollection } from './providers/diagnostics'
+import { useDiagnostics } from './providers/diagnostics'
 import { NpmxHoverProvider } from './providers/hover/npmx'
 import { config, logger } from './state'
 
@@ -76,7 +76,7 @@ export const { activate, deactivate } = defineExtension(() => {
     onCleanup(() => disposable.dispose())
   })
 
-  registerDiagnosticCollection({
+  useDiagnostics({
     [PACKAGE_JSON_BASENAME]: packageJsonExtractor,
     [PNPM_WORKSPACE_BASENAME]: pnpmWorkspaceYamlExtractor,
   })

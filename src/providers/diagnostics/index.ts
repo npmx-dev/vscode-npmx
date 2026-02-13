@@ -5,7 +5,7 @@ import type { Diagnostic, TextDocument } from 'vscode'
 import { config, logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
 import { debounce } from 'perfect-debounce'
-import { computed, useActiveTextEditor, useDocumentText, watch } from 'reactive-vscode'
+import { computed, useActiveTextEditor, useDisposable, useDocumentText, watch } from 'reactive-vscode'
 import { languages } from 'vscode'
 import { Utils } from 'vscode-uri'
 import { displayName } from '../../generated-meta'
@@ -32,8 +32,8 @@ const enabledRules = computed<DiagnosticRule[]>(() => {
   return rules
 })
 
-export function registerDiagnosticCollection(mapping: Record<string, Extractor | undefined>) {
-  const diagnosticCollection = languages.createDiagnosticCollection(displayName)
+export function useDiagnostics(mapping: Record<string, Extractor | undefined>) {
+  const diagnosticCollection = useDisposable(languages.createDiagnosticCollection(displayName))
 
   const activeEditor = useActiveTextEditor()
   const activeDocumentText = useDocumentText(() => activeEditor.value?.document)
