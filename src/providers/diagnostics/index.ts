@@ -40,15 +40,15 @@ export function useDiagnostics() {
   })
 
   async function collectDiagnostics() {
-    if (enabledRules.value.length === 0)
-      return
-
     const extractor = activeExtractor.value
     const document = activeEditor.value?.document
     if (!extractor || !document)
       return
 
     diagnosticCollection.delete(document.uri)
+
+    if (enabledRules.value.length === 0)
+      return
 
     const root = extractor.parse(document)
     if (!root)
