@@ -1,13 +1,13 @@
-import type { DependencyInfo, Extractor, ValidNode } from '#types/extractor'
+import type { DependencyInfo, ValidNode } from '#types/extractor'
 import type { PackageInfo } from '#utils/api/package'
 import type { Awaitable } from 'reactive-vscode'
 import type { Diagnostic, TextDocument } from 'vscode'
+import { useActiveExtractor } from '#composables/active-extractor'
 import { config, logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
 import { debounce } from 'perfect-debounce'
-import { computed, useActiveTextEditor, useDocumentText, watch } from 'reactive-vscode'
+import { computed, useActiveTextEditor, useDisposable, useDocumentText, watch } from 'reactive-vscode'
 import { languages } from 'vscode'
-import { Utils } from 'vscode-uri'
 import { displayName } from '../../generated-meta'
 import { checkDeprecation } from './rules/deprecation'
 import { checkReplacement } from './rules/replacement'
@@ -19,27 +19,44 @@ export interface NodeDiagnosticInfo extends Omit<Diagnostic, 'range' | 'source'>
 }
 export type DiagnosticRule = (dep: DependencyInfo, pkg: PackageInfo) => Awaitable<NodeDiagnosticInfo | undefined>
 
-const enabledRules = computed<DiagnosticRule[]>(() => {
-  const rules: DiagnosticRule[] = []
-  if (config.diagnostics.upgrade)
-    rules.push(checkUpgrade)
-  if (config.diagnostics.deprecation)
-    rules.push(checkDeprecation)
-  if (config.diagnostics.replacement)
-    rules.push(checkReplacement)
-  if (config.diagnostics.vulnerability)
-    rules.push(checkVulnerability)
-  return rules
-})
-
-export function registerDiagnosticCollection(mapping: Record<string, Extractor | undefined>) {
-  const diagnosticCollection = languages.createDiagnosticCollection(displayName)
+export function useDiagnostics() {
+  const diagnosticCollection = useDisposable(languages.createDiagnosticCollection(displayName))
 
   const activeEditor = useActiveTextEditor()
-  const activeDocumentText = useDocumentText(() => activeEditor.value?.document)
+  const activeDocument = computed(() => activeEditor.value?.document)
+  const activeDocumentText = useDocumentText(activeDocument)
+  const activeExtractor = useActiveExtractor()
 
-  async function collectDiagnostics(document: TextDocument, extractor: Extractor) {
+  const enabledRules = computed<DiagnosticRule[]>(() => {
+    const rules: DiagnosticRule[] = []
+    if (config.diagnostics.upgrade)
+      rules.push(checkUpgrade)
+    if (config.diagnostics.deprecation)
+      rules.push(checkDeprecation)
+    if (config.diagnostics.replacement)
+      rules.push(checkReplacement)
+    if (config.diagnostics.vulnerability)
+      rules.push(checkVulnerability)
+    return rules
+  })
+
+  const flush = debounce((doc: TextDocument, diagnostics: Diagnostic[]) => {
+    if (doc.version !== activeDocument.value?.version)
+      return
+
+    diagnosticCollection.set(doc.uri, [...diagnostics])
+  }, 100)
+
+  async function collectDiagnostics() {
+    const extractor = activeExtractor.value
+    const document = activeEditor.value?.document
+    if (!extractor || !document)
+      return
+
     diagnosticCollection.delete(document.uri)
+
+    if (enabledRules.value.length === 0)
+      return
 
     const root = extractor.parse(document)
     if (!root)
@@ -47,10 +64,6 @@ export function registerDiagnosticCollection(mapping: Record<string, Extractor |
 
     const dependencies = extractor.getDependenciesInfo(root)
     const diagnostics: Diagnostic[] = []
-
-    const flush = debounce(() => {
-      diagnosticCollection.set(document.uri, [...diagnostics])
-    }, 100)
 
     dependencies.forEach(async (dep) => {
       try {
@@ -68,7 +81,7 @@ export function registerDiagnosticCollection(mapping: Record<string, Extractor |
               ...diagnostic,
             })
 
-            flush()
+            flush(document, diagnostics)
           }
         })
       } catch (err) {
@@ -77,16 +90,5 @@ export function registerDiagnosticCollection(mapping: Record<string, Extractor |
     })
   }
 
-  watch(activeDocumentText, async () => {
-    const editor = activeEditor.value
-    if (!editor)
-      return
-
-    const document = editor.document
-    const filename = Utils.basename(document.uri)
-    const extractor = mapping[filename]
-
-    if (extractor)
-      await collectDiagnostics(document, extractor)
-  }, { immediate: true })
+  watch([activeDocumentText, enabledRules], collectDiagnostics, { immediate: true })
 }
