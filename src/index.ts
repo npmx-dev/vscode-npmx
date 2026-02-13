@@ -1,7 +1,5 @@
 import {
-  PACKAGE_JSON_BASENAME,
   PACKAGE_JSON_PATTERN,
-  PNPM_WORKSPACE_BASENAME,
   PNPM_WORKSPACE_PATTERN,
   VERSION_TRIGGER_CHARACTERS,
 } from '#constants'
@@ -76,10 +74,7 @@ export const { activate, deactivate } = defineExtension(() => {
     onCleanup(() => disposable.dispose())
   })
 
-  useDiagnostics({
-    [PACKAGE_JSON_BASENAME]: packageJsonExtractor,
-    [PNPM_WORKSPACE_BASENAME]: pnpmWorkspaceYamlExtractor,
-  })
+  useDiagnostics()
 
   useCommands({
     [commands.openInBrowser]: openInBrowser,
