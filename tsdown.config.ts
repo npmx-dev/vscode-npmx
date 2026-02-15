@@ -17,7 +17,6 @@ export default defineConfig({
     'ofetch',
     'perfect-debounce',
     'reactive-vscode',
-    'vscode-uri',
     'yaml',
   ],
   minify: 'dce-only',
