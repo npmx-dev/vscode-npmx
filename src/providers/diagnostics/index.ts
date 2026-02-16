@@ -6,7 +6,7 @@ import { useActiveExtractor } from '#composables/active-extractor'
 import { config, logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
 import { debounce } from 'perfect-debounce'
-import { computed, useActiveTextEditor, useDisposable, watch } from 'reactive-vscode'
+import { computed, useActiveTextEditor, useDisposable, useDocumentText, watch } from 'reactive-vscode'
 import { languages } from 'vscode'
 import { displayName } from '../../generated-meta'
 import { checkDeprecation } from './rules/deprecation'
@@ -23,8 +23,7 @@ export function useDiagnostics() {
   const diagnosticCollection = useDisposable(languages.createDiagnosticCollection(displayName))
 
   const activeEditor = useActiveTextEditor()
-  const activeDocument = computed(() => activeEditor.value?.document)
-  const activeDocumentVersion = computed(() => activeDocument.value?.version)
+  const activeDocumentText = useDocumentText(() => activeEditor.value?.document)
   const activeExtractor = useActiveExtractor()
 
   const enabledRules = computed<DiagnosticRule[]>(() => {
@@ -105,5 +104,5 @@ export function useDiagnostics() {
     }
   }
 
-  watch([activeDocument, activeDocumentVersion, enabledRules], collectDiagnostics, { immediate: true })
+  watch([activeDocumentText, enabledRules], collectDiagnostics, { immediate: true })
 }
