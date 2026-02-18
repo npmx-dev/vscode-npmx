@@ -1,6 +1,6 @@
+import { findNearestFile, walkAncestors } from '#utils/resolve'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Uri } from 'vscode'
-import { resolvePackageRelativePath } from '../../src/utils/resolve'
 import { mockFileSystem } from '../__mocks__/filesystem'
 
 describe('walkAncestors', () => {
