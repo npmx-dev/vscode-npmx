@@ -6,6 +6,7 @@
     "moduleResolution": "Bundler",
     "paths": {
       "#constants": ["./src/constants.ts"],
+      "#extractors": ["./src/extractors/index.ts"],
       "#state": ["./src/state.ts"],
       "#types/*": ["./src/types/*"],
       "#utils/*": ["./src/utils/*"],

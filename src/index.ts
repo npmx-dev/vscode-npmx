@@ -1,12 +1,11 @@
-import { extractorEntries } from '#composables/active-extractor'
 import { VERSION_TRIGGER_CHARACTERS } from '#constants'
 import { defineExtension, useCommands, watchEffect } from 'reactive-vscode'
-import { CodeActionKind, Disposable, languages } from 'vscode'
+import { Disposable, languages } from 'vscode'
 import { openFileInNpmx } from './commands/open-file-in-npmx'
 import { openInBrowser } from './commands/open-in-browser'
+import { extractorEntries } from './extractors'
 import { commands, displayName, version } from './generated-meta'
-import { UpgradeProvider } from './providers/code-actions/upgrade'
-import { VulnerabilityCodeActionProvider } from './providers/code-actions/vulnerability'
+import { useCodeActions } from './providers/code-actions'
 import { VersionCompletionItemProvider } from './providers/completion-item/version'
 import { useDiagnostics } from './providers/diagnostics'
 import { NpmxHoverProvider } from './providers/hover/npmx'
@@ -41,33 +40,9 @@ export const { activate, deactivate } = defineExtension(() => {
     onCleanup(() => Disposable.from(...disposables).dispose())
   })
 
-  watchEffect((onCleanup) => {
-    if (!config.diagnostics.upgrade)
-      return
-
-    const provider = new UpgradeProvider()
-    const options = { providedCodeActionKinds: [CodeActionKind.QuickFix] }
-    const disposables = extractorEntries.map(({ pattern }) =>
-      languages.registerCodeActionsProvider({ pattern }, provider, options),
-    )
-
-    onCleanup(() => Disposable.from(...disposables).dispose())
-  })
-
-  watchEffect((onCleanup) => {
-    if (!config.diagnostics.vulnerability)
-      return
-
-    const provider = new VulnerabilityCodeActionProvider()
-    const options = { providedCodeActionKinds: [CodeActionKind.QuickFix] }
-    const disposables = extractorEntries.map(({ pattern }) =>
-      languages.registerCodeActionsProvider({ pattern }, provider, options),
-    )
-
-    onCleanup(() => Disposable.from(...disposables).dispose())
-  })
-
   useDiagnostics()
+
+  useCodeActions()
 
   useCommands({
     [commands.openInBrowser]: openInBrowser,

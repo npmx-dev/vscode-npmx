@@ -1,7 +1,6 @@
 import type { DependencyInfo } from '#types/extractor'
 import type { ParsedVersion } from '#utils/version'
 import type { DiagnosticRule, NodeDiagnosticInfo } from '..'
-import { UPGRADE_MESSAGE_PREFIX } from '#constants'
 import { formatVersion, getPrereleaseId, isSupportedProtocol, lt, parseVersion } from '#utils/version'
 import { DiagnosticSeverity } from 'vscode'
 
@@ -10,7 +9,8 @@ function createUpgradeDiagnostic(dep: DependencyInfo, parsed: ParsedVersion, upg
   return {
     node: dep.versionNode,
     severity: DiagnosticSeverity.Hint,
-    message: `${UPGRADE_MESSAGE_PREFIX}${target}`,
+    message: `New version available: ${target}`,
+    code: 'upgrade',
   }
 }
 
