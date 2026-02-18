@@ -1,6 +1,6 @@
-import { findNearestFile, walkAncestors } from '#utils/resolve'
 import { describe, expect, it } from 'vitest'
 import { Uri } from 'vscode'
+import { findNearestFile, walkAncestors } from '../../src/utils/resolve'
 
 const root = Uri.file(process.cwd())
 
