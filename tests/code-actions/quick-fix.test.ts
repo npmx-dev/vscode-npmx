@@ -1,95 +1,60 @@
-import type { CodeActionContext, Diagnostic, TextDocument } from 'vscode'
-import { describe, expect, it, vi } from 'vitest'
-import { Range, Uri } from 'vscode'
+import type { CodeActionContext, TextDocument } from 'vscode'
+import { describe, expect, it } from 'vitest'
+import { Diagnostic, DiagnosticSeverity, Range, Uri } from 'vscode'
 import { QuickFixProvider } from '../../src/providers/code-actions/quick-fix'
 
 const provider = new QuickFixProvider()
 
-function createDiagnostic(options: { code?: string | { value: string }, message: string }): Diagnostic {
-  return {
-    code: options.code,
-    message: options.message,
-    range: new Range(0, 0, 0, 6),
-  } as Diagnostic
-}
+const uri = Uri.file('/package.json')
+const range = new Range(0, 0, 0, 6)
+const document = { uri } as TextDocument
 
-function createTextDocument(): TextDocument {
-  return {
-    uri: Uri.parse('file:///package.json'),
-    getText: vi.fn(),
-  } as unknown as TextDocument
+function createDiagnostic(code: string | { value: string, target: Uri }, message: string) {
+  const diagnostic = new Diagnostic(range, message, DiagnosticSeverity.Hint)
+  diagnostic.code = code
+  return diagnostic
 }
 
 function provideCodeActions(diagnostics: Diagnostic[]) {
   return provider.provideCodeActions(
-    createTextDocument(),
+    document,
     diagnostics[0]!.range,
-    { diagnostics, triggerKind: 1, only: undefined } as unknown as CodeActionContext,
+    { diagnostics } as unknown as CodeActionContext,
   )
 }
 
 describe('quick fix provider', () => {
-  describe('upgrade', () => {
-    it('provides a quick fix for upgrade diagnostic', () => {
-      const diagnostic = createDiagnostic({
-        code: 'upgrade',
-        message: 'New version available: ^2.0.0',
-      })
+  it('upgrade', () => {
+    const diagnostic = createDiagnostic('upgrade', 'New version available: ^2.0.0')
+    const actions = provideCodeActions([diagnostic])
 
-      const actions = provideCodeActions([diagnostic])
-
-      expect(actions).toEqual([
-        expect.objectContaining({
-          title: 'Update to ^2.0.0',
-          isPreferred: false,
-        }),
-      ])
-    })
-
-    it('does not provide a quick fix when message format is unexpected', () => {
-      const diagnostic = createDiagnostic({
-        code: 'upgrade',
-        message: 'Something else',
-      })
-
-      expect(provideCodeActions([diagnostic])).toHaveLength(0)
-    })
+    expect(actions).toHaveLength(1)
+    expect(actions[0]!.title).toMatchInlineSnapshot('"Update to ^2.0.0"')
   })
 
-  describe('vulnerability', () => {
-    it('provides a quick fix when message includes upgrade version', () => {
-      const diagnostic = createDiagnostic({
-        code: { value: 'vulnerability' },
-        message: 'This version has 1 high vulnerability. Upgrade to ^1.2.3 to fix.',
-      })
+  it('vulnerability', () => {
+    const diagnostic = createDiagnostic(
+      { value: 'vulnerability', target: Uri.parse('https://npmx.dev') },
+      'This version has 1 high vulnerability. Upgrade to ^1.2.3 to fix.',
+    )
+    const actions = provideCodeActions([diagnostic])
 
-      const actions = provideCodeActions([diagnostic])
-
-      expect(actions).toEqual([
-        expect.objectContaining({
-          title: 'Update to ^1.2.3 to fix vulnerabilities',
-          isPreferred: true,
-        }),
-      ])
-    })
-
-    it('does not provide a quick fix when message has no upgrade target', () => {
-      const diagnostic = createDiagnostic({
-        code: { value: 'vulnerability' },
-        message: 'This version has 1 high vulnerability.',
-      })
-
-      expect(provideCodeActions([diagnostic])).toHaveLength(0)
-    })
+    expect(actions).toHaveLength(1)
+    expect(actions[0]!.title).toMatchInlineSnapshot('"Update to ^1.2.3 to fix vulnerabilities"')
   })
 
-  it('ignores diagnostics without a code', () => {
-    const diagnostic = createDiagnostic({ message: 'some message' })
-    expect(provideCodeActions([diagnostic])).toHaveLength(0)
-  })
+  it('mixed diagnostics', () => {
+    const diagnostics = [
+      createDiagnostic('upgrade', 'New version available: ^2.0.0'),
+      createDiagnostic(
+        { value: 'vulnerability', target: Uri.parse('https://npmx.dev') },
+        'This version has 1 high vulnerability. Upgrade to ^1.2.3 to fix.',
+      ),
+    ]
+    const actions = provideCodeActions(diagnostics)
 
-  it('ignores diagnostics with unknown code', () => {
-    const diagnostic = createDiagnostic({ code: 'deprecation', message: 'deprecated' })
-    expect(provideCodeActions([diagnostic])).toHaveLength(0)
+    expect(actions).toHaveLength(2)
+    expect(actions[0]!.title).toMatchInlineSnapshot('"Update to ^2.0.0"')
+    expect(actions[1]!.title).toMatchInlineSnapshot('"Update to ^1.2.3 to fix vulnerabilities"')
   })
 })

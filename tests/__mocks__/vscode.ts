@@ -21,6 +21,7 @@ export const {
   CodeAction,
   CodeActionKind,
   WorkspaceEdit,
+  Diagnostic,
   DiagnosticSeverity,
   DiagnosticTag,
   window,
