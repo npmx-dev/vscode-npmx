@@ -1,9 +1,8 @@
-import path from 'node:path'
 import { findNearestFile, walkAncestors } from '#utils/resolve'
 import { describe, expect, it } from 'vitest'
 import { Uri } from 'vscode'
 
-const root = process.cwd()
+const root = Uri.file(process.cwd())
 
 describe('walkAncestors', () => {
   it('should yield all ancestor directories', () => {
@@ -37,24 +36,25 @@ describe('walkAncestors', () => {
 
 describe('findNearestFile', () => {
   it('should find a file in a parent directory', async () => {
-    const result = await findNearestFile('package.json', Uri.file(path.join(root, 'src/utils')))
+    const result = await findNearestFile('package.json', Uri.joinPath(root, 'src/utils'))
     expect(result).toBeDefined()
-    expect(result!.fsPath).toBe(path.join(root, 'package.json'))
+    expect(result!.fsPath).toBe(Uri.joinPath(root, 'package.json').fsPath)
   })
 
   it('should return the closest match', async () => {
-    const result = await findNearestFile('package.json', Uri.file(path.join(root, 'playground')))
+    const result = await findNearestFile('package.json', Uri.joinPath(root, 'playground'))
     expect(result).toBeDefined()
-    expect(result!.fsPath).toBe(path.join(root, 'playground/package.json'))
+    expect(result!.fsPath).toBe(Uri.joinPath(root, 'playground/package.json').fsPath)
   })
 
   it('should return undefined when file is not found', async () => {
-    const result = await findNearestFile('__nonexistent_file__', Uri.file(path.join(root, 'src')))
+    const result = await findNearestFile('__nonexistent_file__', Uri.joinPath(root, 'src'))
     expect(result).toBeUndefined()
   })
 
   it('should respect shouldStop', async () => {
-    const result = await findNearestFile('package.json', Uri.file(path.join(root, 'src/utils')), (u) => u.fsPath === path.join(root, 'src'))
+    const stop = Uri.joinPath(root, 'src')
+    const result = await findNearestFile('package.json', Uri.joinPath(root, 'src/utils'), (u) => u.fsPath === stop.fsPath)
     expect(result).toBeUndefined()
   })
 })
