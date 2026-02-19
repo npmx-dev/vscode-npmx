@@ -1,14 +1,7 @@
 import type { Extractor } from '#types/extractor'
-import { PACKAGE_JSON_BASENAME, PNPM_WORKSPACE_BASENAME } from '#constants'
 import { computed, useActiveTextEditor } from 'reactive-vscode'
 import { languages } from 'vscode'
-import { PackageJsonExtractor } from '../extractors/package-json'
-import { PnpmWorkspaceYamlExtractor } from '../extractors/pnpm-workspace-yaml'
-
-export const extractorEntries = [
-  { pattern: `**/${PACKAGE_JSON_BASENAME}`, extractor: new PackageJsonExtractor() },
-  { pattern: `**/${PNPM_WORKSPACE_BASENAME}`, extractor: new PnpmWorkspaceYamlExtractor() },
-]
+import { extractorEntries } from '../extractors'
 
 export function useActiveExtractor() {
   const activeEditor = useActiveTextEditor()
