@@ -1,4 +1,5 @@
 import type { CodeActionContext, TextDocument } from 'vscode'
+import { CATALOG_DIAGNOSTIC_RELATED_INFO_PREFIX } from '#constants'
 import { describe, expect, it } from 'vitest'
 import { Diagnostic, DiagnosticSeverity, Range, Uri } from 'vscode'
 import { QuickFixProvider } from '../../src/providers/code-actions/quick-fix'
@@ -40,7 +41,7 @@ describe('quick fix provider', () => {
     const actions = provideCodeActions([diagnostic])
 
     expect(actions).toHaveLength(1)
-    expect(actions[0]!.title).toMatchInlineSnapshot('"Update to ^1.2.3 to fix vulnerabilities"')
+    expect(actions[0]!.title).toMatchInlineSnapshot('"Update to ^1.2.3 to fix vulnerability"')
   })
 
   it('mixed diagnostics', () => {
@@ -55,6 +56,27 @@ describe('quick fix provider', () => {
 
     expect(actions).toHaveLength(2)
     expect(actions[0]!.title).toMatchInlineSnapshot('"Update to ^2.0.0"')
-    expect(actions[1]!.title).toMatchInlineSnapshot('"Update to ^1.2.3 to fix vulnerabilities"')
+    expect(actions[1]!.title).toMatchInlineSnapshot('"Update to ^1.2.3 to fix vulnerability"')
+  })
+
+  it('vulnerability with catalog related information', () => {
+    const diagnostic = createDiagnostic(
+      { value: 'vulnerability', target: Uri.parse('https://npmx.dev') },
+      'This version has 1 high vulnerability. Upgrade to ^1.2.3 to fix.',
+    )
+    diagnostic.relatedInformation = [
+      {
+        location: {
+          uri: Uri.file('/pnpm-workspace.yaml'),
+          range,
+        },
+        message: `${CATALOG_DIAGNOSTIC_RELATED_INFO_PREFIX}default`,
+      },
+    ] as any
+
+    const actions = provideCodeActions([diagnostic])
+    expect(actions).toHaveLength(2)
+    expect(actions[0]!.title).toMatchInlineSnapshot('"Open catalog entry in pnpm-workspace.yaml"')
+    expect(actions[1]!.title).toMatchInlineSnapshot('"Update catalog entry to ^1.2.3 to fix vulnerability"')
   })
 })

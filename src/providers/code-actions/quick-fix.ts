@@ -1,20 +1,29 @@
-import type { CodeActionContext, CodeActionProvider, Diagnostic, Range, TextDocument } from 'vscode'
+import type { CodeActionContext, CodeActionProvider, Diagnostic, Range, TextDocument, Uri } from 'vscode'
+import { CATALOG_DIAGNOSTIC_RELATED_INFO_PREFIX } from '#constants'
 import { CodeAction, CodeActionKind, WorkspaceEdit } from 'vscode'
 
 interface QuickFixRule {
   pattern: RegExp
-  title: (target: string) => string
+  titleSuffix?: string
   isPreferred?: boolean
+}
+
+function createReplaceAction(title: string, diagnostic: Diagnostic, uri: Uri, range: Range, target: string, isPreferred = false): CodeAction {
+  const action = new CodeAction(title, CodeActionKind.QuickFix)
+  action.isPreferred = isPreferred
+  action.diagnostics = [diagnostic]
+  action.edit = new WorkspaceEdit()
+  action.edit.replace(uri, range, target)
+  return action
 }
 
 const quickFixRules: Record<string, QuickFixRule> = {
   upgrade: {
     pattern: /^New version available: (?<target>\S+)$/,
-    title: (target) => `Update to ${target}`,
   },
   vulnerability: {
     pattern: / Upgrade to (?<target>\S+) to fix\.$/,
-    title: (target) => `Update to ${target} to fix vulnerabilities`,
+    titleSuffix: ' to fix vulnerability',
     isPreferred: true,
   },
 }
@@ -42,12 +51,30 @@ export class QuickFixProvider implements CodeActionProvider {
       if (!target)
         return []
 
-      const action = new CodeAction(rule.title(target), CodeActionKind.QuickFix)
-      action.isPreferred = rule.isPreferred ?? false
-      action.diagnostics = [diagnostic]
-      action.edit = new WorkspaceEdit()
-      action.edit.replace(document.uri, diagnostic.range, target)
-      return [action]
+      const {
+        titleSuffix = '',
+      } = rule
+
+      const relatedCatalog = diagnostic.relatedInformation?.find((i) => i.message.startsWith(CATALOG_DIAGNOSTIC_RELATED_INFO_PREFIX))
+
+      if (relatedCatalog) {
+        const openFix = new CodeAction('Open catalog entry in pnpm-workspace.yaml', CodeActionKind.QuickFix)
+        openFix.command = {
+          title: openFix.title,
+          command: 'vscode.open',
+          arguments: [relatedCatalog.location.uri, { selection: relatedCatalog.location.range, preview: false }],
+        }
+        openFix.diagnostics = [diagnostic]
+
+        const updateFix = createReplaceAction(`Update catalog entry to ${target}${titleSuffix}`, diagnostic, relatedCatalog.location.uri, relatedCatalog.location.range, target)
+
+        return [
+          openFix,
+          updateFix,
+        ]
+      } else {
+        return [createReplaceAction(`Update to ${target}${titleSuffix}`, diagnostic, document.uri, diagnostic.range, target, rule.isPreferred)]
+      }
     })
   }
 }
