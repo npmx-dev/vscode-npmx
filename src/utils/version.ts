@@ -6,17 +6,11 @@ const KNOWN_PROTOCOLS = new Set([...UNSUPPORTED_PROTOCOLS, 'npm'])
 
 export interface ParsedVersion {
   protocol: VersionProtocol
-  prefix: '' | '^' | '~'
   semver: string
 }
 
 export function isSupportedProtocol(protocol: VersionProtocol): boolean {
   return !protocol || !UNSUPPORTED_PROTOCOLS.has(protocol)
-}
-
-export function formatVersion(parsed: ParsedVersion): string {
-  const protocol = parsed.protocol ? `${parsed.protocol}:` : ''
-  return `${protocol}${parsed.prefix}${parsed.semver}`
 }
 
 function isKnownProtocol(protocol: string): protocol is NonNullable<VersionProtocol> {
@@ -29,7 +23,7 @@ export function parseVersion(rawVersion: string): ParsedVersion | null {
     return null
 
   let protocol: string | null = null
-  let versionStr = rawVersion
+  let semver = rawVersion
 
   const colonIndex = rawVersion.indexOf(':')
   if (colonIndex !== -1) {
@@ -38,13 +32,47 @@ export function parseVersion(rawVersion: string): ParsedVersion | null {
     if (!isKnownProtocol(protocol))
       return null
 
-    versionStr = rawVersion.slice(colonIndex + 1)
+    semver = rawVersion.slice(colonIndex + 1)
   }
 
-  const firstChar = versionStr[0]
-  const hasPrefix = firstChar === '^' || firstChar === '~'
-  const prefix = hasPrefix ? firstChar : ''
-  const semver = hasPrefix ? versionStr.slice(1) : versionStr
+  return { protocol, semver }
+}
 
-  return { protocol, prefix, semver }
+const RANGE_PREFIXES = ['>=', '<=', '=', '>', '<', '~', '^']
+
+function getVersionRangePrefix(v: string) {
+  const ver = v.trim().toLowerCase()
+
+  if (ver === '*' || ver === '')
+    return '*'
+  if (ver[0] === '~' || ver[0] === '^')
+    return ver[0]
+  for (const leading of RANGE_PREFIXES) {
+    if (ver.startsWith(leading))
+      return leading
+  }
+  if (ver.includes('x')) {
+    const parts = ver.split('.')
+    if (parts[0] === 'x')
+      return '*'
+    if (parts[1] === 'x')
+      return '^'
+    if (parts[2] === 'x')
+      return '~'
+  }
+
+  return ''
+}
+
+export function getUpgradeVersion(current: ParsedVersion, target: string) {
+  const prefix = getVersionRangePrefix(current.semver)
+
+  if (prefix === '*')
+    return '*'
+
+  const result = `${prefix}${target}`
+  if (!current.protocol)
+    return result
+
+  return `${current.protocol}:${result}`
 }

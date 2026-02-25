@@ -1,18 +1,17 @@
 import type { DependencyInfo } from '#types/extractor'
 import type { ParsedVersion } from '#utils/version'
 import type { DiagnosticRule, NodeDiagnosticInfo } from '..'
-import { formatVersion, isSupportedProtocol, parseVersion } from '#utils/version'
+import { getUpgradeVersion, isSupportedProtocol, parseVersion } from '#utils/version'
 import prerelease from 'semver/functions/prerelease'
 import gtr from 'semver/ranges/gtr'
 import ltr from 'semver/ranges/ltr'
 import { DiagnosticSeverity } from 'vscode'
 
-function createUpgradeDiagnostic(dep: DependencyInfo, parsed: ParsedVersion, upgradeVersion: string): NodeDiagnosticInfo {
-  const target = formatVersion({ ...parsed, semver: upgradeVersion })
+function createUpgradeDiagnostic(dep: DependencyInfo, parsed: ParsedVersion, target: string): NodeDiagnosticInfo {
   return {
     node: dep.versionNode,
     severity: DiagnosticSeverity.Hint,
-    message: `New version available: ${target}`,
+    message: `New version available: ${getUpgradeVersion(parsed, target)}`,
     code: 'upgrade',
   }
 }

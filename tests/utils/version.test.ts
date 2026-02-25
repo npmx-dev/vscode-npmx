@@ -5,47 +5,20 @@ describe('parseVersion', () => {
   it('should parse plain version', () => {
     expect(parseVersion('1.0.0')).toEqual({
       protocol: null,
-      prefix: '',
       semver: '1.0.0',
-    })
-  })
-
-  it('should parse version with ^ prefix', () => {
-    expect(parseVersion('^1.2.3')).toEqual({
-      protocol: null,
-      prefix: '^',
-      semver: '1.2.3',
-    })
-  })
-
-  it('should parse version with ~ prefix', () => {
-    expect(parseVersion('~2.0.0')).toEqual({
-      protocol: null,
-      prefix: '~',
-      semver: '2.0.0',
     })
   })
 
   it('should parse npm: protocol', () => {
-    expect(parseVersion('npm:1.0.0')).toEqual({
+    expect(parseVersion('npm:~1.0.0')).toEqual({
       protocol: 'npm',
-      prefix: '',
-      semver: '1.0.0',
-    })
-  })
-
-  it('should parse npm: protocol with prefix', () => {
-    expect(parseVersion('npm:^1.0.0')).toEqual({
-      protocol: 'npm',
-      prefix: '^',
-      semver: '1.0.0',
+      semver: '~1.0.0',
     })
   })
 
   it('should parse workspace: protocol', () => {
     expect(parseVersion('workspace:*')).toEqual({
       protocol: 'workspace',
-      prefix: '',
       semver: '*',
     })
   })
@@ -53,7 +26,6 @@ describe('parseVersion', () => {
   it('should parse catalog: protocol', () => {
     expect(parseVersion('catalog:default')).toEqual({
       protocol: 'catalog',
-      prefix: '',
       semver: 'default',
     })
   })
@@ -61,8 +33,7 @@ describe('parseVersion', () => {
   it('should parse jsr: protocol', () => {
     expect(parseVersion('jsr:^1.1.4')).toEqual({
       protocol: 'jsr',
-      prefix: '^',
-      semver: '1.1.4',
+      semver: '^1.1.4',
     })
   })
 
