@@ -9,6 +9,9 @@ catalogs:
     '@types/node':
       specifier: ^25.3.0
       version: 25.3.0
+    '@types/semver':
+      specifier: ^7.7.1
+      version: 7.7.1
     '@vida0905/eslint-config':
       specifier: ^2.10.1
       version: 2.10.1
@@ -49,6 +52,9 @@ catalogs:
     reactive-vscode:
       specifier: ^1.0.0-beta.2
       version: 1.0.0-beta.2
+    semver:
+      specifier: ^7.7.4
+      version: 7.7.4
     yaml:
       specifier: ^2.8.2
       version: 2.8.2
@@ -70,6 +76,9 @@ importers:
       '@types/node':
         specifier: catalog:dev
         version: 25.3.0
+      '@types/semver':
+        specifier: catalog:dev
+        version: 7.7.1
       '@types/vscode':
         specifier: 1.101.0
         version: 1.101.0
@@ -106,6 +115,9 @@ importers:
       reactive-vscode:
         specifier: catalog:inline
         version: 1.0.0-beta.2(@types/vscode@1.101.0)
+      semver:
+        specifier: catalog:inline
+        version: 7.7.4
       tsdown:
         specifier: catalog:dev
         version: 0.20.3(typescript@5.9.3)
@@ -806,6 +818,9 @@ packages:
 
   '@types/node@25.3.0':
     resolution: {integrity: sha512-4K3bqJpXpqfg2XKGK9bpDTc6xO/xoUP/RBWS7AtRMug6zZFaRekiLzjVtAoZMquxoAbzBvy5nxQ7veS5eYzf8A==}
+
+  '@types/semver@7.7.1':
+    resolution: {integrity: sha512-FmgJfu+MOcQ370SD0ev7EI8TlCAfKYU+B4m5T3yXc1CiRN94g/SZPtsCkk506aUDtlMnFZvasDwHHUcZUEaYuA==}
 
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
@@ -2667,6 +2682,8 @@ snapshots:
   '@types/node@25.3.0':
     dependencies:
       undici-types: 7.18.2
+
+  '@types/semver@7.7.1': {}
 
   '@types/unist@3.0.3': {}
 
