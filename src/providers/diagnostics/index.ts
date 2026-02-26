@@ -87,19 +87,22 @@ export function useDiagnostics() {
           continue
 
         for (const rule of rules) {
-          const diagnostic = await rule(dep, pkg)
-          if (isDocumentChanged(document, targetUri, targetVersion))
-            return
-          if (!diagnostic)
-            continue
+          try {
+            const diagnostic = await rule(dep, pkg)
+            if (isDocumentChanged(document, targetUri, targetVersion))
+              return
+            if (!diagnostic)
+              continue
 
-          diagnostics.push({
-            source: displayName,
-            range: extractor.getNodeRange(document, diagnostic.node),
-            ...diagnostic,
-          })
-
-          flush(document, targetUri, targetVersion, diagnostics)
+            diagnostics.push({
+              source: displayName,
+              range: extractor.getNodeRange(document, diagnostic.node),
+              ...diagnostic,
+            })
+            flush(document, targetUri, targetVersion, diagnostics)
+          } catch (err) {
+            logger.warn(`Fail to check ${dep.name} (${rule.name}): ${err}`)
+          }
         }
       } catch (err) {
         logger.warn(`Failed to check ${dep.name}: ${err}`)
