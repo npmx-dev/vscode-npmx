@@ -22,9 +22,11 @@ export const checkUpgrade: DiagnosticRule = (dep, pkg) => {
     return
 
   const { version } = parsed
-  const latest = pkg.distTags.latest
+  if (version in pkg.distTags)
+    return
 
-  if (latest && gtr(latest, version))
+  const { latest } = pkg.distTags
+  if (gtr(latest, version))
     return createUpgradeDiagnostic(dep, parsed, latest)
 
   const currentPreId = prerelease(version)?.[0]
