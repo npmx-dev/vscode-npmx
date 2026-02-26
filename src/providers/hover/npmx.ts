@@ -4,6 +4,7 @@ import { SPACER } from '#constants'
 import { getPackageInfo } from '#utils/api/package'
 import { jsrPackageUrl, npmxDocsUrl, npmxPackageUrl } from '#utils/links'
 import { isSupportedProtocol, parseVersion } from '#utils/version'
+import maxSatisfying from 'semver/ranges/max-satisfying'
 import { Hover, MarkdownString } from 'vscode'
 
 export class NpmxHoverProvider<T extends Extractor> implements HoverProvider {
@@ -59,13 +60,14 @@ export class NpmxHoverProvider<T extends Extractor> implements HoverProvider {
     const md = new MarkdownString('', true)
     md.isTrusted = true
 
-    const currentVersion = pkg.versionsMeta[version]
-    if (currentVersion) {
-      if (currentVersion.provenance)
-        md.appendMarkdown(`[$(verified)${SPACER}Verified provenance](${npmxPackageUrl(name, version)}#provenance)\n\n`)
-    }
+    const resolvedVersion = version in pkg.distTags
+      ? pkg.distTags[version]
+      : maxSatisfying(Object.keys(pkg.versionsMeta), version)
 
-    const packageLink = `[$(package)${SPACER}View on npmx.dev](${npmxPackageUrl(name)})`
+    if (resolvedVersion && pkg.versionsMeta[resolvedVersion]?.provenance)
+      md.appendMarkdown(`[$(verified)${SPACER}Verified provenance](${npmxPackageUrl(name, version)}#provenance)\n\n`)
+
+    const packageLink = `[$(package)${SPACER}View on npmx.dev](${npmxPackageUrl(name, version)})`
     const docsLink = `[$(book)${SPACER}View docs on npmx.dev](${npmxDocsUrl(name, version)})`
 
     md.appendMarkdown(`${packageLink} | ${docsLink}`)

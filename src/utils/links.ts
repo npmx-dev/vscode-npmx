@@ -22,6 +22,8 @@ export function npmxFileUrl(name: string, version: string, path: string, startLi
   return `${base}#L${startLine}`
 }
 
-export function jsrPackageUrl(name: string, version: string): string {
-  return `https://jsr.io/${name}@${version}`
+export function jsrPackageUrl(name: string, version?: string): string {
+  return version
+    ? `https://jsr.io/${name}@${version}`
+    : `https://jsr.io/${name}`
 }
