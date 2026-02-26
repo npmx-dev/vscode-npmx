@@ -9,7 +9,7 @@ export const checkDistTag: DiagnosticRule = (dep, pkg) => {
     return
 
   const tag = parsed.version
-  if (!(tag in pkg.distTags))
+  if (!Object.hasOwn(pkg.distTags, tag))
     return
 
   return {

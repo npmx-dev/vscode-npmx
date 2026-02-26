@@ -13,7 +13,7 @@ export function encodePackageName(name: string): string {
 }
 
 export function resolveExactVersion(pkg: PackageInfo, version: string) {
-  if (version in pkg.distTags)
+  if (Object.hasOwn(pkg.distTags, version))
     return pkg.distTags[version]
 
   return maxSatisfying(Object.keys(pkg.versionsMeta), version)
