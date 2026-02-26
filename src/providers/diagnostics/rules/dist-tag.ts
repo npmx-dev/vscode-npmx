@@ -8,7 +8,7 @@ export const checkDistTag: DiagnosticRule = (dep, pkg) => {
   if (!parsed || !isSupportedProtocol(parsed.protocol))
     return
 
-  const tag = parsed.semver
+  const tag = parsed.version
   if (!(tag in pkg.distTags))
     return
 

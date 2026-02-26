@@ -21,13 +21,13 @@ export const checkUpgrade: DiagnosticRule = (dep, pkg) => {
   if (!parsed || !isSupportedProtocol(parsed.protocol))
     return
 
-  const { semver } = parsed
+  const { version } = parsed
   const latest = pkg.distTags.latest
 
-  if (latest && gtr(latest, semver))
+  if (latest && gtr(latest, version))
     return createUpgradeDiagnostic(dep, parsed, latest)
 
-  const currentPreId = prerelease(semver)?.[0]
+  const currentPreId = prerelease(version)?.[0]
   if (currentPreId == null)
     return
 
@@ -36,7 +36,7 @@ export const checkUpgrade: DiagnosticRule = (dep, pkg) => {
       continue
     if (prerelease(tagVersion)?.[0] !== currentPreId)
       continue
-    if (ltr(tagVersion, semver))
+    if (ltr(tagVersion, version))
       continue
 
     return createUpgradeDiagnostic(dep, parsed, tagVersion)

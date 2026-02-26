@@ -46,46 +46,46 @@ describe('parseVersion', () => {
 
 describe('formatUpgradeVersion', () => {
   it('should preserve ^ prefix', () => {
-    expect(formatUpgradeVersion({ protocol: null, semver: '^1.0.0' }, '2.0.0')).toBe('^2.0.0')
+    expect(formatUpgradeVersion({ protocol: null, version: '^1.0.0' }, '2.0.0')).toBe('^2.0.0')
   })
 
   it('should preserve ~ prefix', () => {
-    expect(formatUpgradeVersion({ protocol: null, semver: '~1.0.0' }, '1.1.0')).toBe('~1.1.0')
+    expect(formatUpgradeVersion({ protocol: null, version: '~1.0.0' }, '1.1.0')).toBe('~1.1.0')
   })
 
   it('should handle pinned version', () => {
-    expect(formatUpgradeVersion({ protocol: null, semver: '1.0.0' }, '2.0.0')).toBe('2.0.0')
+    expect(formatUpgradeVersion({ protocol: null, version: '1.0.0' }, '2.0.0')).toBe('2.0.0')
   })
 
   it('should preserve >= prefix', () => {
-    expect(formatUpgradeVersion({ protocol: null, semver: '>=1.0.0' }, '2.0.0')).toBe('>=2.0.0')
+    expect(formatUpgradeVersion({ protocol: null, version: '>=1.0.0' }, '2.0.0')).toBe('>=2.0.0')
   })
 
   it('should return * for wildcard', () => {
-    expect(formatUpgradeVersion({ protocol: null, semver: '*' }, '2.0.0')).toBe('*')
+    expect(formatUpgradeVersion({ protocol: null, version: '*' }, '2.0.0')).toBe('*')
   })
 
   it('should return * for empty semver', () => {
-    expect(formatUpgradeVersion({ protocol: null, semver: '' }, '2.0.0')).toBe('*')
+    expect(formatUpgradeVersion({ protocol: null, version: '' }, '2.0.0')).toBe('*')
   })
 
   it('should handle x-range major wildcard', () => {
-    expect(formatUpgradeVersion({ protocol: null, semver: 'x' }, '2.0.0')).toBe('*')
+    expect(formatUpgradeVersion({ protocol: null, version: 'x' }, '2.0.0')).toBe('*')
   })
 
   it('should handle x-range minor wildcard as ^', () => {
-    expect(formatUpgradeVersion({ protocol: null, semver: '1.x' }, '2.0.0')).toBe('^2.0.0')
+    expect(formatUpgradeVersion({ protocol: null, version: '1.x' }, '2.0.0')).toBe('^2.0.0')
   })
 
   it('should handle x-range patch wildcard as ~', () => {
-    expect(formatUpgradeVersion({ protocol: null, semver: '1.0.x' }, '1.1.0')).toBe('~1.1.0')
+    expect(formatUpgradeVersion({ protocol: null, version: '1.0.x' }, '1.1.0')).toBe('~1.1.0')
   })
 
   it('should include protocol in result', () => {
-    expect(formatUpgradeVersion({ protocol: 'npm', semver: '^1.0.0' }, '2.0.0')).toBe('npm:^2.0.0')
+    expect(formatUpgradeVersion({ protocol: 'npm', version: '^1.0.0' }, '2.0.0')).toBe('npm:^2.0.0')
   })
 
   it('should handle pinned version with protocol', () => {
-    expect(formatUpgradeVersion({ protocol: 'npm', semver: '1.0.0' }, '2.0.0')).toBe('npm:2.0.0')
+    expect(formatUpgradeVersion({ protocol: 'npm', version: '1.0.0' }, '2.0.0')).toBe('npm:2.0.0')
   })
 })

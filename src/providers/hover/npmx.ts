@@ -28,11 +28,11 @@ export class NpmxHoverProvider<T extends Extractor> implements HoverProvider {
       return
 
     const { name } = dep
-    const { protocol, semver } = parsed
+    const { protocol, version } = parsed
 
     if (protocol === 'jsr') {
       const jsrMd = new MarkdownString('', true)
-      const jsrUrl = jsrPackageUrl(name, semver)
+      const jsrUrl = jsrPackageUrl(name, version)
 
       jsrMd.isTrusted = true
 
@@ -59,14 +59,14 @@ export class NpmxHoverProvider<T extends Extractor> implements HoverProvider {
     const md = new MarkdownString('', true)
     md.isTrusted = true
 
-    const currentVersion = pkg.versionsMeta[semver]
+    const currentVersion = pkg.versionsMeta[version]
     if (currentVersion) {
       if (currentVersion.provenance)
-        md.appendMarkdown(`[$(verified)${SPACER}Verified provenance](${npmxPackageUrl(name, semver)}#provenance)\n\n`)
+        md.appendMarkdown(`[$(verified)${SPACER}Verified provenance](${npmxPackageUrl(name, version)}#provenance)\n\n`)
     }
 
     const packageLink = `[$(package)${SPACER}View on npmx.dev](${npmxPackageUrl(name)})`
-    const docsLink = `[$(book)${SPACER}View docs on npmx.dev](${npmxDocsUrl(name, semver)})`
+    const docsLink = `[$(book)${SPACER}View docs on npmx.dev](${npmxDocsUrl(name, version)})`
 
     md.appendMarkdown(`${packageLink} | ${docsLink}`)
 

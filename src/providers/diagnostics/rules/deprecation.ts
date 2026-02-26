@@ -9,23 +9,23 @@ export const checkDeprecation: DiagnosticRule = (dep, pkg) => {
   if (!parsed || !isSupportedProtocol(parsed.protocol))
     return
 
-  const version = maxSatisfying(Object.keys(pkg.versionsMeta), parsed.semver)
+  const maxSatisfyingVersion = maxSatisfying(Object.keys(pkg.versionsMeta), parsed.version)
 
-  if (!version)
+  if (!maxSatisfyingVersion)
     return
 
-  const versionInfo = pkg.versionsMeta[version]
+  const versionInfo = pkg.versionsMeta[maxSatisfyingVersion]
 
   if (!versionInfo.deprecated)
     return
 
   return {
     node: dep.versionNode,
-    message: `${dep.name} v${version} has been deprecated: ${versionInfo.deprecated}`,
+    message: `${dep.name} v${maxSatisfyingVersion} has been deprecated: ${versionInfo.deprecated}`,
     severity: DiagnosticSeverity.Error,
     code: {
       value: 'deprecation',
-      target: Uri.parse(npmxPackageUrl(dep.name, version)),
+      target: Uri.parse(npmxPackageUrl(dep.name, maxSatisfyingVersion)),
     },
     tags: [DiagnosticTag.Deprecated],
   }

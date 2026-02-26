@@ -6,7 +6,7 @@ const KNOWN_PROTOCOLS = new Set([...UNSUPPORTED_PROTOCOLS, 'npm'])
 
 export interface ParsedVersion {
   protocol: VersionProtocol
-  semver: string
+  version: string
 }
 
 export function isSupportedProtocol(protocol: VersionProtocol): boolean {
@@ -23,7 +23,7 @@ export function parseVersion(rawVersion: string): ParsedVersion | null {
     return null
 
   let protocol: string | null = null
-  let semver = rawVersion
+  let version = rawVersion
 
   const colonIndex = rawVersion.indexOf(':')
   if (colonIndex !== -1) {
@@ -32,10 +32,10 @@ export function parseVersion(rawVersion: string): ParsedVersion | null {
     if (!isKnownProtocol(protocol))
       return null
 
-    semver = rawVersion.slice(colonIndex + 1)
+    version = rawVersion.slice(colonIndex + 1)
   }
 
-  return { protocol, semver }
+  return { protocol, version }
 }
 
 const RANGE_PREFIXES = ['>=', '<=', '=', '>', '<']
@@ -65,7 +65,7 @@ function getVersionRangePrefix(v: string): string {
 }
 
 export function formatUpgradeVersion(current: ParsedVersion, target: string): string {
-  const prefix = getVersionRangePrefix(current.semver)
+  const prefix = getVersionRangePrefix(current.version)
 
   if (prefix === '*')
     return '*'
