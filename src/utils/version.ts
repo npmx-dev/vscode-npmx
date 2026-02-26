@@ -67,10 +67,7 @@ function getVersionRangePrefix(v: string): string {
 export function formatUpgradeVersion(current: ParsedVersion, target: string): string {
   const prefix = getVersionRangePrefix(current.version)
 
-  if (prefix === '*')
-    return '*'
-
-  const result = `${prefix}${target}`
+  const result = prefix === '*' ? '*' : `${prefix}${target}`
   if (!current.protocol)
     return result
 

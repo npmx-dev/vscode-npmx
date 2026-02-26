@@ -88,4 +88,8 @@ describe('formatUpgradeVersion', () => {
   it('should handle pinned version with protocol', () => {
     expect(formatUpgradeVersion({ protocol: 'npm', version: '1.0.0' }, '2.0.0')).toBe('npm:2.0.0')
   })
+
+  it('should preserve protocol for wildcard', () => {
+    expect(formatUpgradeVersion({ protocol: 'npm', version: '*' }, '2.0.0')).toBe('npm:*')
+  })
 })
