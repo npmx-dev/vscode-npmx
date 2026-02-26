@@ -1,3 +1,6 @@
+import type { PackageInfo } from './api/package'
+import maxSatisfying from 'semver/ranges/max-satisfying'
+
 /**
  * Encode a package name for use in npm registry URLs.
  * Handles scoped packages (e.g., @scope/name -> @scope%2Fname).
@@ -7,4 +10,11 @@ export function encodePackageName(name: string): string {
     return `@${encodeURIComponent(name.slice(1))}`
   }
   return encodeURIComponent(name)
+}
+
+export function resolveExactVersion(pkg: PackageInfo, version: string) {
+  if (version in pkg.distTags)
+    return pkg.distTags[version]
+
+  return maxSatisfying(Object.keys(pkg.versionsMeta), version)
 }

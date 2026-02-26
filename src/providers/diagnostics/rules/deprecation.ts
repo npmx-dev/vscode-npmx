@@ -1,7 +1,7 @@
 import type { DiagnosticRule } from '..'
 import { npmxPackageUrl } from '#utils/links'
+import { resolveExactVersion } from '#utils/package'
 import { isSupportedProtocol, parseVersion } from '#utils/version'
-import maxSatisfying from 'semver/ranges/max-satisfying'
 import { DiagnosticSeverity, DiagnosticTag, Uri } from 'vscode'
 
 export const checkDeprecation: DiagnosticRule = (dep, pkg) => {
@@ -9,23 +9,23 @@ export const checkDeprecation: DiagnosticRule = (dep, pkg) => {
   if (!parsed || !isSupportedProtocol(parsed.protocol))
     return
 
-  const maxSatisfyingVersion = maxSatisfying(Object.keys(pkg.versionsMeta), parsed.version)
+  const exactVersion = resolveExactVersion(pkg, parsed.version)
 
-  if (!maxSatisfyingVersion)
+  if (!exactVersion)
     return
 
-  const versionInfo = pkg.versionsMeta[maxSatisfyingVersion]
+  const versionInfo = pkg.versionsMeta[exactVersion]
 
   if (!versionInfo.deprecated)
     return
 
   return {
     node: dep.versionNode,
-    message: `${dep.name} v${maxSatisfyingVersion} has been deprecated: ${versionInfo.deprecated}`,
+    message: `${dep.name} v${exactVersion} has been deprecated: ${versionInfo.deprecated}`,
     severity: DiagnosticSeverity.Error,
     code: {
       value: 'deprecation',
-      target: Uri.parse(npmxPackageUrl(dep.name, maxSatisfyingVersion)),
+      target: Uri.parse(npmxPackageUrl(dep.name, parsed.version)),
     },
     tags: [DiagnosticTag.Deprecated],
   }
