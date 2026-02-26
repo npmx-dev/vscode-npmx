@@ -3,7 +3,7 @@ import type { CompletionItemProvider, Position, TextDocument } from 'vscode'
 import { PRERELEASE_PATTERN } from '#constants'
 import { config } from '#state'
 import { getPackageInfo } from '#utils/api/package'
-import { getUpgradeVersion, isSupportedProtocol, parseVersion } from '#utils/version'
+import { formatUpgradeVersion, isSupportedProtocol, parseVersion } from '#utils/version'
 import { CompletionItem, CompletionItemKind } from 'vscode'
 
 export class VersionCompletionItemProvider<T extends Extractor> implements CompletionItemProvider {
@@ -51,7 +51,7 @@ export class VersionCompletionItemProvider<T extends Extractor> implements Compl
       if (config.completion.version === 'provenance-only' && !meta.provenance)
         continue
 
-      const text = getUpgradeVersion(parsed, version)
+      const text = formatUpgradeVersion(parsed, version)
       const item = new CompletionItem(text, CompletionItemKind.Value)
 
       item.range = this.extractor.getNodeRange(document, versionNode)

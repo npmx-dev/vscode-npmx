@@ -1,7 +1,7 @@
 import type { DependencyInfo } from '#types/extractor'
 import type { ParsedVersion } from '#utils/version'
 import type { DiagnosticRule, NodeDiagnosticInfo } from '..'
-import { getUpgradeVersion, isSupportedProtocol, parseVersion } from '#utils/version'
+import { formatUpgradeVersion, isSupportedProtocol, parseVersion } from '#utils/version'
 import prerelease from 'semver/functions/prerelease'
 import gtr from 'semver/ranges/gtr'
 import ltr from 'semver/ranges/ltr'
@@ -11,7 +11,7 @@ function createUpgradeDiagnostic(dep: DependencyInfo, parsed: ParsedVersion, tar
   return {
     node: dep.versionNode,
     severity: DiagnosticSeverity.Hint,
-    message: `New version available: ${getUpgradeVersion(parsed, target)}`,
+    message: `New version available: ${formatUpgradeVersion(parsed, target)}`,
     code: 'upgrade',
   }
 }

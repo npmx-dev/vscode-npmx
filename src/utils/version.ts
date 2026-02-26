@@ -38,9 +38,9 @@ export function parseVersion(rawVersion: string): ParsedVersion | null {
   return { protocol, semver }
 }
 
-const RANGE_PREFIXES = ['>=', '<=', '=', '>', '<', '~', '^']
+const RANGE_PREFIXES = ['>=', '<=', '=', '>', '<']
 
-function getVersionRangePrefix(v: string) {
+function getVersionRangePrefix(v: string): string {
   const ver = v.trim().toLowerCase()
 
   if (ver === '*' || ver === '')
@@ -64,7 +64,7 @@ function getVersionRangePrefix(v: string) {
   return ''
 }
 
-export function getUpgradeVersion(current: ParsedVersion, target: string) {
+export function formatUpgradeVersion(current: ParsedVersion, target: string): string {
   const prefix = getVersionRangePrefix(current.semver)
 
   if (prefix === '*')

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseVersion } from '../../src/utils/version'
+import { formatUpgradeVersion, parseVersion } from '../../src/utils/version'
 
 describe('parseVersion', () => {
   it('should parse plain version', () => {
@@ -41,5 +41,51 @@ describe('parseVersion', () => {
     expect(parseVersion('https://github.com/user/repo')).toBeNull()
     expect(parseVersion('git://github.com/user/repo')).toBeNull()
     expect(parseVersion('git+https://github.com/user/repo')).toBeNull()
+  })
+})
+
+describe('formatUpgradeVersion', () => {
+  it('should preserve ^ prefix', () => {
+    expect(formatUpgradeVersion({ protocol: null, semver: '^1.0.0' }, '2.0.0')).toBe('^2.0.0')
+  })
+
+  it('should preserve ~ prefix', () => {
+    expect(formatUpgradeVersion({ protocol: null, semver: '~1.0.0' }, '1.1.0')).toBe('~1.1.0')
+  })
+
+  it('should handle pinned version', () => {
+    expect(formatUpgradeVersion({ protocol: null, semver: '1.0.0' }, '2.0.0')).toBe('2.0.0')
+  })
+
+  it('should preserve >= prefix', () => {
+    expect(formatUpgradeVersion({ protocol: null, semver: '>=1.0.0' }, '2.0.0')).toBe('>=2.0.0')
+  })
+
+  it('should return * for wildcard', () => {
+    expect(formatUpgradeVersion({ protocol: null, semver: '*' }, '2.0.0')).toBe('*')
+  })
+
+  it('should return * for empty semver', () => {
+    expect(formatUpgradeVersion({ protocol: null, semver: '' }, '2.0.0')).toBe('*')
+  })
+
+  it('should handle x-range major wildcard', () => {
+    expect(formatUpgradeVersion({ protocol: null, semver: 'x' }, '2.0.0')).toBe('*')
+  })
+
+  it('should handle x-range minor wildcard as ^', () => {
+    expect(formatUpgradeVersion({ protocol: null, semver: '1.x' }, '2.0.0')).toBe('^2.0.0')
+  })
+
+  it('should handle x-range patch wildcard as ~', () => {
+    expect(formatUpgradeVersion({ protocol: null, semver: '1.0.x' }, '1.1.0')).toBe('~1.1.0')
+  })
+
+  it('should include protocol in result', () => {
+    expect(formatUpgradeVersion({ protocol: 'npm', semver: '^1.0.0' }, '2.0.0')).toBe('npm:^2.0.0')
+  })
+
+  it('should handle pinned version with protocol', () => {
+    expect(formatUpgradeVersion({ protocol: 'npm', semver: '1.0.0' }, '2.0.0')).toBe('npm:2.0.0')
   })
 })

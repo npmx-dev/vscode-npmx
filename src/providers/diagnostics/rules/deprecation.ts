@@ -21,7 +21,7 @@ export const checkDeprecation: DiagnosticRule = (dep, pkg) => {
 
   return {
     node: dep.versionNode,
-    message: `${dep.name} ${version} has been deprecated: ${versionInfo.deprecated}`,
+    message: `${dep.name} v${version} has been deprecated: ${versionInfo.deprecated}`,
     severity: DiagnosticSeverity.Error,
     code: {
       value: 'deprecation',
