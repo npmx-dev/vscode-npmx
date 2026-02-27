@@ -7,8 +7,8 @@ import prerelease from 'semver/functions/prerelease'
  * Resolve the next upgrade target from npm dist-tags based on current exact version.
  * Mirrors the existing diagnostics upgrade rule behavior so other providers can reuse it.
  */
-export function resolveUpgradeTargetVersion(pkg: PackageInfo, exactVersion: string): string | undefined {
-  if (Object.hasOwn(pkg.distTags, exactVersion))
+export function resolveUpgradeTargetVersion(pkg: PackageInfo | undefined, exactVersion: string): string | undefined {
+  if (!pkg?.distTags || Object.hasOwn(pkg.distTags, exactVersion))
     return
 
   const { latest } = pkg.distTags

@@ -12,9 +12,9 @@ export function encodePackageName(name: string): string {
   return encodeURIComponent(name)
 }
 
-export function resolveExactVersion(pkg: PackageInfo, version: string) {
-  if (Object.hasOwn(pkg.distTags, version))
-    return pkg.distTags[version]
+export function resolveExactVersion(pkg: PackageInfo | undefined, version: string) {
+  if (!pkg?.distTags)
+    return null
 
-  return maxSatisfying(Object.keys(pkg.versionsMeta), version)
+  return pkg.distTags[version] ?? maxSatisfying(Object.keys(pkg.versionsMeta ?? {}), version)
 }

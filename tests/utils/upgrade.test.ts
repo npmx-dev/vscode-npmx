@@ -24,4 +24,8 @@ describe('resolveUpgradeTargetVersion', () => {
   ])('should resolve target for $exactVersion to $expected', ({ exactVersion, expected }) => {
     expect(resolveUpgradeTargetVersion(pkg, exactVersion)).toBe(expected)
   })
+
+  it('should return undefined when distTags are missing', () => {
+    expect(resolveUpgradeTargetVersion(undefined, '1.0.0')).toBeUndefined()
+  })
 })
