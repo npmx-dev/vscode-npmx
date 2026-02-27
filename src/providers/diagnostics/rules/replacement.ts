@@ -39,7 +39,7 @@ function getReplacementInfo(replacement: ModuleReplacement) {
   }
 }
 
-export const checkReplacement: DiagnosticRule = async (dep) => {
+export const checkReplacement: DiagnosticRule = async ({ dep }) => {
   const replacement = await getReplacement(dep.name)
   if (!replacement)
     return

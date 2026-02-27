@@ -1,8 +1,7 @@
 import type { DependencyInfo } from '#types/extractor'
 import type { ParsedVersion } from '#utils/version'
 import type { DiagnosticRule, NodeDiagnosticInfo } from '..'
-import { resolveExactVersion } from '#utils/package'
-import { formatUpgradeVersion, isSupportedProtocol, parseVersion } from '#utils/version'
+import { formatUpgradeVersion, isSupportedProtocol } from '#utils/version'
 import lte from 'semver/functions/lte'
 import prerelease from 'semver/functions/prerelease'
 import gtr from 'semver/ranges/gtr'
@@ -17,8 +16,7 @@ function createUpgradeDiagnostic(dep: DependencyInfo, parsed: ParsedVersion, tar
   }
 }
 
-export const checkUpgrade: DiagnosticRule = (dep, pkg) => {
-  const parsed = parseVersion(dep.version)
+export const checkUpgrade: DiagnosticRule = ({ dep, pkg, parsed, exactVersion }) => {
   if (!parsed || !isSupportedProtocol(parsed.protocol))
     return
 
@@ -30,7 +28,6 @@ export const checkUpgrade: DiagnosticRule = (dep, pkg) => {
   if (gtr(latest, version))
     return createUpgradeDiagnostic(dep, parsed, latest)
 
-  const exactVersion = resolveExactVersion(pkg, version)
   if (!exactVersion)
     return
 
