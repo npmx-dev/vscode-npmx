@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import { DiagnosticTag } from 'vscode'
 import { checkDeprecation } from '../../src/providers/diagnostics/rules/deprecation'
 import { createContext } from './context'
 
@@ -10,7 +9,10 @@ function createDeprecationContext(version: string) {
     distTags: { latest: '2.0.0' },
     versionsMeta: {
       '1.0.0': {
-        deprecated: 'deprecated',
+        deprecated: '1.0.0',
+      },
+      '1.2.0': {
+        deprecated: '1.2.0',
       },
       '2.0.0': {},
     },
@@ -19,12 +21,20 @@ function createDeprecationContext(version: string) {
 
 describe('checkDeprecation', () => {
   it('should flag deprecated version', async () => {
+    const ctx = createDeprecationContext('1.0.0')
+    const result = await checkDeprecation(ctx)
+
+    expect(result).toBeDefined()
+    expect(result!.message).toMatchInlineSnapshot('"lodash v1.0.0 has been deprecated: 1.0.0"')
+    expect(result!.code).toMatchObject({ value: 'deprecation' })
+  })
+
+  it('resolve range to the highest matching deprecated version', async () => {
     const ctx = createDeprecationContext('^1.0.0')
     const result = await checkDeprecation(ctx)
 
     expect(result).toBeDefined()
-    expect(result!.message).toContain('deprecated')
-    expect(result!.tags).toContain(DiagnosticTag.Deprecated)
+    expect(result!.message).toMatchInlineSnapshot('"lodash v1.2.0 has been deprecated: 1.2.0"')
     expect(result!.code).toMatchObject({ value: 'deprecation' })
   })
 
