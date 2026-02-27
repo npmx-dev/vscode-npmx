@@ -5,6 +5,7 @@
     "nuxt": "npm:4.3.0"
   },
   "devDependencies": {
+    "ofetch": "^2.0.0-alpha.1",
     "array-includes": "latest",
     "axios": "",
     "is-number": "",
