@@ -25,7 +25,7 @@ describe('checkUpgrade', () => {
     const result = await checkUpgrade(ctx)
 
     expect(result).toBeDefined()
-    expect(result!.code).toBe('upgrade')
+    expect(result!.code).toMatchObject({ value: 'upgrade' })
     expect(result!.message).toContain('2.7.0')
   })
 
