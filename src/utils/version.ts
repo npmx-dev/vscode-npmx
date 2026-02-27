@@ -1,6 +1,10 @@
 type VersionProtocol = 'workspace' | 'catalog' | 'npm' | 'jsr' | null
 
-const URL_PREFIXES = ['http://', 'https://', 'git://', 'git+']
+const URL_PACKAGE_PATTERN = /^(?:https?:|git\+|github:)/
+function isUrlPackage(currentVersion: string) {
+  return URL_PACKAGE_PATTERN.test(currentVersion)
+}
+
 const UNSUPPORTED_PROTOCOLS = new Set(['workspace', 'catalog', 'jsr'])
 const KNOWN_PROTOCOLS = new Set([...UNSUPPORTED_PROTOCOLS, 'npm'])
 
@@ -19,7 +23,7 @@ function isKnownProtocol(protocol: string): protocol is NonNullable<VersionProto
 
 export function parseVersion(rawVersion: string): ParsedVersion | null {
   rawVersion = rawVersion.trim()
-  if (URL_PREFIXES.some((p) => rawVersion.startsWith(p)))
+  if (isUrlPackage(rawVersion))
     return null
 
   let protocol: string | null = null
