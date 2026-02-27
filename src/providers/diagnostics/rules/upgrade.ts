@@ -1,18 +1,22 @@
 import type { DependencyInfo } from '#types/extractor'
 import type { ParsedVersion } from '#utils/version'
 import type { DiagnosticRule, NodeDiagnosticInfo } from '..'
+import { npmxPackageUrl } from '#utils/links'
 import { formatUpgradeVersion } from '#utils/version'
 import gt from 'semver/functions/gt'
 import lte from 'semver/functions/lte'
 import prerelease from 'semver/functions/prerelease'
-import { DiagnosticSeverity } from 'vscode'
+import { DiagnosticSeverity, Uri } from 'vscode'
 
 function createUpgradeDiagnostic(dep: DependencyInfo, parsed: ParsedVersion, target: string): NodeDiagnosticInfo {
   return {
     node: dep.versionNode,
     severity: DiagnosticSeverity.Hint,
     message: `New version available: ${formatUpgradeVersion(parsed, target)}`,
-    code: 'upgrade',
+    code: {
+      value: 'upgrade',
+      target: Uri.parse(npmxPackageUrl(dep.name, target)),
+    },
   }
 }
 
