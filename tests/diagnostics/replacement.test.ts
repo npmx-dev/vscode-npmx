@@ -17,6 +17,7 @@ describe('checkReplacement', () => {
 
     expect(result).toBeDefined()
     expect(result!.message).toBeDefined()
+    expect(result!.code).toMatchObject({ value: 'replacement' })
   })
 
   it('should not flag when no replacement found', async () => {
