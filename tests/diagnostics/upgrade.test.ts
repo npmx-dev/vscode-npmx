@@ -43,6 +43,13 @@ describe('checkUpgrade', () => {
     expect(result).toBeUndefined()
   })
 
+  it('should not flag when version is a dist tag with protocol', async () => {
+    const ctx = createUpgradeContext('npm:latest')
+    const result = await checkUpgrade(ctx)
+
+    expect(result).toBeUndefined()
+  })
+
   it('should flag prerelease upgrade within same pre-id', async () => {
     const ctx = createUpgradeContext('3.0.0-alpha.1')
     const result = await checkUpgrade(ctx)
