@@ -46,6 +46,7 @@
 | `npmx.diagnostics.replacement`      | Show suggestions for package replacements                                               | `boolean` | `true`              |
 | `npmx.diagnostics.vulnerability`    | Show warnings for packages with known vulnerabilities                                   | `boolean` | `true`              |
 | `npmx.diagnostics.distTag`          | Show warnings when a dependency uses a dist tag                                         | `boolean` | `true`              |
+| `npmx.versionLens.enabled`          | Show version lens (CodeLens) for package dependencies                                   | `boolean` | `false`             |
 
 <!-- configs -->
 

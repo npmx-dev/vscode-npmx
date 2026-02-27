@@ -1,4 +1,5 @@
 {
   "eslint.enable": false,
-  "knip.enabled": false
+  "knip.enabled": false,
+  "npmx.versionLens.enabled": true
 }

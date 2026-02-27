@@ -93,6 +93,11 @@
           "type": "boolean",
           "default": true,
           "description": "Show warnings when a dependency uses a dist tag"
+        },
+        "npmx.versionLens.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show version lens (CodeLens) for package dependencies"
         }
       }
     },

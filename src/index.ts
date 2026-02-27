@@ -1,11 +1,13 @@
 import { VERSION_TRIGGER_CHARACTERS } from '#constants'
 import { defineExtension, useCommands, watchEffect } from 'reactive-vscode'
 import { Disposable, languages } from 'vscode'
+import { useInternalCommands } from './commands/internal'
 import { openFileInNpmx } from './commands/open-file-in-npmx'
 import { openInBrowser } from './commands/open-in-browser'
 import { extractorEntries } from './extractors'
 import { commands, displayName, version } from './generated-meta'
 import { useCodeActions } from './providers/code-actions'
+import { useCodeLens } from './providers/code-lens'
 import { VersionCompletionItemProvider } from './providers/completion-item/version'
 import { useDiagnostics } from './providers/diagnostics'
 import { NpmxHoverProvider } from './providers/hover/npmx'
@@ -40,9 +42,10 @@ export const { activate, deactivate } = defineExtension(() => {
     onCleanup(() => Disposable.from(...disposables).dispose())
   })
 
+  useInternalCommands()
   useDiagnostics()
-
   useCodeActions()
+  useCodeLens()
 
   useCommands({
     [commands.openInBrowser]: openInBrowser,
