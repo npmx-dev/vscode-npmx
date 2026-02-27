@@ -23,5 +23,6 @@ catalogs:
     yaml: ^2.8.2
   test:
     jest-mock-vscode: ^4.11.0
+    msw: ^2.12.10
     vite-tsconfig-paths: ^6.1.1
     vitest: ^4.0.18

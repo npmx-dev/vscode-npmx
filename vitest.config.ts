@@ -12,5 +12,6 @@ export default defineConfig({
       vscode: join(rootDir, '/tests/__mocks__/vscode.ts'),
     },
     include: ['tests/**/*.test.ts'],
+    setupFiles: ['tests/__setup__/index.ts'],
   },
 })

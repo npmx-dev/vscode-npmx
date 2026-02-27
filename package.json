@@ -164,6 +164,7 @@
     "jest-mock-vscode": "catalog:test",
     "jsonc-parser": "catalog:inline",
     "module-replacements": "catalog:inline",
+    "msw": "catalog:test",
     "nano-staged": "catalog:dev",
     "ofetch": "catalog:inline",
     "perfect-debounce": "catalog:inline",
