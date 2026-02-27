@@ -1,10 +1,9 @@
 import type { DiagnosticRule } from '..'
 import { npmxPackageUrl } from '#utils/links'
-import { isSupportedProtocol } from '#utils/version'
 import { DiagnosticSeverity, Uri } from 'vscode'
 
-export const checkDistTag: DiagnosticRule = ({ dep, pkg, parsed }) => {
-  if (!parsed || !isSupportedProtocol(parsed.protocol))
+export const checkDistTag: DiagnosticRule = ({ dep, pkg, parsed, exactVersion }) => {
+  if (!parsed || !exactVersion)
     return
 
   const tag = parsed.version

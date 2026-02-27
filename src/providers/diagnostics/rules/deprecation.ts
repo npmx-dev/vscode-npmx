@@ -1,10 +1,9 @@
 import type { DiagnosticRule } from '..'
 import { npmxPackageUrl } from '#utils/links'
-import { isSupportedProtocol } from '#utils/version'
 import { DiagnosticSeverity, DiagnosticTag, Uri } from 'vscode'
 
 export const checkDeprecation: DiagnosticRule = ({ dep, pkg, parsed, exactVersion }) => {
-  if (!parsed || !isSupportedProtocol(parsed.protocol) || !exactVersion)
+  if (!parsed || !exactVersion)
     return
 
   const versionInfo = pkg.versionsMeta[exactVersion]

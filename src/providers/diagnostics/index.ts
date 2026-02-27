@@ -7,7 +7,7 @@ import { useActiveExtractor } from '#composables/active-extractor'
 import { config, logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
 import { resolveExactVersion } from '#utils/package'
-import { parseVersion } from '#utils/version'
+import { isSupportedProtocol, parseVersion } from '#utils/version'
 import { debounce } from 'perfect-debounce'
 import { computed, useActiveTextEditor, useDisposable, useDocumentText, watch } from 'reactive-vscode'
 import { languages } from 'vscode'
@@ -97,7 +97,7 @@ export function useDiagnostics() {
           continue
 
         const parsed = parseVersion(dep.version)
-        const exactVersion = parsed
+        const exactVersion = parsed && isSupportedProtocol(parsed.protocol)
           ? resolveExactVersion(pkg, parsed.version)
           : null
 

@@ -1,10 +1,10 @@
 import type { DependencyInfo } from '#types/extractor'
 import type { ParsedVersion } from '#utils/version'
 import type { DiagnosticRule, NodeDiagnosticInfo } from '..'
-import { formatUpgradeVersion, isSupportedProtocol } from '#utils/version'
+import { formatUpgradeVersion } from '#utils/version'
+import gt from 'semver/functions/gt'
 import lte from 'semver/functions/lte'
 import prerelease from 'semver/functions/prerelease'
-import gtr from 'semver/ranges/gtr'
 import { DiagnosticSeverity } from 'vscode'
 
 function createUpgradeDiagnostic(dep: DependencyInfo, parsed: ParsedVersion, target: string): NodeDiagnosticInfo {
@@ -17,7 +17,7 @@ function createUpgradeDiagnostic(dep: DependencyInfo, parsed: ParsedVersion, tar
 }
 
 export const checkUpgrade: DiagnosticRule = ({ dep, pkg, parsed, exactVersion }) => {
-  if (!parsed || !isSupportedProtocol(parsed.protocol))
+  if (!parsed || !exactVersion)
     return
 
   const { version } = parsed
@@ -25,11 +25,8 @@ export const checkUpgrade: DiagnosticRule = ({ dep, pkg, parsed, exactVersion })
     return
 
   const { latest } = pkg.distTags
-  if (gtr(latest, version))
+  if (gt(latest, exactVersion))
     return createUpgradeDiagnostic(dep, parsed, latest)
-
-  if (!exactVersion)
-    return
 
   const currentPreId = prerelease(exactVersion)?.[0]
   if (currentPreId == null)
