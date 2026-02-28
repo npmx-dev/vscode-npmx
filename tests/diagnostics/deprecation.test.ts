@@ -25,7 +25,7 @@ describe('checkDeprecation', () => {
     const result = await checkDeprecation(ctx)
 
     expect(result).toBeDefined()
-    expect(result!.message).toMatchInlineSnapshot(`""lodash@1.0.0" has been deprecated: old notice"`)
+    expect(result!.message).toMatchInlineSnapshot('""lodash@1.0.0" has been deprecated: old notice"')
     expect(result!.code).toMatchObject({ value: 'deprecation' })
   })
 
@@ -34,7 +34,7 @@ describe('checkDeprecation', () => {
     const result = await checkDeprecation(ctx)
 
     expect(result).toBeDefined()
-    expect(result!.message).toMatchInlineSnapshot(`""lodash@1.2.0" has been deprecated: new notice"`)
+    expect(result!.message).toMatchInlineSnapshot('""lodash@1.2.0" has been deprecated: new notice"')
     expect(result!.code).toMatchObject({ value: 'deprecation' })
   })
 
