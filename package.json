@@ -97,7 +97,7 @@
         "npmx.diagnostics.engineMismatch": {
           "type": "boolean",
           "default": true,
-          "description": "Show warnings when dependency engines conflict with the current package"
+          "description": "Show warnings when dependency engines mismatch with the current package"
         }
       }
     },
