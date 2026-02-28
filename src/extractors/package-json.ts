@@ -81,13 +81,14 @@ export class PackageJsonExtractor implements Extractor<Node> {
     if (enginesNode?.type !== 'object' || !enginesNode.children?.length)
       return
 
-    const engines: Engines = {}
+    let engines: Engines | undefined
 
     for (const engineNode of enginesNode.children) {
       const [nameNode, rangeNode] = engineNode.children ?? []
       if (typeof nameNode?.value !== 'string' || typeof rangeNode?.value !== 'string')
         continue
 
+      engines ??= {}
       engines[nameNode.value] = rangeNode.value
     }
 
