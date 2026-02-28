@@ -46,6 +46,7 @@
 | `npmx.diagnostics.replacement`      | Show suggestions for package replacements                                               | `boolean` | `true`              |
 | `npmx.diagnostics.vulnerability`    | Show warnings for packages with known vulnerabilities                                   | `boolean` | `true`              |
 | `npmx.diagnostics.distTag`          | Show warnings when a dependency uses a dist tag                                         | `boolean` | `true`              |
+| `npmx.diagnostics.engineMismatch`   | Show warnings when dependency engines conflict with the current package                 | `boolean` | `true`              |
 
 <!-- configs -->
 

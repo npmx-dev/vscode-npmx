@@ -75,6 +75,27 @@ export class PackageJsonExtractor implements Extractor<Node> {
     return result
   }
 
+  getEngines(root: Node): Record<string, string> | null {
+    const enginesNode = findNodeAtLocation(root, ['engines'])
+    if (enginesNode?.type !== 'object' || !enginesNode.children?.length)
+      return null
+
+    const engines: Record<string, string> = {}
+
+    for (const engineNode of enginesNode.children) {
+      const [nameNode, rangeNode] = engineNode.children ?? []
+      if (typeof nameNode?.value !== 'string' || typeof rangeNode?.value !== 'string')
+        continue
+
+      engines[nameNode.value] = rangeNode.value
+    }
+
+    if (Object.keys(engines).length === 0)
+      return null
+
+    return engines
+  }
+
   getDependencyInfoByOffset(root: Node, offset: number) {
     const node = findNodeAtOffset(root, offset)
     if (!node || node.type !== 'string' || !this.isInDependencySection(root, node))

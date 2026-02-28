@@ -14,6 +14,7 @@ import { languages } from 'vscode'
 import { displayName } from '../../generated-meta'
 import { checkDeprecation } from './rules/deprecation'
 import { checkDistTag } from './rules/dist-tag'
+import { checkEngineMismatch } from './rules/engine-mismatch'
 import { checkReplacement } from './rules/replacement'
 import { checkUpgrade } from './rules/upgrade'
 import { checkVulnerability } from './rules/vulnerability'
@@ -23,6 +24,7 @@ export interface DiagnosticContext {
   pkg: PackageInfo
   parsed: ParsedVersion | null
   exactVersion: string | null
+  engines: Record<string, string> | null
 }
 
 export interface NodeDiagnosticInfo extends Omit<Diagnostic, 'range' | 'source'> {
@@ -45,6 +47,8 @@ export function useDiagnostics() {
       rules.push(checkDeprecation)
     if (config.diagnostics.distTag)
       rules.push(checkDistTag)
+    if (config.diagnostics.engineMismatch)
+      rules.push(checkEngineMismatch)
     if (config.diagnostics.replacement)
       rules.push(checkReplacement)
     if (config.diagnostics.vulnerability)
@@ -83,6 +87,7 @@ export function useDiagnostics() {
     const targetVersion = document.version
 
     const dependencies = extractor.getDependenciesInfo(root)
+    const engines = extractor.getEngines?.(root) ?? null
     const diagnostics: Diagnostic[] = []
 
     for (const dep of dependencies) {
@@ -103,7 +108,7 @@ export function useDiagnostics() {
 
         for (const rule of rules) {
           try {
-            const diagnostic = await rule({ dep, pkg, parsed, exactVersion })
+            const diagnostic = await rule({ dep, pkg, parsed, exactVersion, engines })
             if (isDocumentChanged(document, targetUri, targetVersion))
               return
             if (!diagnostic)

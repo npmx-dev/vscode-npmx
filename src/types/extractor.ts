@@ -19,4 +19,6 @@ export interface Extractor<T extends ValidNode = any> {
   getDependenciesInfo: (root: T) => DependencyInfo<T>[]
 
   getDependencyInfoByOffset: (root: T, offset: number) => DependencyInfo<T> | undefined
+
+  getEngines?: (root: T) => Record<string, string> | null
 }

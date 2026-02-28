@@ -8,16 +8,20 @@ interface CreateContextOptions {
   name: string
   version: string
   distTags?: Record<string, string>
-  versionsMeta?: Record<string, { deprecated?: string }>
+  versionsMeta?: Record<string, {
+    deprecated?: string
+    engines?: Record<string, string>
+  }>
+  engines?: Record<string, string> | null
 }
 
 export function createContext(options: CreateContextOptions): DiagnosticContext {
-  const { name, version, distTags = {}, versionsMeta = {} } = options
+  const { name, version, distTags = {}, versionsMeta = {}, engines = null } = options
   const dep: DependencyInfo = { name, version, nameNode: {}, versionNode: {} }
   const pkg = { distTags, versionsMeta, versionToTag: new Map() } as PackageInfo
   const parsed = parseVersion(version)
   const exactVersion = parsed && isSupportedProtocol(parsed.protocol)
     ? resolveExactVersion(pkg, parsed.version)
     : null
-  return { dep, pkg, parsed, exactVersion }
+  return { dep, pkg, parsed, exactVersion, engines }
 }

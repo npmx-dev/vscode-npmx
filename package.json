@@ -93,6 +93,11 @@
           "type": "boolean",
           "default": true,
           "description": "Show warnings when a dependency uses a dist tag"
+        },
+        "npmx.diagnostics.engineMismatch": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show warnings when dependency engines conflict with the current package"
         }
       }
     },
