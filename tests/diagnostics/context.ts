@@ -1,5 +1,6 @@
 import type { DependencyInfo } from '#types/extractor'
 import type { PackageInfo } from '#utils/api/package'
+import type { Engines } from 'fast-npm-meta'
 import type { DiagnosticContext } from '../../src/providers/diagnostics'
 import { resolveExactVersion } from '#utils/package'
 import { isSupportedProtocol, parseVersion } from '#utils/version'
@@ -10,13 +11,13 @@ interface CreateContextOptions {
   distTags?: Record<string, string>
   versionsMeta?: Record<string, {
     deprecated?: string
-    engines?: Record<string, string>
+    engines?: Engines
   }>
-  engines?: Record<string, string> | null
+  engines?: Engines
 }
 
 export function createContext(options: CreateContextOptions): DiagnosticContext {
-  const { name, version, distTags = {}, versionsMeta = {}, engines = null } = options
+  const { name, version, distTags = {}, versionsMeta = {}, engines } = options
   const dep: DependencyInfo = { name, version, nameNode: {}, versionNode: {} }
   const pkg = { distTags, versionsMeta, versionToTag: new Map() } as PackageInfo
   const parsed = parseVersion(version)

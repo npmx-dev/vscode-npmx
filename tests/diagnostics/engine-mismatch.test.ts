@@ -1,16 +1,19 @@
+import type { Engines } from 'fast-npm-meta'
 import { describe, expect, it } from 'vitest'
 import { checkEngineMismatch } from '../../src/providers/diagnostics/rules/engine-mismatch'
 import { createContext } from './context'
 
 function createEngineMismatchContext(
-  engines: Record<string, string> | null,
-  dependencyEngines: Record<string, string> | null,
+  engines: Engines | undefined,
+  dependencyEngines: Engines | undefined,
 ) {
   return createContext({
     name: 'foo',
     version: '^1.0.0',
     distTags: { latest: '1.0.0' },
-    versionsMeta: { '1.0.0': dependencyEngines ? { engines: dependencyEngines } : {} },
+    versionsMeta: {
+      '1.0.0': dependencyEngines ? { engines: dependencyEngines } : {},
+    },
     engines,
   })
 }
@@ -71,8 +74,8 @@ describe('checkEngineMismatch', () => {
   })
 
   it('should not flag when either engines is missing', async () => {
-    expect(await checkEngineMismatch(createEngineMismatchContext(null, { node: '>=18' }))).toBeUndefined()
-    expect(await checkEngineMismatch(createEngineMismatchContext({ node: '>=18' }, null))).toBeUndefined()
+    expect(await checkEngineMismatch(createEngineMismatchContext(undefined, { node: '>=18' }))).toBeUndefined()
+    expect(await checkEngineMismatch(createEngineMismatchContext({ node: '>=18' }, undefined))).toBeUndefined()
   })
 
   it('should skip engines with non-standard semver values', async () => {
