@@ -36,7 +36,14 @@ export function parseVersion(rawVersion: string): ParsedVersion | null {
     if (!isKnownProtocol(protocol))
       return null
 
-    version = rawVersion.slice(colonIndex + 1)
+    version = rawVersion.substring(colonIndex + 1)
+
+    if (protocol === 'npm') {
+      const lastAtIndex = version.lastIndexOf('@')
+      if (lastAtIndex > 0) {
+        version = version.substring(lastAtIndex + 1)
+      }
+    }
   }
 
   return { protocol, version }

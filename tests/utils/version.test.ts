@@ -20,6 +20,15 @@ describe('parseVersion', () => {
     `)
   })
 
+  it('should parse npm alias package', () => {
+    expect(parseVersion('npm:lodash@~3.0.0')).toMatchInlineSnapshot(`
+      {
+        "protocol": "npm",
+        "version": "~3.0.0",
+      }
+    `)
+  })
+
   it('should parse workspace: protocol', () => {
     expect(parseVersion('workspace:*')).toMatchInlineSnapshot(`
       {
