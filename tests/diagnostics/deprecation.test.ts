@@ -9,10 +9,10 @@ function createDeprecationContext(version: string) {
     distTags: { latest: '2.0.0' },
     versionsMeta: {
       '1.0.0': {
-        deprecated: '1.0.0',
+        deprecated: 'old notice',
       },
       '1.2.0': {
-        deprecated: '1.2.0',
+        deprecated: 'new notice',
       },
       '2.0.0': {},
     },
@@ -25,7 +25,7 @@ describe('checkDeprecation', () => {
     const result = await checkDeprecation(ctx)
 
     expect(result).toBeDefined()
-    expect(result!.message).toMatchInlineSnapshot('"lodash v1.0.0 has been deprecated: 1.0.0"')
+    expect(result!.message).toMatchInlineSnapshot(`""lodash@1.0.0" has been deprecated: old notice"`)
     expect(result!.code).toMatchObject({ value: 'deprecation' })
   })
 
@@ -34,7 +34,7 @@ describe('checkDeprecation', () => {
     const result = await checkDeprecation(ctx)
 
     expect(result).toBeDefined()
-    expect(result!.message).toMatchInlineSnapshot('"lodash v1.2.0 has been deprecated: 1.2.0"')
+    expect(result!.message).toMatchInlineSnapshot(`""lodash@1.2.0" has been deprecated: new notice"`)
     expect(result!.code).toMatchObject({ value: 'deprecation' })
   })
 

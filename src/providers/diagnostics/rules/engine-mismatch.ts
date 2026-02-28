@@ -1,6 +1,7 @@
 import type { Engines } from 'fast-npm-meta'
 import type { DiagnosticRule } from '..'
 import { npmxPackageUrl } from '#utils/links'
+import { formatPackageId } from '#utils/package'
 import Range from 'semver/classes/range'
 import intersects from 'semver/ranges/intersects'
 import subset from 'semver/ranges/subset'
@@ -63,7 +64,7 @@ export const checkEngineMismatch: DiagnosticRule = ({ dep, pkg, parsed, exactVer
 
   return {
     node: dep.versionNode,
-    message: `Engines mismatch for "${dep.name}@${exactVersion}": ${mismatchDetails}.`,
+    message: `Engines mismatch for "${formatPackageId(dep.name, exactVersion)}": ${mismatchDetails}.`,
     severity: DiagnosticSeverity.Warning,
     code: {
       value: 'engine-mismatch',

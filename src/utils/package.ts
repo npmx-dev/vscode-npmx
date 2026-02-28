@@ -12,6 +12,10 @@ export function encodePackageName(name: string): string {
   return encodeURIComponent(name)
 }
 
+export function formatPackageId(name: string, version: string): string {
+  return `${name}@${version}`
+}
+
 export function resolveExactVersion(pkg: PackageInfo, version: string) {
   if (Object.hasOwn(pkg.distTags, version))
     return pkg.distTags[version]

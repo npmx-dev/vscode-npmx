@@ -1,5 +1,6 @@
 import type { DiagnosticRule } from '..'
 import { npmxPackageUrl } from '#utils/links'
+import { formatPackageId } from '#utils/package'
 import { DiagnosticSeverity, DiagnosticTag, Uri } from 'vscode'
 
 export const checkDeprecation: DiagnosticRule = ({ dep, pkg, parsed, exactVersion }) => {
@@ -13,7 +14,7 @@ export const checkDeprecation: DiagnosticRule = ({ dep, pkg, parsed, exactVersio
 
   return {
     node: dep.versionNode,
-    message: `${dep.name} v${exactVersion} has been deprecated: ${versionInfo.deprecated}`,
+    message: `"${formatPackageId(dep.name, exactVersion)}" has been deprecated: ${versionInfo.deprecated}`,
     severity: DiagnosticSeverity.Error,
     code: {
       value: 'deprecation',
