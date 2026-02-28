@@ -49,6 +49,7 @@
 | `npmx.diagnostics.vulnerability`    | Show warnings for packages with known vulnerabilities                                   | `boolean` | `true`              |
 | `npmx.diagnostics.distTag`          | Show warnings when a dependency uses a dist tag                                         | `boolean` | `true`              |
 | `npmx.diagnostics.engineMismatch`   | Show warnings when dependency engines mismatch with the current package                 | `boolean` | `true`              |
+| `npmx.ignore.vulnerability`         | List of package names to ignore vulnerability warnings for (e.g. ["nuxt", "lodash"])    | `array`   | `[]`                |
 
 <!-- configs -->
 

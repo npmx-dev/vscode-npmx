@@ -98,6 +98,14 @@
           "type": "boolean",
           "default": true,
           "description": "Show warnings when dependency engines mismatch with the current package"
+        },
+        "npmx.ignore.vulnerability": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "List of package names to ignore vulnerability warnings for (e.g. [\"nuxt\", \"lodash\"])"
         }
       }
     },
