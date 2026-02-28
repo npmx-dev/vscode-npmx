@@ -1,5 +1,7 @@
+import type { Engines } from 'fast-npm-meta'
 import type { DiagnosticRule } from '..'
 import { npmxPackageUrl } from '#utils/links'
+import Range from 'semver/classes/range'
 import intersects from 'semver/ranges/intersects'
 import subset from 'semver/ranges/subset'
 import { DiagnosticSeverity, Uri } from 'vscode'
@@ -12,36 +14,39 @@ interface EngineMismatch {
 }
 
 function resolveEngineMismatches(
-  packageEngines: Record<string, string>,
-  dependencyEngines: Record<string, string>,
+  packageEngines: Engines,
+  dependencyEngines: Engines,
 ) {
   const mismatches: EngineMismatch[] = []
 
-  for (const [engine, dependencyRange] of Object.entries(dependencyEngines)) {
-    const packageRange = packageEngines[engine]
-    if (typeof packageRange !== 'string')
+  for (const [engine, dependencyRangeStr] of Object.entries(dependencyEngines)) {
+    const packageRangeStr = packageEngines[engine]
+    if (!packageRangeStr || !dependencyRangeStr)
       continue
 
     try {
-      if (subset(packageRange, dependencyRange))
+      const pkgRange = new Range(packageRangeStr)
+      const depRange = new Range(dependencyRangeStr)
+
+      if (subset(pkgRange, depRange))
         continue
 
       mismatches.push({
         engine,
-        packageRange,
-        dependencyRange,
-        hasIntersection: intersects(packageRange, dependencyRange),
+        packageRange: packageRangeStr,
+        dependencyRange: dependencyRangeStr,
+        hasIntersection: intersects(pkgRange, depRange),
       })
+    } catch {
+      continue
     }
-    // HACK: engines fields can contain non-standard values (e.g., "lts"), skip silently
-    catch {}
   }
 
   return mismatches
 }
 
-export const checkEngineMismatch: DiagnosticRule = ({ dep, pkg, exactVersion, engines }) => {
-  if (!exactVersion || !engines)
+export const checkEngineMismatch: DiagnosticRule = ({ dep, pkg, parsed, exactVersion, engines }) => {
+  if (!parsed || !exactVersion || !engines)
     return
 
   const dependencyEngines = pkg.versionsMeta[exactVersion]?.engines
@@ -62,7 +67,7 @@ export const checkEngineMismatch: DiagnosticRule = ({ dep, pkg, exactVersion, en
     severity: DiagnosticSeverity.Warning,
     code: {
       value: 'engine-mismatch',
-      target: Uri.parse(npmxPackageUrl(dep.name, exactVersion)),
+      target: Uri.parse(npmxPackageUrl(dep.name, parsed.version)),
     },
   }
 }

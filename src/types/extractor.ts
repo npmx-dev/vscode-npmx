@@ -1,3 +1,4 @@
+import type { Engines } from 'fast-npm-meta'
 import type { Node as JsonNode } from 'jsonc-parser'
 import type { Range, TextDocument } from 'vscode'
 import type { Node as YamlNode } from 'yaml'
@@ -20,5 +21,5 @@ export interface Extractor<T extends ValidNode = any> {
 
   getDependencyInfoByOffset: (root: T, offset: number) => DependencyInfo<T> | undefined
 
-  getEngines?: (root: T) => Record<string, string> | null
+  getEngines?: (root: T) => Engines | undefined
 }

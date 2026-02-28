@@ -1,4 +1,5 @@
 import type { DependencyInfo, Extractor } from '#types/extractor'
+import type { Engines } from 'fast-npm-meta'
 import type { Node } from 'jsonc-parser'
 import type { TextDocument } from 'vscode'
 import { isInRange } from '#utils/ast'
@@ -75,12 +76,12 @@ export class PackageJsonExtractor implements Extractor<Node> {
     return result
   }
 
-  getEngines(root: Node): Record<string, string> | null {
+  getEngines(root: Node): Engines | undefined {
     const enginesNode = findNodeAtLocation(root, ['engines'])
     if (enginesNode?.type !== 'object' || !enginesNode.children?.length)
-      return null
+      return
 
-    const engines: Record<string, string> = {}
+    const engines: Engines = {}
 
     for (const engineNode of enginesNode.children) {
       const [nameNode, rangeNode] = engineNode.children ?? []
@@ -89,9 +90,6 @@ export class PackageJsonExtractor implements Extractor<Node> {
 
       engines[nameNode.value] = rangeNode.value
     }
-
-    if (Object.keys(engines).length === 0)
-      return null
 
     return engines
   }

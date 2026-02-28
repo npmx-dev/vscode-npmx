@@ -1,6 +1,7 @@
 import type { DependencyInfo, ValidNode } from '#types/extractor'
 import type { PackageInfo } from '#utils/api/package'
 import type { ParsedVersion } from '#utils/version'
+import type { Engines } from 'fast-npm-meta'
 import type { Awaitable } from 'reactive-vscode'
 import type { Diagnostic, TextDocument } from 'vscode'
 import { useActiveExtractor } from '#composables/active-extractor'
@@ -24,7 +25,7 @@ export interface DiagnosticContext {
   pkg: PackageInfo
   parsed: ParsedVersion | null
   exactVersion: string | null
-  engines: Record<string, string> | null
+  engines: Engines | undefined
 }
 
 export interface NodeDiagnosticInfo extends Omit<Diagnostic, 'range' | 'source'> {
@@ -87,7 +88,7 @@ export function useDiagnostics() {
     const targetVersion = document.version
 
     const dependencies = extractor.getDependenciesInfo(root)
-    const engines = extractor.getEngines?.(root) ?? null
+    const engines = extractor.getEngines?.(root)
     const diagnostics: Diagnostic[] = []
 
     for (const dep of dependencies) {
