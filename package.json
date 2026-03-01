@@ -27,6 +27,10 @@
     "Other"
   ],
   "main": "./dist/index.mjs",
+  "browser": "./dist/index.mjs",
+  "extensionKind": [
+    "workspace"
+  ],
   "icon": "res/logo.png",
   "files": [
     "LICENSE.md",

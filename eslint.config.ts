@@ -16,4 +16,16 @@ export default defineConfig(
       }],
     },
   },
+  {
+    name: 'extensions/browser',
+    files: ['src/**/*'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [{
+          regex: '^node:',
+          message: 'Node.js built-in modules are not available in browser environments.',
+        }],
+      }],
+    },
+  },
 )
