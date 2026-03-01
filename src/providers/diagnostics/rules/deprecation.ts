@@ -8,12 +8,13 @@ export const checkDeprecation: DiagnosticRule = ({ dep, pkg, parsed, exactVersio
   if (!parsed || !exactVersion)
     return
 
-  if (config.ignore.deprecation.includes(dep.name))
-    return
-
   const versionInfo = pkg.versionsMeta[exactVersion]
 
   if (!versionInfo.deprecated)
+    return
+
+  const ignoreList = config.ignore.deprecation
+  if (ignoreList.includes(dep.name) || ignoreList.includes(formatPackageId(dep.name, exactVersion)))
     return
 
   return {
