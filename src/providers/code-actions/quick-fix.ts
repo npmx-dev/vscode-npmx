@@ -1,5 +1,5 @@
 import type { CodeActionContext, CodeActionProvider, Diagnostic, Range, TextDocument } from 'vscode'
-import { CodeAction, CodeActionKind, WorkspaceEdit } from 'vscode'
+import { CodeAction, CodeActionKind, ConfigurationTarget, WorkspaceEdit } from 'vscode'
 
 interface QuickFixRule {
   pattern: RegExp
@@ -7,7 +7,7 @@ interface QuickFixRule {
   isPreferred?: boolean
 }
 
-const quickFixRules: Record<string, QuickFixRule> = {
+const quickFixRules: Partial<Record<string, QuickFixRule>> = {
   upgrade: {
     pattern: /^New version available: (?<target>\S+)$/,
     title: (target) => `Update to ${target}`,
@@ -16,6 +16,16 @@ const quickFixRules: Record<string, QuickFixRule> = {
     pattern: / Upgrade to (?<target>\S+) to fix\.$/,
     title: (target) => `Update to ${target} to fix vulnerabilities`,
     isPreferred: true,
+  },
+}
+
+interface AddIgnoreRule {
+  pattern: RegExp
+}
+
+const addIgnoreRules: Partial<Record<string, AddIgnoreRule>> = {
+  vulnerability: {
+    pattern: /^"(?<target>\S+)" has .+ vulnerabilit/,
   },
 }
 
@@ -34,20 +44,38 @@ export class QuickFixProvider implements CodeActionProvider {
       if (!code)
         return []
 
-      const rule = quickFixRules[code]
-      if (!rule)
-        return []
+      const actions: CodeAction[] = []
 
-      const target = rule.pattern.exec(diagnostic.message)?.groups?.target
-      if (!target)
-        return []
+      const quickFixRule = quickFixRules[code]
+      const target = quickFixRule?.pattern?.exec(diagnostic.message)?.groups?.target
+      if (target) {
+        const action = new CodeAction(quickFixRule.title(target), CodeActionKind.QuickFix)
+        action.isPreferred = quickFixRule.isPreferred ?? false
+        action.diagnostics = [diagnostic]
+        action.edit = new WorkspaceEdit()
+        action.edit.replace(document.uri, diagnostic.range, target)
+        actions.push(action)
+      }
 
-      const action = new CodeAction(rule.title(target), CodeActionKind.QuickFix)
-      action.isPreferred = rule.isPreferred ?? false
-      action.diagnostics = [diagnostic]
-      action.edit = new WorkspaceEdit()
-      action.edit.replace(document.uri, diagnostic.range, target)
-      return [action]
+      const addIgnoreRule = addIgnoreRules[code]
+      const ignoreTarget = addIgnoreRule?.pattern?.exec(diagnostic.message)?.groups?.target
+      if (ignoreTarget) {
+        for (const [title, configTarget] of [
+          [`Ignore ${code} for "${ignoreTarget}" (Workspace)`, ConfigurationTarget.Workspace],
+          [`Ignore ${code} for "${ignoreTarget}" (User)`, ConfigurationTarget.Global],
+        ] as const) {
+          const action = new CodeAction(title, CodeActionKind.QuickFix)
+          action.diagnostics = [diagnostic]
+          action.command = {
+            title,
+            command: 'npmx.addToIgnore',
+            arguments: [code, ignoreTarget, configTarget],
+          }
+          actions.push(action)
+        }
+      }
+
+      return actions
     })
   }
 }

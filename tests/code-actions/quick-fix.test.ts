@@ -32,15 +32,40 @@ describe('quick fix provider', () => {
     expect(actions[0]!.title).toMatchInlineSnapshot('"Update to ^2.0.0"')
   })
 
-  it('vulnerability', () => {
+  it('vulnerability with fix', () => {
     const diagnostic = createDiagnostic(
       { value: 'vulnerability', target: Uri.parse('https://npmx.dev') },
-      'This version has 1 high vulnerability. Upgrade to ^1.2.3 to fix.',
+      '"lodash@4.17.20" has 1 high vulnerability. Upgrade to ^4.17.21 to fix.',
     )
     const actions = provideCodeActions([diagnostic])
 
-    expect(actions).toHaveLength(1)
-    expect(actions[0]!.title).toMatchInlineSnapshot('"Update to ^1.2.3 to fix vulnerabilities"')
+    expect(actions).toHaveLength(3)
+    expect(actions[0]!.title).toMatchInlineSnapshot('"Update to ^4.17.21 to fix vulnerabilities"')
+    expect(actions[1]!.title).toMatchInlineSnapshot('"Ignore vulnerability for "lodash@4.17.20" (Workspace)"')
+    expect(actions[2]!.title).toMatchInlineSnapshot('"Ignore vulnerability for "lodash@4.17.20" (User)"')
+  })
+
+  it('vulnerability without fix', () => {
+    const diagnostic = createDiagnostic(
+      { value: 'vulnerability', target: Uri.parse('https://npmx.dev') },
+      '"express@4.18.0" has 1 moderate vulnerability.',
+    )
+    const actions = provideCodeActions([diagnostic])
+
+    expect(actions).toHaveLength(2)
+    expect(actions[0]!.title).toMatchInlineSnapshot('"Ignore vulnerability for "express@4.18.0" (Workspace)"')
+    expect(actions[1]!.title).toMatchInlineSnapshot('"Ignore vulnerability for "express@4.18.0" (User)"')
+  })
+
+  it('vulnerability for scoped package', () => {
+    const diagnostic = createDiagnostic(
+      { value: 'vulnerability', target: Uri.parse('https://npmx.dev') },
+      '"@babel/core@7.0.0" has 1 critical vulnerability. Upgrade to ^7.1.0 to fix.',
+    )
+    const actions = provideCodeActions([diagnostic])
+
+    expect(actions).toHaveLength(3)
+    expect(actions[1]!.title).toMatchInlineSnapshot('"Ignore vulnerability for "@babel/core@7.0.0" (Workspace)"')
   })
 
   it('mixed diagnostics', () => {
@@ -48,13 +73,13 @@ describe('quick fix provider', () => {
       createDiagnostic('upgrade', 'New version available: ^2.0.0'),
       createDiagnostic(
         { value: 'vulnerability', target: Uri.parse('https://npmx.dev') },
-        'This version has 1 high vulnerability. Upgrade to ^1.2.3 to fix.',
+        '"lodash@4.17.20" has 1 high vulnerability. Upgrade to ^4.17.21 to fix.',
       ),
     ]
     const actions = provideCodeActions(diagnostics)
 
-    expect(actions).toHaveLength(2)
+    expect(actions).toHaveLength(4)
     expect(actions[0]!.title).toMatchInlineSnapshot('"Update to ^2.0.0"')
-    expect(actions[1]!.title).toMatchInlineSnapshot('"Update to ^1.2.3 to fix vulnerabilities"')
+    expect(actions[1]!.title).toMatchInlineSnapshot('"Update to ^4.17.21 to fix vulnerabilities"')
   })
 })

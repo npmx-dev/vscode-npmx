@@ -20,6 +20,7 @@ export const {
   CompletionItemKind,
   CodeAction,
   CodeActionKind,
+  ConfigurationTarget,
   WorkspaceEdit,
   Diagnostic,
   DiagnosticSeverity,
