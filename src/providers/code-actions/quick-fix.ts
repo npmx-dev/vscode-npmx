@@ -24,6 +24,12 @@ interface AddIgnoreRule {
 }
 
 const addIgnoreRules: Partial<Record<string, AddIgnoreRule>> = {
+  deprecation: {
+    pattern: /^"(?<target>\S+)" has been deprecated/,
+  },
+  replacement: {
+    pattern: /^"(?<target>\S+)"/,
+  },
   vulnerability: {
     pattern: /^"(?<target>\S+)" has .+ vulnerabilit/,
   },

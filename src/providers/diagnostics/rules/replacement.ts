@@ -1,5 +1,6 @@
 import type { ModuleReplacement } from 'module-replacements'
 import type { DiagnosticRule } from '..'
+import { config } from '#state'
 import { getReplacement } from '#utils/api/replacement'
 import { DiagnosticSeverity, Uri } from 'vscode'
 
@@ -20,26 +21,29 @@ function getReplacementInfo(replacement: ModuleReplacement) {
   switch (replacement.type) {
     case 'native':
       return {
-        message: `This can be replaced with ${replacement.replacement}, available since Node ${replacement.nodeVersion}.`,
+        message: `can be replaced with ${replacement.replacement}, available since Node ${replacement.nodeVersion}.`,
         link: getMdnUrl(replacement.mdnPath),
       }
     case 'simple':
       return {
-        message: `The community has flagged this package as redundant, with the advice:\n${replacement.replacement}.`,
+        message: `has been flagged as redundant, with the advice:\n${replacement.replacement}.`,
       }
     case 'documented':
       return {
-        message: 'The community has flagged this package as having more performant alternatives.',
+        message: 'has been flagged as having more performant alternatives.',
         link: getReplacementsDocUrl(replacement.docPath),
       }
     case 'none':
       return {
-        message: 'This package has been flagged as no longer needed, and its functionality is likely available natively in all engines.',
+        message: 'has been flagged as no longer needed, and its functionality is likely available natively in all engines.',
       }
   }
 }
 
 export const checkReplacement: DiagnosticRule = async ({ dep }) => {
+  if (config.ignore.replacement.includes(dep.name))
+    return
+
   const replacement = await getReplacement(dep.name)
   if (!replacement)
     return
@@ -48,7 +52,7 @@ export const checkReplacement: DiagnosticRule = async ({ dep }) => {
 
   return {
     node: dep.nameNode,
-    message,
+    message: `"${dep.name}" ${message}`,
     severity: DiagnosticSeverity.Warning,
     code: link ? { value: 'replacement', target: Uri.parse(link) } : 'replacement',
   }

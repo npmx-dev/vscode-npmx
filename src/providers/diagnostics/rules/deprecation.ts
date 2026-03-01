@@ -1,10 +1,14 @@
 import type { DiagnosticRule } from '..'
+import { config } from '#state'
 import { npmxPackageUrl } from '#utils/links'
 import { formatPackageId } from '#utils/package'
 import { DiagnosticSeverity, DiagnosticTag, Uri } from 'vscode'
 
 export const checkDeprecation: DiagnosticRule = ({ dep, pkg, parsed, exactVersion }) => {
   if (!parsed || !exactVersion)
+    return
+
+  if (config.ignore.deprecation.includes(dep.name))
     return
 
   const versionInfo = pkg.versionsMeta[exactVersion]

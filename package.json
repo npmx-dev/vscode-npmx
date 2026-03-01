@@ -99,6 +99,22 @@
           "default": true,
           "description": "Show warnings when dependency engines mismatch with the current package"
         },
+        "npmx.ignore.deprecation": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "List of package names to ignore deprecation warnings for (e.g. [\"nuxt\", \"lodash\"])"
+        },
+        "npmx.ignore.replacement": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "List of package names to ignore replacement suggestions for (e.g. [\"left-pad\", \"is-odd\"])"
+        },
         "npmx.ignore.vulnerability": {
           "type": "array",
           "items": {

@@ -16,7 +16,7 @@ export function useCodeActions() {
     await config.update(scope, [...current, name], target)
   })
 
-  const hasQuickFix = computed(() => config.diagnostics.upgrade || config.diagnostics.vulnerability)
+  const hasQuickFix = computed(() => config.diagnostics.upgrade || config.diagnostics.deprecation || config.diagnostics.replacement || config.diagnostics.vulnerability)
 
   watch(hasQuickFix, (enabled, _, onCleanup) => {
     if (!enabled)

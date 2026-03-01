@@ -38,18 +38,20 @@
 
 <!-- configs -->
 
-| Key                                 | Description                                                                             | Type      | Default             |
-| ----------------------------------- | --------------------------------------------------------------------------------------- | --------- | ------------------- |
-| `npmx.hover.enabled`                | Enable hover information for packages                                                   | `boolean` | `true`              |
-| `npmx.completion.version`           | Version completion behavior                                                             | `string`  | `"provenance-only"` |
-| `npmx.completion.excludePrerelease` | Exclude prerelease versions (alpha, beta, rc, canary, etc.) from completion suggestions | `boolean` | `true`              |
-| `npmx.diagnostics.upgrade`          | Show hints when a newer version of a package is available                               | `boolean` | `true`              |
-| `npmx.diagnostics.deprecation`      | Show warnings for deprecated packages                                                   | `boolean` | `true`              |
-| `npmx.diagnostics.replacement`      | Show suggestions for package replacements                                               | `boolean` | `true`              |
-| `npmx.diagnostics.vulnerability`    | Show warnings for packages with known vulnerabilities                                   | `boolean` | `true`              |
-| `npmx.diagnostics.distTag`          | Show warnings when a dependency uses a dist tag                                         | `boolean` | `true`              |
-| `npmx.diagnostics.engineMismatch`   | Show warnings when dependency engines mismatch with the current package                 | `boolean` | `true`              |
-| `npmx.ignore.vulnerability`         | List of package names to ignore vulnerability warnings for (e.g. ["nuxt", "lodash"])    | `array`   | `[]`                |
+| Key                                 | Description                                                                               | Type      | Default             |
+| ----------------------------------- | ----------------------------------------------------------------------------------------- | --------- | ------------------- |
+| `npmx.hover.enabled`                | Enable hover information for packages                                                     | `boolean` | `true`              |
+| `npmx.completion.version`           | Version completion behavior                                                               | `string`  | `"provenance-only"` |
+| `npmx.completion.excludePrerelease` | Exclude prerelease versions (alpha, beta, rc, canary, etc.) from completion suggestions   | `boolean` | `true`              |
+| `npmx.diagnostics.upgrade`          | Show hints when a newer version of a package is available                                 | `boolean` | `true`              |
+| `npmx.diagnostics.deprecation`      | Show warnings for deprecated packages                                                     | `boolean` | `true`              |
+| `npmx.diagnostics.replacement`      | Show suggestions for package replacements                                                 | `boolean` | `true`              |
+| `npmx.diagnostics.vulnerability`    | Show warnings for packages with known vulnerabilities                                     | `boolean` | `true`              |
+| `npmx.diagnostics.distTag`          | Show warnings when a dependency uses a dist tag                                           | `boolean` | `true`              |
+| `npmx.diagnostics.engineMismatch`   | Show warnings when dependency engines mismatch with the current package                   | `boolean` | `true`              |
+| `npmx.ignore.deprecation`           | List of package names to ignore deprecation warnings for (e.g. ["nuxt", "lodash"])        | `array`   | `[]`                |
+| `npmx.ignore.replacement`           | List of package names to ignore replacement suggestions for (e.g. ["left-pad", "is-odd"]) | `array`   | `[]`                |
+| `npmx.ignore.vulnerability`         | List of package names to ignore vulnerability warnings for (e.g. ["nuxt", "lodash"])      | `array`   | `[]`                |
 
 <!-- configs -->
 

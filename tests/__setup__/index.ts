@@ -6,6 +6,8 @@ vi.mock('#state', () => ({
   logger: { info: vi.fn(), warn: vi.fn() },
   config: {
     ignore: {
+      deprecation: [],
+      replacement: [],
       vulnerability: [],
     },
   },
