@@ -42,7 +42,8 @@
   },
   "activationEvents": [
     "workspaceContains:package.json",
-    "workspaceContains:pnpm-workspace.yaml"
+    "workspaceContains:pnpm-workspace.yaml",
+    "workspaceContains:.yarnrc.yml"
   ],
   "contributes": {
     "configuration": {
