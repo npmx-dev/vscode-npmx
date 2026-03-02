@@ -5,8 +5,8 @@ function isUrlPackage(currentVersion: string) {
   return URL_PACKAGE_PATTERN.test(currentVersion)
 }
 
-const UNSUPPORTED_PROTOCOLS = new Set(['workspace', 'catalog', 'jsr'])
-const KNOWN_PROTOCOLS = new Set([...UNSUPPORTED_PROTOCOLS, 'npm'])
+const UNSUPPORTED_PROTOCOLS = new Set(['workspace', 'jsr'])
+const KNOWN_PROTOCOLS = new Set([...UNSUPPORTED_PROTOCOLS, 'catalog', 'npm'])
 
 export interface ParsedVersion {
   protocol: VersionProtocol

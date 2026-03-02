@@ -7,6 +7,7 @@ import type { Diagnostic, TextDocument } from 'vscode'
 import { useActiveExtractor } from '#composables/active-extractor'
 import { config, logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
+import { resolveCatalogVersion } from '#utils/catalog'
 import { resolveExactVersion } from '#utils/package'
 import { isSupportedProtocol, parseVersion } from '#utils/version'
 import { debounce } from 'perfect-debounce'
@@ -102,7 +103,15 @@ export function useDiagnostics() {
         if (!pkg)
           continue
 
-        const parsed = parseVersion(dep.version)
+        let parsed = parseVersion(dep.version)
+
+        if (parsed?.protocol === 'catalog') {
+          const resolved = await resolveCatalogVersion(document.uri, dep.name, parsed.version)
+          if (isDocumentChanged(document, targetUri, targetVersion))
+            return
+          parsed = resolved ? { protocol: 'catalog', version: resolved } : null
+        }
+
         const exactVersion = parsed && isSupportedProtocol(parsed.protocol)
           ? resolveExactVersion(pkg, parsed.version)
           : null

@@ -16,14 +16,17 @@ export function* walkAncestors(start: Uri, shouldStop?: (uri: Uri) => boolean): 
   }
 }
 
-export async function findNearestFile(filename: string, start: Uri, shouldStop?: (uri: Uri) => boolean): Promise<Uri | undefined> {
+export async function findNearestFile(filenames: string | string[], start: Uri, shouldStop?: (uri: Uri) => boolean): Promise<Uri | undefined> {
+  const names = Array.isArray(filenames) ? filenames : [filenames]
   for (const dir of walkAncestors(start, shouldStop)) {
-    const fileUri = Uri.joinPath(dir, filename)
-    try {
-      await workspace.fs.stat(fileUri)
-      return fileUri
-    } catch {
-      continue
+    for (const filename of names) {
+      const fileUri = Uri.joinPath(dir, filename)
+      try {
+        await workspace.fs.stat(fileUri)
+        return fileUri
+      } catch {
+        continue
+      }
     }
   }
 }

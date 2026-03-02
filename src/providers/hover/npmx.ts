@@ -2,6 +2,7 @@ import type { Extractor } from '#types/extractor'
 import type { HoverProvider, Position, TextDocument } from 'vscode'
 import { SPACER } from '#constants'
 import { getPackageInfo } from '#utils/api/package'
+import { resolveCatalogVersion } from '#utils/catalog'
 import { jsrPackageUrl, npmxDocsUrl, npmxPackageUrl } from '#utils/links'
 import { resolveExactVersion } from '#utils/package'
 import { isSupportedProtocol, parseVersion } from '#utils/version'
@@ -29,7 +30,14 @@ export class NpmxHoverProvider<T extends Extractor> implements HoverProvider {
       return
 
     const { name } = dep
-    const { protocol, version } = parsed
+    let { protocol, version } = parsed
+
+    if (protocol === 'catalog') {
+      const resolved = await resolveCatalogVersion(document.uri, name, version)
+      if (!resolved)
+        return
+      version = resolved
+    }
 
     if (protocol === 'jsr') {
       const jsrMd = new MarkdownString('', true)

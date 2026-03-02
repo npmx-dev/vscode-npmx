@@ -30,7 +30,7 @@ export class VersionCompletionItemProvider<T extends Extractor> implements Compl
     } = info
 
     const parsed = parseVersion(version)
-    if (!parsed || !isSupportedProtocol(parsed.protocol))
+    if (!parsed || !isSupportedProtocol(parsed.protocol) || parsed.protocol === 'catalog')
       return
 
     const pkg = await getPackageInfo(name)
