@@ -100,6 +100,7 @@
           "description": "Show warnings when dependency engines mismatch with the current package"
         },
         "npmx.ignore.upgrade": {
+          "scope": "resource",
           "type": "array",
           "items": {
             "type": "string"
@@ -108,6 +109,7 @@
           "description": "List of packages to ignore upgrade hints. Supports both \"name\" and \"name@version\" (e.g. [\"request\", \"uuid@3.4.0\"])"
         },
         "npmx.ignore.deprecation": {
+          "scope": "resource",
           "type": "array",
           "items": {
             "type": "string"
@@ -116,6 +118,7 @@
           "description": "List of packages to ignore deprecation warnings. Supports both \"name\" and \"name@version\" (e.g. [\"request\", \"uuid@3.4.0\"])"
         },
         "npmx.ignore.replacement": {
+          "scope": "resource",
           "type": "array",
           "items": {
             "type": "string"
@@ -124,6 +127,7 @@
           "description": "List of package names to ignore replacement suggestions. (e.g. [\"find-up\", \"axios\"])"
         },
         "npmx.ignore.vulnerability": {
+          "scope": "resource",
           "type": "array",
           "items": {
             "type": "string"
