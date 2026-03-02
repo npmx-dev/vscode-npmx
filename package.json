@@ -99,13 +99,21 @@
           "default": true,
           "description": "Show warnings when dependency engines mismatch with the current package"
         },
+        "npmx.ignore.upgrade": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "List of packages to ignore upgrade hints. Supports both \"name\" and \"name@version\" (e.g. [\"request\", \"uuid@3.4.0\"])"
+        },
         "npmx.ignore.deprecation": {
           "type": "array",
           "items": {
             "type": "string"
           },
           "default": [],
-          "description": "List of packages to ignore deprecation warnings for. Supports both \"name\" and \"name@version\" (e.g. [\"request\", \"uuid@3.4.0\"])"
+          "description": "List of packages to ignore deprecation warnings. Supports both \"name\" and \"name@version\" (e.g. [\"request\", \"uuid@3.4.0\"])"
         },
         "npmx.ignore.replacement": {
           "type": "array",
@@ -113,7 +121,7 @@
             "type": "string"
           },
           "default": [],
-          "description": "List of package names to ignore replacement suggestions for (e.g. [\"find-up\", \"axios\"])"
+          "description": "List of package names to ignore replacement suggestions. (e.g. [\"find-up\", \"axios\"])"
         },
         "npmx.ignore.vulnerability": {
           "type": "array",
@@ -121,7 +129,7 @@
             "type": "string"
           },
           "default": [],
-          "description": "List of packages to ignore vulnerability warnings for. Supports both \"name\" and \"name@version\" (e.g. [\"lodash\", \"express@4.18.0\"])"
+          "description": "List of packages to ignore vulnerability warnings. Supports both \"name\" and \"name@version\" (e.g. [\"lodash\", \"express@4.18.0\"])"
         }
       }
     },
