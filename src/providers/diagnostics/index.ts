@@ -1,10 +1,10 @@
-import type { DependencyInfo, ValidNode } from '#types/extractor'
+import type { DependencyInfo, Extractor, ValidNode } from '#types/extractor'
 import type { PackageInfo } from '#utils/api/package'
 import type { ParsedVersion } from '#utils/version'
 import type { Engines } from 'fast-npm-meta'
 import type { Awaitable } from 'reactive-vscode'
 import type { Diagnostic, TextDocument } from 'vscode'
-import { useActiveExtractor } from '#composables/active-extractor'
+import { extractorEntries } from '#extractors'
 import { config, logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
 import { resolveExactVersion } from '#utils/package'
@@ -38,7 +38,6 @@ export function useDiagnostics() {
 
   const activeEditor = useActiveTextEditor()
   const activeDocumentText = useDocumentText(() => activeEditor.value?.document)
-  const activeExtractor = useActiveExtractor()
 
   const enabledRules = computed<DiagnosticRule[]>(() => {
     const rules: DiagnosticRule[] = []
@@ -57,79 +56,90 @@ export function useDiagnostics() {
     return rules
   })
 
-  function isDocumentChanged(document: TextDocument, targetUri: string, targetVersion: number) {
-    return document.uri.toString() !== targetUri || document.version !== targetVersion
+  const hasEnabledRules = computed(() => enabledRules.value.length > 0)
+
+  function isDocumentChanged(document: TextDocument, targetVersion: number) {
+    return document.version !== targetVersion
   }
 
-  const flush = debounce((doc: TextDocument, targetUri: string, targetVersion: number, diagnostics: Diagnostic[]) => {
-    if (isDocumentChanged(doc, targetUri, targetVersion))
-      return
-
-    diagnosticCollection.set(doc.uri, [...diagnostics])
-  }, 100)
-
-  async function collectDiagnostics() {
-    const extractor = activeExtractor.value
-    const document = activeEditor.value?.document
-    if (!extractor || !document)
-      return
-
+  async function collectDiagnostics(document: TextDocument, extractor: Extractor) {
+    logger.info(`[diagnostics] collect: ${document.uri.path}`)
     diagnosticCollection.delete(document.uri)
 
-    const rules = enabledRules.value
-    if (rules.length === 0)
+    if (!hasEnabledRules.value)
       return
 
     const root = extractor.parse(document)
     if (!root)
       return
 
-    const targetUri = document.uri.toString()
     const targetVersion = document.version
 
     const dependencies = extractor.getDependenciesInfo(root)
     const engines = extractor.getEngines?.(root)
     const diagnostics: Diagnostic[] = []
 
-    for (const dep of dependencies) {
-      if (isDocumentChanged(document, targetUri, targetVersion))
+    const flush = debounce((document: TextDocument, targetVersion: number, diagnostics: Diagnostic[]) => {
+      if (isDocumentChanged(document, targetVersion))
         return
 
+      diagnosticCollection.set(document.uri, [...diagnostics])
+      logger.info(`[diagnostics] flush: ${document.uri.path}`)
+    }, 50)
+
+    const runRule = async (rule: DiagnosticRule, ctx: DiagnosticContext) => {
+      try {
+        const diagnostic = await rule(ctx)
+        if (isDocumentChanged(document, targetVersion))
+          return
+        if (!diagnostic)
+          return
+
+        diagnostics.push({
+          source: displayName,
+          range: extractor.getNodeRange(document, diagnostic.node),
+          ...diagnostic,
+        })
+        flush(document, targetVersion, diagnostics)
+        logger.info(`[diagnostics] set flush: ${document.uri.path}`)
+      } catch (err) {
+        logger.warn(`[diagnostics] fail to check ${ctx.dep.name} (${rule.name}): ${err}`)
+      }
+    }
+
+    const collect = async (dep: DependencyInfo) => {
       try {
         const pkg = await getPackageInfo(dep.name)
-        if (isDocumentChanged(document, targetUri, targetVersion))
+        if (!pkg || isDocumentChanged(document, targetVersion))
           return
-        if (!pkg)
-          continue
 
         const parsed = parseVersion(dep.version)
         const exactVersion = parsed && isSupportedProtocol(parsed.protocol)
           ? resolveExactVersion(pkg, parsed.version)
           : null
 
-        for (const rule of rules) {
-          try {
-            const diagnostic = await rule({ dep, pkg, parsed, exactVersion, engines })
-            if (isDocumentChanged(document, targetUri, targetVersion))
-              return
-            if (!diagnostic)
-              continue
-
-            diagnostics.push({
-              source: displayName,
-              range: extractor.getNodeRange(document, diagnostic.node),
-              ...diagnostic,
-            })
-            flush(document, targetUri, targetVersion, diagnostics)
-          } catch (err) {
-            logger.warn(`Fail to check ${dep.name} (${rule.name}): ${err}`)
-          }
+        for (const rule of enabledRules.value) {
+          runRule(rule, { dep, pkg, parsed, exactVersion, engines })
         }
       } catch (err) {
-        logger.warn(`Failed to check ${dep.name}: ${err}`)
+        logger.warn(`[diagnostics] fail to check ${dep.name}: ${err}`)
       }
+    }
+
+    for (const dep of dependencies) {
+      collect(dep)
     }
   }
 
-  watch([activeDocumentText, enabledRules], collectDiagnostics, { immediate: true })
+  watch([activeDocumentText, enabledRules], () => {
+    if (!activeEditor.value)
+      return
+
+    const document = activeEditor.value.document
+    const extractor = extractorEntries.find(({ pattern }) => languages.match({ pattern }, document))?.extractor
+    if (!extractor)
+      return
+
+    collectDiagnostics(document, extractor)
+  }, { immediate: true })
 }
