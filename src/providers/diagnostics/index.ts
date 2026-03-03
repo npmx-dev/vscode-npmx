@@ -56,8 +56,10 @@ export function useDiagnostics() {
     return rules
   })
 
-  function isDocumentChanged(document: TextDocument, targetVersion: number) {
-    return document.version !== targetVersion
+  const revisions = new Map<string, number>()
+
+  function isStale(uri: string, targetRevision: number) {
+    return revisions.get(uri) !== targetRevision
   }
 
   async function collectDiagnostics(document: TextDocument, extractor: Extractor) {
@@ -72,14 +74,16 @@ export function useDiagnostics() {
     if (!root)
       return
 
-    const targetVersion = document.version
+    const uri = document.uri.toString()
+    const targetRevision = (revisions.get(uri) ?? 0) + 1
+    revisions.set(uri, targetRevision)
 
     const dependencies = extractor.getDependenciesInfo(root)
     const engines = extractor.getEngines?.(root)
     const diagnostics: Diagnostic[] = []
 
-    const flush = debounce((document: TextDocument, targetVersion: number, diagnostics: Diagnostic[]) => {
-      if (isDocumentChanged(document, targetVersion))
+    const flush = debounce(() => {
+      if (isStale(uri, targetRevision))
         return
 
       diagnosticCollection.set(document.uri, [...diagnostics])
@@ -89,7 +93,7 @@ export function useDiagnostics() {
     const runRule = async (rule: DiagnosticRule, ctx: DiagnosticContext) => {
       try {
         const diagnostic = await rule(ctx)
-        if (isDocumentChanged(document, targetVersion))
+        if (isStale(uri, targetRevision))
           return
         if (!diagnostic)
           return
@@ -99,7 +103,7 @@ export function useDiagnostics() {
           range: extractor.getNodeRange(document, diagnostic.node),
           ...diagnostic,
         })
-        flush(document, targetVersion, diagnostics)
+        flush()
         logger.debug(`[diagnostics] set flush: ${document.uri.path}`)
       } catch (err) {
         logger.warn(`[diagnostics] fail to check ${ctx.dep.name} (${rule.name}): ${err}`)
@@ -109,7 +113,7 @@ export function useDiagnostics() {
     const collect = async (dep: DependencyInfo) => {
       try {
         const pkg = await getPackageInfo(dep.name)
-        if (!pkg || isDocumentChanged(document, targetVersion))
+        if (!pkg || isStale(uri, targetRevision))
           return
 
         const parsed = parseVersion(dep.version)
@@ -125,6 +129,7 @@ export function useDiagnostics() {
       }
     }
 
+    // fire-and-forget to progressively display diagnostics as each dep resolves, rather than awaiting all
     for (const dep of dependencies) {
       collect(dep)
     }
