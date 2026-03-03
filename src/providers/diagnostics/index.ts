@@ -56,8 +56,6 @@ export function useDiagnostics() {
     return rules
   })
 
-  const hasEnabledRules = computed(() => enabledRules.value.length > 0)
-
   function isDocumentChanged(document: TextDocument, targetVersion: number) {
     return document.version !== targetVersion
   }
@@ -66,7 +64,8 @@ export function useDiagnostics() {
     logger.info(`[diagnostics] collect: ${document.uri.path}`)
     diagnosticCollection.delete(document.uri)
 
-    if (!hasEnabledRules.value)
+    const rules = enabledRules.value
+    if (rules.length === 0)
       return
 
     const root = extractor.parse(document)
@@ -101,7 +100,7 @@ export function useDiagnostics() {
           ...diagnostic,
         })
         flush(document, targetVersion, diagnostics)
-        logger.info(`[diagnostics] set flush: ${document.uri.path}`)
+        logger.debug(`[diagnostics] set flush: ${document.uri.path}`)
       } catch (err) {
         logger.warn(`[diagnostics] fail to check ${ctx.dep.name} (${rule.name}): ${err}`)
       }
