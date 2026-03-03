@@ -66,6 +66,10 @@ export function useDiagnostics() {
     logger.info(`[diagnostics] collect: ${document.uri.path}`)
     diagnosticCollection.delete(document.uri)
 
+    const uri = document.uri.toString()
+    const targetRevision = (revisions.get(uri) ?? 0) + 1
+    revisions.set(uri, targetRevision)
+
     const rules = enabledRules.value
     if (rules.length === 0)
       return
@@ -73,10 +77,6 @@ export function useDiagnostics() {
     const root = extractor.parse(document)
     if (!root)
       return
-
-    const uri = document.uri.toString()
-    const targetRevision = (revisions.get(uri) ?? 0) + 1
-    revisions.set(uri, targetRevision)
 
     const dependencies = extractor.getDependenciesInfo(root)
     const engines = extractor.getEngines?.(root)
@@ -121,7 +121,7 @@ export function useDiagnostics() {
           ? resolveExactVersion(pkg, parsed.version)
           : null
 
-        for (const rule of enabledRules.value) {
+        for (const rule of rules) {
           runRule(rule, { dep, pkg, parsed, exactVersion, engines })
         }
       } catch (err) {
