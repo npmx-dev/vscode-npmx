@@ -50,6 +50,7 @@
 | `npmx.diagnostics.vulnerability`    | Show warnings for packages with known vulnerabilities                                   | `boolean` | `true`              |
 | `npmx.diagnostics.distTag`          | Show warnings when a dependency uses a dist tag                                         | `boolean` | `true`              |
 | `npmx.diagnostics.engineMismatch`   | Show warnings when dependency engines mismatch with the current package                 | `boolean` | `true`              |
+| `npmx.documentLinks`                | Enable clickable links for package names                                                | `string`  | `"version"`         |
 
 <!-- configs -->
 

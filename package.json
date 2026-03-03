@@ -103,6 +103,21 @@
           "type": "boolean",
           "default": true,
           "description": "Show warnings when dependency engines mismatch with the current package"
+        },
+        "npmx.documentLinks": {
+          "type": "string",
+          "enum": [
+            "off",
+            "latest",
+            "version"
+          ],
+          "enumDescriptions": [
+            "Disable clickable links",
+            "Link to package page (latest version)",
+            "Link to specific version page"
+          ],
+          "default": "version",
+          "description": "Enable clickable links for package names"
         }
       }
     },
