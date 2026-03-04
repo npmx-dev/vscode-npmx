@@ -90,7 +90,9 @@ export class NpmxDocumentLinkProvider<T extends Extractor> implements DocumentLi
         : npmxPackageUrl(name)
       // Create link for package name
       const nameRange = this.extractor.getNodeRange(document, nameNode)
-      links.push(new VscodeDocumentLink(nameRange, Uri.parse(url)))
+      const link = new VscodeDocumentLink(nameRange, Uri.parse(url))
+      link.tooltip = `Open ${name}@${targetVersion ?? parsed.version} on npmx`
+      links.push(link)
     }
 
     return links
