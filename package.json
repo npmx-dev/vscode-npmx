@@ -181,7 +181,7 @@
   "devDependencies": {
     "@types/node": "catalog:dev",
     "@types/semver": "catalog:dev",
-    "@types/vscode": "catalog:dev",
+    "@types/vscode": "1.101.0",
     "@vida0905/eslint-config": "catalog:dev",
     "eslint": "catalog:dev",
     "fast-npm-meta": "catalog:inline",

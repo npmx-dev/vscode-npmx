@@ -12,9 +12,6 @@ catalogs:
     '@types/semver':
       specifier: ^7.7.1
       version: 7.7.1
-    '@types/vscode':
-      specifier: 1.101.0
-      version: 1.101.0
     '@vida0905/eslint-config':
       specifier: ^2.10.1
       version: 2.10.1
@@ -86,7 +83,7 @@ importers:
         specifier: catalog:dev
         version: 7.7.1
       '@types/vscode':
-        specifier: catalog:dev
+        specifier: 1.101.0
         version: 1.101.0
       '@vida0905/eslint-config':
         specifier: catalog:dev
