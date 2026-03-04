@@ -56,19 +56,13 @@ export function useDiagnostics() {
     return rules
   })
 
-  const revisions = new Map<string, number>()
-
-  function isStale(uri: string, targetRevision: number) {
-    return revisions.get(uri) !== targetRevision
+  function isStale(document: TextDocument, targetVersion: number) {
+    return document.isClosed || document.version !== targetVersion
   }
 
   async function collectDiagnostics(document: TextDocument, extractor: Extractor) {
     logger.info(`[diagnostics] collect: ${document.uri.path}`)
     diagnosticCollection.delete(document.uri)
-
-    const uri = document.uri.toString()
-    const targetRevision = (revisions.get(uri) ?? 0) + 1
-    revisions.set(uri, targetRevision)
 
     const rules = enabledRules.value
     if (rules.length === 0)
@@ -78,12 +72,14 @@ export function useDiagnostics() {
     if (!root)
       return
 
+    const targetVersion = document.version
+
     const dependencies = extractor.getDependenciesInfo(root)
     const engines = extractor.getEngines?.(root)
     const diagnostics: Diagnostic[] = []
 
     const flush = debounce(() => {
-      if (isStale(uri, targetRevision))
+      if (isStale(document, targetVersion))
         return
 
       diagnosticCollection.set(document.uri, [...diagnostics])
@@ -93,7 +89,7 @@ export function useDiagnostics() {
     const runRule = async (rule: DiagnosticRule, ctx: DiagnosticContext) => {
       try {
         const diagnostic = await rule(ctx)
-        if (isStale(uri, targetRevision))
+        if (isStale(document, targetVersion))
           return
         if (!diagnostic)
           return
@@ -113,7 +109,7 @@ export function useDiagnostics() {
     const collect = async (dep: DependencyInfo) => {
       try {
         const pkg = await getPackageInfo(dep.name)
-        if (!pkg || isStale(uri, targetRevision))
+        if (!pkg || isStale(document, targetVersion))
           return
 
         const parsed = parseVersion(dep.version)
