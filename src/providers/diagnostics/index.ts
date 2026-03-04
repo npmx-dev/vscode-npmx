@@ -1,17 +1,17 @@
-import type { DependencyInfo, ValidNode } from '#types/extractor'
+import type { DependencyInfo, Extractor, ValidNode } from '#types/extractor'
 import type { PackageInfo } from '#utils/api/package'
 import type { ParsedVersion } from '#utils/version'
 import type { Engines } from 'fast-npm-meta'
 import type { Awaitable } from 'reactive-vscode'
-import type { Diagnostic, TextDocument } from 'vscode'
-import { useActiveExtractor } from '#composables/active-extractor'
+import type { Diagnostic, TextDocument, Uri } from 'vscode'
+import { extractorEntries } from '#extractors'
 import { config, logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
 import { resolveExactVersion } from '#utils/package'
 import { isSupportedProtocol, parseVersion } from '#utils/version'
 import { debounce } from 'perfect-debounce'
-import { computed, useActiveTextEditor, useDisposable, useDocumentText, watch } from 'reactive-vscode'
-import { languages } from 'vscode'
+import { computed, useActiveTextEditor, useDisposable, useDocumentText, useFileSystemWatcher, watch } from 'reactive-vscode'
+import { languages, TabInputText, window, workspace } from 'vscode'
 import { displayName } from '../../generated-meta'
 import { checkDeprecation } from './rules/deprecation'
 import { checkDistTag } from './rules/dist-tag'
@@ -38,7 +38,6 @@ export function useDiagnostics() {
 
   const activeEditor = useActiveTextEditor()
   const activeDocumentText = useDocumentText(() => activeEditor.value?.document)
-  const activeExtractor = useActiveExtractor()
 
   const enabledRules = computed<DiagnosticRule[]>(() => {
     const rules: DiagnosticRule[] = []
@@ -57,24 +56,13 @@ export function useDiagnostics() {
     return rules
   })
 
-  function isDocumentChanged(document: TextDocument, targetUri: string, targetVersion: number) {
-    return document.uri.toString() !== targetUri || document.version !== targetVersion
+  function isStale(document: TextDocument, targetVersion: number) {
+    return document.isClosed || document.version !== targetVersion
   }
 
-  const flush = debounce((doc: TextDocument, targetUri: string, targetVersion: number, diagnostics: Diagnostic[]) => {
-    if (isDocumentChanged(doc, targetUri, targetVersion))
-      return
-
-    diagnosticCollection.set(doc.uri, [...diagnostics])
-  }, 100)
-
-  async function collectDiagnostics() {
-    const extractor = activeExtractor.value
-    const document = activeEditor.value?.document
-    if (!extractor || !document)
-      return
-
-    diagnosticCollection.delete(document.uri)
+  async function collectDiagnostics(document: TextDocument, extractor: Extractor) {
+    logger.info(`[diagnostics] collect: ${document.uri.path}`)
+    diagnosticCollection.set(document.uri, [])
 
     const rules = enabledRules.value
     if (rules.length === 0)
@@ -84,23 +72,45 @@ export function useDiagnostics() {
     if (!root)
       return
 
-    const targetUri = document.uri.toString()
     const targetVersion = document.version
 
     const dependencies = extractor.getDependenciesInfo(root)
     const engines = extractor.getEngines?.(root)
     const diagnostics: Diagnostic[] = []
 
-    for (const dep of dependencies) {
-      if (isDocumentChanged(document, targetUri, targetVersion))
+    const flush = debounce(() => {
+      if (isStale(document, targetVersion))
         return
 
+      diagnosticCollection.set(document.uri, [...diagnostics])
+      logger.info(`[diagnostics] flush: ${document.uri.path}`)
+    }, 50)
+
+    const runRule = async (rule: DiagnosticRule, ctx: DiagnosticContext) => {
+      try {
+        const diagnostic = await rule(ctx)
+        if (isStale(document, targetVersion))
+          return
+        if (!diagnostic)
+          return
+
+        diagnostics.push({
+          source: displayName,
+          range: extractor.getNodeRange(document, diagnostic.node),
+          ...diagnostic,
+        })
+        flush()
+        logger.debug(`[diagnostics] set flush: ${document.uri.path}`)
+      } catch (err) {
+        logger.warn(`[diagnostics] fail to check ${ctx.dep.name} (${rule.name}): ${err}`)
+      }
+    }
+
+    const collect = async (dep: DependencyInfo) => {
       try {
         const pkg = await getPackageInfo(dep.name)
-        if (isDocumentChanged(document, targetUri, targetVersion))
+        if (!pkg || isStale(document, targetVersion))
           return
-        if (!pkg)
-          continue
 
         const parsed = parseVersion(dep.version)
         const exactVersion = parsed && isSupportedProtocol(parsed.protocol)
@@ -108,28 +118,56 @@ export function useDiagnostics() {
           : null
 
         for (const rule of rules) {
-          try {
-            const diagnostic = await rule({ dep, pkg, parsed, exactVersion, engines })
-            if (isDocumentChanged(document, targetUri, targetVersion))
-              return
-            if (!diagnostic)
-              continue
-
-            diagnostics.push({
-              source: displayName,
-              range: extractor.getNodeRange(document, diagnostic.node),
-              ...diagnostic,
-            })
-            flush(document, targetUri, targetVersion, diagnostics)
-          } catch (err) {
-            logger.warn(`Fail to check ${dep.name} (${rule.name}): ${err}`)
-          }
+          runRule(rule, { dep, pkg, parsed, exactVersion, engines })
         }
       } catch (err) {
-        logger.warn(`Failed to check ${dep.name}: ${err}`)
+        logger.warn(`[diagnostics] fail to check ${dep.name}: ${err}`)
       }
+    }
+
+    // fire-and-forget to progressively display diagnostics as each dep resolves, rather than awaiting all
+    for (const dep of dependencies) {
+      collect(dep)
     }
   }
 
-  watch([activeDocumentText, enabledRules], collectDiagnostics, { immediate: true })
+  watch([activeDocumentText, enabledRules], () => {
+    if (!activeEditor.value)
+      return
+
+    const document = activeEditor.value.document
+    const extractor = extractorEntries.find(({ pattern }) => languages.match({ pattern }, document))?.extractor
+    if (!extractor)
+      return
+
+    collectDiagnostics(document, extractor)
+  }, { immediate: true })
+
+  async function recollectByUri(uri: Uri, extractor: Extractor) {
+    if (!diagnosticCollection.has(uri))
+      return
+
+    const doc = await workspace.openTextDocument(uri)
+
+    collectDiagnostics(doc, extractor)
+  }
+
+  extractorEntries.forEach(({ pattern, extractor }) => {
+    const { onDidCreate, onDidChange, onDidDelete } = useFileSystemWatcher(pattern)
+
+    onDidCreate((uri) => recollectByUri(uri, extractor))
+    onDidChange((uri) => recollectByUri(uri, extractor))
+    onDidDelete((uri) => diagnosticCollection.delete(uri))
+  })
+
+  useDisposable(window.tabGroups.onDidChangeTabs(({ closed }) => {
+    closed.forEach((tab) => {
+      if (!(tab.input instanceof TabInputText))
+        return
+
+      const uri = tab.input.uri
+      diagnosticCollection.delete(uri)
+      logger.debug(`[diagnostics] close and clear ${uri.path}`)
+    })
+  }))
 }
