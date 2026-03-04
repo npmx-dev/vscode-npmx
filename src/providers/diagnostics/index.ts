@@ -62,7 +62,7 @@ export function useDiagnostics() {
 
   async function collectDiagnostics(document: TextDocument, extractor: Extractor) {
     logger.info(`[diagnostics] collect: ${document.uri.path}`)
-    diagnosticCollection.delete(document.uri)
+    diagnosticCollection.set(document.uri, [])
 
     const rules = enabledRules.value
     if (rules.length === 0)
@@ -143,7 +143,10 @@ export function useDiagnostics() {
     collectDiagnostics(document, extractor)
   }, { immediate: true })
 
-  async function collectDiagnosticsByUri(uri: Uri, extractor: Extractor) {
+  async function recollectByUri(uri: Uri, extractor: Extractor) {
+    if (!diagnosticCollection.has(uri))
+      return
+
     const doc = await workspace.openTextDocument(uri)
 
     collectDiagnostics(doc, extractor)
@@ -152,8 +155,8 @@ export function useDiagnostics() {
   extractorEntries.forEach(({ pattern, extractor }) => {
     const { onDidCreate, onDidChange, onDidDelete } = useFileSystemWatcher(pattern)
 
-    onDidCreate((uri) => collectDiagnosticsByUri(uri, extractor))
-    onDidChange((uri) => collectDiagnosticsByUri(uri, extractor))
+    onDidCreate((uri) => recollectByUri(uri, extractor))
+    onDidChange((uri) => recollectByUri(uri, extractor))
     onDidDelete((uri) => diagnosticCollection.delete(uri))
   })
 
