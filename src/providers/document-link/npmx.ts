@@ -27,12 +27,8 @@ export class NpmxDocumentLinkProvider<T extends Extractor> implements DocumentLi
       if (!parsed)
         continue
 
-      // Skip unsupported protocols (workspace:, file:, git:, link:, etc.)
+      // Skip unsupported protocols (workspace:, file:, git:, link:, jsr:, etc.)
       if (!isSupportedProtocol(parsed.protocol))
-        continue
-
-      // Skip JSR packages (consistent with hover provider)
-      if (parsed.protocol === 'jsr')
         continue
 
       // Generate link URL
