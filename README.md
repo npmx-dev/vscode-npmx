@@ -50,12 +50,37 @@
 | `npmx.diagnostics.vulnerability`    | Show warnings for packages with known vulnerabilities                                                                          | `boolean` | `true`              |
 | `npmx.diagnostics.distTag`          | Show warnings when a dependency uses a dist tag                                                                                | `boolean` | `true`              |
 | `npmx.diagnostics.engineMismatch`   | Show warnings when dependency engines mismatch with the current package                                                        | `boolean` | `true`              |
-| `npmx.ignore.upgrade`               | List of packages to ignore upgrade hints. Supports both "name" and "name@version" (e.g. ["request", "uuid@3.4.0"])             | `array`   | `[]`                |
-| `npmx.ignore.deprecation`           | List of packages to ignore deprecation warnings. Supports both "name" and "name@version" (e.g. ["request", "uuid@3.4.0"])      | `array`   | `[]`                |
-| `npmx.ignore.replacement`           | List of package names to ignore replacement suggestions. (e.g. ["find-up", "axios"])                                           | `array`   | `[]`                |
-| `npmx.ignore.vulnerability`         | List of packages to ignore vulnerability warnings. Supports both "name" and "name@version" (e.g. ["lodash", "express@4.18.0"]) | `array`   | `[]`                |
+| `npmx.ignore.upgrade`               | Ignore upgrade diagnostics. See [Ignore Diagnostics](#ignore-diagnostics)                                                      | `array`   | `[]`                |
+| `npmx.ignore.deprecation`           | Ignore deprecation diagnostics. See [Ignore Diagnostics](#ignore-diagnostics)                                                  | `array`   | `[]`                |
+| `npmx.ignore.replacement`           | Ignore replacement diagnostics. See [Ignore Diagnostics](#ignore-diagnostics)                                                  | `array`   | `[]`                |
+| `npmx.ignore.vulnerability`         | Ignore vulnerability diagnostics. See [Ignore Diagnostics](#ignore-diagnostics)                                                | `array`   | `[]`                |
 
 <!-- configs -->
+
+## Ignore Diagnostics
+
+`npmx` supports ignore lists for selected diagnostics.
+
+Matching rules:
+
+- `npmx.ignore.upgrade`, `npmx.ignore.deprecation`, and `npmx.ignore.vulnerability` support `name` and `name@version`.
+- `npmx.ignore.replacement` supports `name` only.
+
+When a diagnostic supports ignore actions, quick fixes can add entries directly:
+
+- `Ignore ... (Workspace)` updates workspace settings.
+- `Ignore ... (User)` updates user settings.
+
+### Example
+
+```json
+{
+  "npmx.ignore.upgrade": ["lodash", "@babel/core@7.0.0"],
+  "npmx.ignore.deprecation": ["request"],
+  "npmx.ignore.replacement": ["find-up"],
+  "npmx.ignore.vulnerability": ["express@4.18.0"]
+}
+```
 
 ## Related
 

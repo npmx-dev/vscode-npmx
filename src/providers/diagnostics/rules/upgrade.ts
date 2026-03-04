@@ -2,8 +2,8 @@ import type { DependencyInfo } from '#types/extractor'
 import type { ParsedVersion } from '#utils/version'
 import type { DiagnosticRule, NodeDiagnosticInfo } from '..'
 import { config } from '#state'
+import { checkIgnored } from '#utils/ignore'
 import { npmxPackageUrl } from '#utils/links'
-import { formatPackageId } from '#utils/package'
 import { formatUpgradeVersion } from '#utils/version'
 import gt from 'semver/functions/gt'
 import lte from 'semver/functions/lte'
@@ -26,8 +26,7 @@ export const checkUpgrade: DiagnosticRule = ({ dep, pkg, parsed, exactVersion })
   if (!parsed || !exactVersion)
     return
 
-  const ignoreList = config.ignore.upgrade
-  if (ignoreList.includes(dep.name) || ignoreList.includes(formatPackageId(dep.name, exactVersion)))
+  if (checkIgnored({ ignoreList: config.ignore.upgrade, name: dep.name, version: exactVersion }))
     return
 
   if (Object.hasOwn(pkg.distTags, exactVersion))

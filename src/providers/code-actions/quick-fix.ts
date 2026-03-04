@@ -1,4 +1,5 @@
 import type { CodeActionContext, CodeActionProvider, Diagnostic, Range, TextDocument } from 'vscode'
+import { internalCommands } from '#state'
 import { CodeAction, CodeActionKind, ConfigurationTarget, WorkspaceEdit } from 'vscode'
 
 interface QuickFixRule {
@@ -74,7 +75,7 @@ export class QuickFixProvider implements CodeActionProvider {
           action.diagnostics = [diagnostic]
           action.command = {
             title,
-            command: 'npmx.addToIgnore',
+            command: internalCommands.addToIgnore,
             arguments: [code, ignoreTarget, configTarget],
           }
           actions.push(action)

@@ -2,6 +2,7 @@ import type { ModuleReplacement } from 'module-replacements'
 import type { DiagnosticRule } from '..'
 import { config } from '#state'
 import { getReplacement } from '#utils/api/replacement'
+import { checkIgnored } from '#utils/ignore'
 import { DiagnosticSeverity, Uri } from 'vscode'
 
 function getMdnUrl(path: string): string {
@@ -41,7 +42,7 @@ function getReplacementInfo(replacement: ModuleReplacement) {
 }
 
 export const checkReplacement: DiagnosticRule = async ({ dep }) => {
-  if (config.ignore.replacement.includes(dep.name))
+  if (checkIgnored({ ignoreList: config.ignore.replacement, name: dep.name }))
     return
 
   const replacement = await getReplacement(dep.name)

@@ -1,20 +1,12 @@
-import type { ConfigurationTarget } from 'vscode'
 import { extractorEntries } from '#extractors'
-import { config } from '#state'
+import { config, internalCommands } from '#state'
 import { computed, useCommand, watch } from 'reactive-vscode'
-import { CodeActionKind, Disposable, languages, workspace } from 'vscode'
-import { scopedConfigs } from '../../generated-meta'
+import { CodeActionKind, Disposable, languages } from 'vscode'
+import { addToIgnore } from '../../commands/add-to-ignore'
 import { QuickFixProvider } from './quick-fix'
 
 export function useCodeActions() {
-  useCommand('npmx.addToIgnore', async (scope: string, name: string, target: ConfigurationTarget) => {
-    scope = `ignore.${scope}`
-    const config = workspace.getConfiguration(scopedConfigs.scope)
-    const current = config.get<string[]>(scope, [])
-    if (current.includes(name))
-      return
-    await config.update(scope, [...current, name], target)
-  })
+  useCommand(internalCommands.addToIgnore, addToIgnore)
 
   const hasQuickFix = computed(() => config.diagnostics.upgrade || config.diagnostics.deprecation || config.diagnostics.replacement || config.diagnostics.vulnerability)
 

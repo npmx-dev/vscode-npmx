@@ -5,3 +5,7 @@ import { displayName, scopedConfigs } from './generated-meta'
 export const config = defineConfig<NestedScopedConfigs>(scopedConfigs.scope)
 
 export const logger = defineLogger(displayName)
+
+export const internalCommands = {
+  addToIgnore: `${displayName}.addToIgnore`,
+}

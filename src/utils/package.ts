@@ -16,6 +16,26 @@ export function formatPackageId(name: string, version: string): string {
   return `${name}@${version}`
 }
 
+interface ParsedPackageId {
+  name: string
+  version: string | null
+}
+
+export function parsePackageId(id: string): ParsedPackageId {
+  const separatorIndex = id.lastIndexOf('@')
+  if (separatorIndex <= 0) {
+    return {
+      name: id,
+      version: null,
+    }
+  }
+
+  return {
+    name: id.slice(0, separatorIndex),
+    version: id.slice(separatorIndex + 1),
+  }
+}
+
 export function resolveExactVersion(pkg: PackageInfo, version: string) {
   if (Object.hasOwn(pkg.distTags, version))
     return pkg.distTags[version]
