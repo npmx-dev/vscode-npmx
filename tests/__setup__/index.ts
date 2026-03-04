@@ -12,4 +12,5 @@ vi.mock('#state', () => ({
       vulnerability: [],
     },
   },
+  internalCommands: {},
 }))
