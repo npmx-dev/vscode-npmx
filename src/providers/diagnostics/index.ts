@@ -11,7 +11,7 @@ import { resolveExactVersion } from '#utils/package'
 import { isSupportedProtocol, parseVersion } from '#utils/version'
 import { debounce } from 'perfect-debounce'
 import { computed, useActiveTextEditor, useDisposable, useDocumentText, watch } from 'reactive-vscode'
-import { languages } from 'vscode'
+import { languages, TabInputText, window } from 'vscode'
 import { displayName } from '../../generated-meta'
 import { checkDeprecation } from './rules/deprecation'
 import { checkDistTag } from './rules/dist-tag'
@@ -132,4 +132,15 @@ export function useDiagnostics() {
   }
 
   watch([activeDocumentText, enabledRules], collectDiagnostics, { immediate: true })
+
+  useDisposable(window.tabGroups.onDidChangeTabs(({ closed }) => {
+    closed.forEach((tab) => {
+      if (!(tab.input instanceof TabInputText))
+        return
+
+      const uri = tab.input.uri
+      diagnosticCollection.delete(uri)
+      logger.debug(`[diagnostics] close and clear ${uri.path}`)
+    })
+  }))
 }
