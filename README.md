@@ -39,21 +39,21 @@
 
 <!-- configs -->
 
-| Key                                 | Description                                                                                                                    | Type      | Default             |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------- | ------------------- |
-| `npmx.hover.enabled`                | Enable hover information for packages                                                                                          | `boolean` | `true`              |
-| `npmx.completion.version`           | Version completion behavior                                                                                                    | `string`  | `"provenance-only"` |
-| `npmx.completion.excludePrerelease` | Exclude prerelease versions (alpha, beta, rc, canary, etc.) from completion suggestions                                        | `boolean` | `true`              |
-| `npmx.diagnostics.upgrade`          | Show hints when a newer version of a package is available                                                                      | `boolean` | `true`              |
-| `npmx.diagnostics.deprecation`      | Show warnings for deprecated packages                                                                                          | `boolean` | `true`              |
-| `npmx.diagnostics.replacement`      | Show suggestions for package replacements                                                                                      | `boolean` | `true`              |
-| `npmx.diagnostics.vulnerability`    | Show warnings for packages with known vulnerabilities                                                                          | `boolean` | `true`              |
-| `npmx.diagnostics.distTag`          | Show warnings when a dependency uses a dist tag                                                                                | `boolean` | `true`              |
-| `npmx.diagnostics.engineMismatch`   | Show warnings when dependency engines mismatch with the current package                                                        | `boolean` | `true`              |
-| `npmx.ignore.upgrade`               | Ignore upgrade diagnostics. See [Ignore Diagnostics](#ignore-diagnostics)                                                      | `array`   | `[]`                |
-| `npmx.ignore.deprecation`           | Ignore deprecation diagnostics. See [Ignore Diagnostics](#ignore-diagnostics)                                                  | `array`   | `[]`                |
-| `npmx.ignore.replacement`           | Ignore replacement diagnostics. See [Ignore Diagnostics](#ignore-diagnostics)                                                  | `array`   | `[]`                |
-| `npmx.ignore.vulnerability`         | Ignore vulnerability diagnostics. See [Ignore Diagnostics](#ignore-diagnostics)                                                | `array`   | `[]`                |
+| Key                                 | Description                                                                                                                                                | Type      | Default             |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------- |
+| `npmx.hover.enabled`                | Enable hover information for packages                                                                                                                      | `boolean` | `true`              |
+| `npmx.completion.version`           | Version completion behavior                                                                                                                                | `string`  | `"provenance-only"` |
+| `npmx.completion.excludePrerelease` | Exclude prerelease versions (alpha, beta, rc, canary, etc.) from completion suggestions                                                                    | `boolean` | `true`              |
+| `npmx.diagnostics.upgrade`          | Show hints when a newer version of a package is available                                                                                                  | `boolean` | `true`              |
+| `npmx.diagnostics.deprecation`      | Show warnings for deprecated packages                                                                                                                      | `boolean` | `true`              |
+| `npmx.diagnostics.replacement`      | Show suggestions for package replacements                                                                                                                  | `boolean` | `true`              |
+| `npmx.diagnostics.vulnerability`    | Show warnings for packages with known vulnerabilities                                                                                                      | `boolean` | `true`              |
+| `npmx.diagnostics.distTag`          | Show warnings when a dependency uses a dist tag                                                                                                            | `boolean` | `true`              |
+| `npmx.diagnostics.engineMismatch`   | Show warnings when dependency engines mismatch with the current package                                                                                    | `boolean` | `true`              |
+| `npmx.ignore.upgrade`               | Ignore list for upgrade diagnostics ("name" or "name@version"). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics)       | `array`   | `[]`                |
+| `npmx.ignore.deprecation`           | Ignore list for deprecation diagnostics ("name" or "name@version"). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics)   | `array`   | `[]`                |
+| `npmx.ignore.replacement`           | Ignore list for replacement diagnostics ("name" only). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics)                | `array`   | `[]`                |
+| `npmx.ignore.vulnerability`         | Ignore list for vulnerability diagnostics ("name" or "name@version"). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics) | `array`   | `[]`                |
 
 <!-- configs -->
 

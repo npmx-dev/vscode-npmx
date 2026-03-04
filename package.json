@@ -111,7 +111,7 @@
             "type": "string"
           },
           "default": [],
-          "description": "List of packages to ignore upgrade hints. Supports both \"name\" and \"name@version\" (e.g. [\"request\", \"uuid@3.4.0\"])"
+          "markdownDescription": "Ignore list for upgrade diagnostics (\"name\" or \"name@version\"). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics)"
         },
         "npmx.ignore.deprecation": {
           "scope": "resource",
@@ -120,7 +120,7 @@
             "type": "string"
           },
           "default": [],
-          "description": "List of packages to ignore deprecation warnings. Supports both \"name\" and \"name@version\" (e.g. [\"request\", \"uuid@3.4.0\"])"
+          "markdownDescription": "Ignore list for deprecation diagnostics (\"name\" or \"name@version\"). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics)"
         },
         "npmx.ignore.replacement": {
           "scope": "resource",
@@ -129,7 +129,7 @@
             "type": "string"
           },
           "default": [],
-          "description": "List of package names to ignore replacement suggestions. (e.g. [\"find-up\", \"axios\"])"
+          "markdownDescription": "Ignore list for replacement diagnostics (\"name\" only). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics)"
         },
         "npmx.ignore.vulnerability": {
           "scope": "resource",
@@ -138,7 +138,7 @@
             "type": "string"
           },
           "default": [],
-          "description": "List of packages to ignore vulnerability warnings. Supports both \"name\" and \"name@version\" (e.g. [\"lodash\", \"express@4.18.0\"])"
+          "markdownDescription": "Ignore list for vulnerability diagnostics (\"name\" or \"name@version\"). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics)"
         }
       }
     },
