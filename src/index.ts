@@ -42,7 +42,7 @@ export const { activate, deactivate } = defineExtension(() => {
   })
 
   watchEffect((onCleanup) => {
-    if (config.documentLinks === 'off')
+    if (config.packageLinks === 'off')
       return
 
     const disposables = extractorEntries.map(({ pattern, extractor }) =>
