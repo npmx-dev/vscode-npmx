@@ -1,6 +1,6 @@
 import { NPMX_DEV } from '#constants'
 
-const SPACES = /\s+/
+const SPACES = /\s+/g
 
 export function npmxPackageUrl(name: string, version?: string): string {
   return version
