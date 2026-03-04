@@ -1,6 +1,6 @@
 import type { CodeActionContext, TextDocument } from 'vscode'
 import { describe, expect, it } from 'vitest'
-import { Diagnostic, DiagnosticSeverity, Range, Uri } from 'vscode'
+import { CodeActionKind, ConfigurationTarget, Diagnostic, DiagnosticSeverity, Range, Uri } from 'vscode'
 import { QuickFixProvider } from '../../src/providers/code-actions/quick-fix'
 
 const provider = new QuickFixProvider()
@@ -25,11 +25,17 @@ function provideCodeActions(diagnostics: Diagnostic[]) {
 
 describe('quick fix provider', () => {
   it('upgrade', () => {
-    const diagnostic = createDiagnostic('upgrade', 'New version available: ^2.0.0')
+    const diagnostic = createDiagnostic('upgrade', '"vite@1.0.0" can be upgraded to ^2.0.0.')
     const actions = provideCodeActions([diagnostic])
 
-    expect(actions).toHaveLength(1)
+    expect(actions).toHaveLength(3)
     expect(actions[0]!.title).toMatchInlineSnapshot('"Update to ^2.0.0"')
+    expect(actions[1]!.title).toMatchInlineSnapshot('"Ignore upgrade for "vite@^2.0.0" (Workspace)"')
+    expect(actions[1]!.kind).toBe(CodeActionKind.QuickFix)
+    expect(actions[1]!.command?.arguments).toEqual(['upgrade', 'vite@^2.0.0', ConfigurationTarget.Workspace])
+    expect(actions[2]!.title).toMatchInlineSnapshot('"Ignore upgrade for "vite@^2.0.0" (User)"')
+    expect(actions[2]!.kind).toBe(CodeActionKind.QuickFix)
+    expect(actions[2]!.command?.arguments).toEqual(['upgrade', 'vite@^2.0.0', ConfigurationTarget.Global])
   })
 
   it('vulnerability with fix', () => {
@@ -70,7 +76,7 @@ describe('quick fix provider', () => {
 
   it('mixed diagnostics', () => {
     const diagnostics = [
-      createDiagnostic('upgrade', 'New version available: ^2.0.0'),
+      createDiagnostic('upgrade', '"vite@1.0.0" can be upgraded to ^2.0.0.'),
       createDiagnostic(
         { value: 'vulnerability', target: Uri.parse('https://npmx.dev') },
         '"lodash@4.17.20" has 1 high vulnerability. Upgrade to ^4.17.21 to fix.',
@@ -78,8 +84,8 @@ describe('quick fix provider', () => {
     ]
     const actions = provideCodeActions(diagnostics)
 
-    expect(actions).toHaveLength(4)
+    expect(actions).toHaveLength(6)
     expect(actions[0]!.title).toMatchInlineSnapshot('"Update to ^2.0.0"')
-    expect(actions[1]!.title).toMatchInlineSnapshot('"Update to ^4.17.21 to fix vulnerabilities"')
+    expect(actions[3]!.title).toMatchInlineSnapshot('"Update to ^4.17.21 to fix vulnerabilities"')
   })
 })

@@ -1,5 +1,7 @@
+import type { DiagnosticsCode } from '#types/meta'
 import type { CodeActionContext, CodeActionProvider, Diagnostic, Range, TextDocument } from 'vscode'
 import { internalCommands } from '#state'
+import { parsePackageId } from '#utils/package'
 import { CodeAction, CodeActionKind, ConfigurationTarget, WorkspaceEdit } from 'vscode'
 
 interface QuickFixRule {
@@ -8,9 +10,9 @@ interface QuickFixRule {
   isPreferred?: boolean
 }
 
-const quickFixRules: Partial<Record<string, QuickFixRule>> = {
+const quickFixRules: Partial<Record<DiagnosticsCode, QuickFixRule>> = {
   upgrade: {
-    pattern: /^New version available: (?<target>\S+)$/,
+    pattern: /^"\S+" can be upgraded to (?<target>\S+)\.$/,
     title: (target) => `Update to ${target}`,
   },
   vulnerability: {
@@ -22,9 +24,17 @@ const quickFixRules: Partial<Record<string, QuickFixRule>> = {
 
 interface AddIgnoreRule {
   pattern: RegExp
+  getTarget?: (groups: Record<string, string>) => string
 }
 
-const addIgnoreRules: Partial<Record<string, AddIgnoreRule>> = {
+const addIgnoreRules: Partial<Record<DiagnosticsCode, AddIgnoreRule>> = {
+  upgrade: {
+    pattern: /^"(?<current>[^"]+)" can be upgraded to (?<targetVersion>[^"\s]+)\.$/,
+    getTarget: (groups) => {
+      const parsed = parsePackageId(groups.current)
+      return `${parsed.name}@${groups.targetVersion}`
+    },
+  },
   deprecation: {
     pattern: /^"(?<target>\S+)" has been deprecated/,
   },
@@ -36,12 +46,12 @@ const addIgnoreRules: Partial<Record<string, AddIgnoreRule>> = {
   },
 }
 
-function getDiagnosticCodeValue(diagnostic: Diagnostic): string | undefined {
+function getDiagnosticCodeValue(diagnostic: Diagnostic): DiagnosticsCode | undefined {
   if (typeof diagnostic.code === 'string')
-    return diagnostic.code
+    return diagnostic.code as DiagnosticsCode
 
   if (typeof diagnostic.code === 'object' && typeof diagnostic.code.value === 'string')
-    return diagnostic.code.value
+    return diagnostic.code.value as DiagnosticsCode
 }
 
 export class QuickFixProvider implements CodeActionProvider {
@@ -65,20 +75,29 @@ export class QuickFixProvider implements CodeActionProvider {
       }
 
       const addIgnoreRule = addIgnoreRules[code]
-      const ignoreTarget = addIgnoreRule?.pattern?.exec(diagnostic.message)?.groups?.target
-      if (ignoreTarget) {
-        for (const [title, configTarget] of [
-          [`Ignore ${code} for "${ignoreTarget}" (Workspace)`, ConfigurationTarget.Workspace],
-          [`Ignore ${code} for "${ignoreTarget}" (User)`, ConfigurationTarget.Global],
-        ] as const) {
-          const action = new CodeAction(title, CodeActionKind.QuickFix)
-          action.diagnostics = [diagnostic]
-          action.command = {
-            title,
-            command: internalCommands.addToIgnore,
-            arguments: [code, ignoreTarget, configTarget],
+      if (addIgnoreRule) {
+        const {
+          pattern,
+          getTarget = (groups) => groups.target,
+        } = addIgnoreRule
+
+        const addIgnoreMatch = pattern.exec(diagnostic.message)
+        const ignoreTarget = addIgnoreMatch?.groups && getTarget(addIgnoreMatch.groups)
+
+        if (ignoreTarget) {
+          for (const [title, configTarget] of [
+            [`Ignore ${code} for "${ignoreTarget}" (Workspace)`, ConfigurationTarget.Workspace],
+            [`Ignore ${code} for "${ignoreTarget}" (User)`, ConfigurationTarget.Global],
+          ] as const) {
+            const action = new CodeAction(title, CodeActionKind.QuickFix)
+            action.diagnostics = [diagnostic]
+            action.command = {
+              title,
+              command: internalCommands.addToIgnore,
+              arguments: [code, ignoreTarget, configTarget],
+            }
+            actions.push(action)
           }
-          actions.push(action)
         }
       }
 
