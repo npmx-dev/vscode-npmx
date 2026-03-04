@@ -33,6 +33,7 @@
 
 - `package.json`
 - `pnpm-workspace.yaml`
+- `.yarnrc.yml`
 
 ## Configuration
 

@@ -27,6 +27,10 @@
     "Other"
   ],
   "main": "./dist/index.mjs",
+  "browser": "./dist/index.mjs",
+  "extensionKind": [
+    "workspace"
+  ],
   "icon": "res/logo.png",
   "files": [
     "LICENSE.md",
@@ -38,7 +42,8 @@
   },
   "activationEvents": [
     "workspaceContains:package.json",
-    "workspaceContains:pnpm-workspace.yaml"
+    "workspaceContains:pnpm-workspace.yaml",
+    "workspaceContains:.yarnrc.yml"
   ],
   "contributes": {
     "configuration": {

@@ -2,11 +2,9 @@ name: Unit Test
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
 
 # cancel in-progress runs on new commits to same PR (gitub.event.number)
 concurrency:
@@ -14,7 +12,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  unit-test:
-    uses: sxzz/workflows/.github/workflows/unit-test.yml@v1
-    with:
-      node-versions: 22,"lts/*"
+  lint:
+    runs-on: ubuntu-slim
+    permissions: {}
+    steps:
+      - name: Setup JS
+        uses: sxzz/workflows/setup-js@69098296b6f6083ed99f38e2040f2a7238580e27 # v1.4.0
+
+      - name: Type Check
+        run: pnpm run typecheck
+
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-slim, windows-latest, macos-latest]
+        node-version: [22, lts/*]
+      fail-fast: false
+
+    runs-on: ${{ matrix.os }}
+    permissions: {}
+    steps:
+      - name: Setup JS
+        uses: sxzz/workflows/setup-js@69098296b6f6083ed99f38e2040f2a7238580e27 # v1.4.0
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Unit Test
+        run: pnpm run test
