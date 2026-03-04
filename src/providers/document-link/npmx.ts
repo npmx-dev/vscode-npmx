@@ -7,6 +7,7 @@ import { resolveExactVersion } from '#utils/package'
 import { isSupportedProtocol, parseVersion } from '#utils/version'
 import { Uri, DocumentLink as VscodeDocumentLink } from 'vscode'
 
+// Limit concurrent lookups to avoid overwhelming the registry and hitting rate limits
 const RESOLVED_LOOKUP_CONCURRENCY = 6
 
 type PackageInfoResult = Awaited<ReturnType<typeof getPackageInfo>>
@@ -51,6 +52,7 @@ export class NpmxDocumentLinkProvider<T extends Extractor> implements DocumentLi
     const links: DocumentLink[] = []
     const dependencies = this.extractor.getDependenciesInfo(root)
     const linkMode = config.packageLinks
+    // First parse and filter dependencies to minimize unnecessary registry lookups, especially for 'resolved' mode
     const parsedDeps: { dep: typeof dependencies[number], parsed: NonNullable<ReturnType<typeof parseVersion>> }[] = []
 
     for (const dep of dependencies) {
