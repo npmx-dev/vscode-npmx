@@ -1,3 +1,5 @@
+import { formatPackageId } from './package'
+
 type VersionProtocol = 'workspace' | 'catalog' | 'npm' | 'jsr' | null
 
 const URL_PACKAGE_PATTERN = /^(?:https?:|git\+|github:)/
@@ -10,6 +12,7 @@ const KNOWN_PROTOCOLS = new Set([...UNSUPPORTED_PROTOCOLS, 'npm'])
 
 export interface ParsedVersion {
   protocol: VersionProtocol
+  aliasName: string | null
   version: string
 }
 
@@ -27,6 +30,7 @@ export function parseVersion(rawVersion: string): ParsedVersion | null {
     return null
 
   let protocol: string | null = null
+  let aliasName: string | null = null
   let version = rawVersion
 
   const colonIndex = rawVersion.indexOf(':')
@@ -41,12 +45,13 @@ export function parseVersion(rawVersion: string): ParsedVersion | null {
     if (protocol === 'npm') {
       const lastAtIndex = version.lastIndexOf('@')
       if (lastAtIndex > 0) {
+        aliasName = version.substring(0, lastAtIndex)
         version = version.substring(lastAtIndex + 1)
       }
     }
   }
 
-  return { protocol, version }
+  return { protocol, aliasName, version }
 }
 
 const RANGE_PREFIXES = ['>=', '<=', '=', '>', '<']
@@ -82,5 +87,6 @@ export function formatUpgradeVersion(current: ParsedVersion, target: string): st
   if (!current.protocol)
     return result
 
-  return `${current.protocol}:${result}`
+  const versionPart = current.aliasName ? formatPackageId(current.aliasName, result) : result
+  return `${current.protocol}:${versionPart}`
 }

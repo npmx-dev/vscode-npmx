@@ -3,6 +3,7 @@ import type { CompletionItemProvider, Position, TextDocument } from 'vscode'
 import { PRERELEASE_PATTERN } from '#constants'
 import { config } from '#state'
 import { getPackageInfo } from '#utils/api/package'
+import { resolvePackageName } from '#utils/package'
 import { formatUpgradeVersion, isSupportedProtocol, parseVersion } from '#utils/version'
 import { CompletionItem, CompletionItemKind } from 'vscode'
 
@@ -33,7 +34,11 @@ export class VersionCompletionItemProvider<T extends Extractor> implements Compl
     if (!parsed || !isSupportedProtocol(parsed.protocol))
       return
 
-    const pkg = await getPackageInfo(name)
+    const packageName = resolvePackageName(name, parsed)
+    if (!packageName)
+      return
+
+    const pkg = await getPackageInfo(packageName)
     if (!pkg)
       return
 

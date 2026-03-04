@@ -1,3 +1,4 @@
+import type { ParsedVersion } from './version'
 import type { PackageInfo } from './api/package'
 import maxSatisfying from 'semver/ranges/max-satisfying'
 
@@ -10,6 +11,10 @@ export function encodePackageName(name: string): string {
     return `@${encodeURIComponent(name.slice(1))}`
   }
   return encodeURIComponent(name)
+}
+
+export function resolvePackageName(depName: string, parsed: ParsedVersion | null): string {
+  return parsed?.aliasName ?? depName
 }
 
 export function formatPackageId(name: string, version: string): string {
