@@ -1,6 +1,6 @@
-import { formatPackageId } from './package'
+import { formatPackageId, isJsrNpmPackage, jsrNpmToJsrName } from './package'
 
-type VersionProtocol = 'workspace' | 'catalog' | 'npm' | 'jsr' | null
+type VersionProtocol = 'workspace' | 'catalog' | 'npm' | 'jsr'
 
 const URL_PACKAGE_PATTERN = /^(?:https?:|git\+|github:)/
 function isUrlPackage(currentVersion: string) {
@@ -11,16 +11,16 @@ const UNSUPPORTED_PROTOCOLS = new Set(['workspace', 'catalog', 'jsr'])
 const KNOWN_PROTOCOLS = new Set([...UNSUPPORTED_PROTOCOLS, 'npm'])
 
 export interface ParsedVersion {
-  protocol: VersionProtocol
+  protocol: VersionProtocol | null
   aliasName: string | null
   version: string
 }
 
-export function isSupportedProtocol(protocol: VersionProtocol): boolean {
+export function isSupportedProtocol(protocol: VersionProtocol | null): boolean {
   return !protocol || !UNSUPPORTED_PROTOCOLS.has(protocol)
 }
 
-function isKnownProtocol(protocol: string): protocol is NonNullable<VersionProtocol> {
+function isKnownProtocol(protocol: string): protocol is VersionProtocol {
   return KNOWN_PROTOCOLS.has(protocol)
 }
 
@@ -47,11 +47,16 @@ export function parseVersion(rawVersion: string): ParsedVersion | null {
       if (lastAtIndex > 0) {
         aliasName = version.substring(0, lastAtIndex)
         version = version.substring(lastAtIndex + 1)
+
+        if (isJsrNpmPackage(aliasName)) {
+          aliasName = jsrNpmToJsrName(aliasName)
+          protocol = 'jsr'
+        }
       }
     }
   }
 
-  return { protocol, aliasName, version }
+  return { protocol, aliasName, version } as ParsedVersion
 }
 
 const RANGE_PREFIXES = ['>=', '<=', '=', '>', '<']

@@ -1,4 +1,4 @@
-import type { DependencyInfo } from '#types/extractor'
+import type { ValidNode } from '#types/extractor'
 import type { ParsedVersion } from '#utils/version'
 import type { DiagnosticRule, NodeDiagnosticInfo } from '..'
 import { npmxPackageUrl } from '#utils/links'
@@ -8,19 +8,19 @@ import lte from 'semver/functions/lte'
 import prerelease from 'semver/functions/prerelease'
 import { DiagnosticSeverity, Uri } from 'vscode'
 
-function createUpgradeDiagnostic(dep: DependencyInfo, parsed: ParsedVersion, target: string): NodeDiagnosticInfo {
+function createUpgradeDiagnostic(node: ValidNode, packageName: string, parsed: ParsedVersion, target: string): NodeDiagnosticInfo {
   return {
-    node: dep.versionNode,
+    node,
     severity: DiagnosticSeverity.Hint,
     message: `New version available: ${formatUpgradeVersion(parsed, target)}`,
     code: {
       value: 'upgrade',
-      target: Uri.parse(npmxPackageUrl(dep.name, target)),
+      target: Uri.parse(npmxPackageUrl(packageName, target)),
     },
   }
 }
 
-export const checkUpgrade: DiagnosticRule = ({ dep, pkg, parsed, exactVersion }) => {
+export const checkUpgrade: DiagnosticRule = ({ dep, packageName, pkg, parsed, exactVersion }) => {
   if (!parsed || !exactVersion)
     return
 
@@ -29,7 +29,7 @@ export const checkUpgrade: DiagnosticRule = ({ dep, pkg, parsed, exactVersion })
 
   const { latest } = pkg.distTags
   if (gt(latest, exactVersion))
-    return createUpgradeDiagnostic(dep, parsed, latest)
+    return createUpgradeDiagnostic(dep.versionNode, packageName, parsed, latest)
 
   const currentPreId = prerelease(exactVersion)?.[0]
   if (currentPreId == null)
@@ -43,6 +43,6 @@ export const checkUpgrade: DiagnosticRule = ({ dep, pkg, parsed, exactVersion })
     if (lte(tagVersion, exactVersion))
       continue
 
-    return createUpgradeDiagnostic(dep, parsed, tagVersion)
+    return createUpgradeDiagnostic(dep.versionNode, packageName, parsed, tagVersion)
   }
 }

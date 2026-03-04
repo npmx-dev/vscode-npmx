@@ -42,8 +42,8 @@ describe('parseVersion', () => {
     `)
     expect(parseVersion('npm:@jsr/luca__cases@^1.0.1')).toMatchInlineSnapshot(`
       {
-        "aliasName": "@jsr/luca__cases",
-        "protocol": "npm",
+        "aliasName": "@luca/cases",
+        "protocol": "jsr",
         "version": "^1.0.1",
       }
     `)

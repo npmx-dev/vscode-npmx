@@ -3,7 +3,7 @@ import type { HoverProvider, Position, TextDocument } from 'vscode'
 import { SPACER } from '#constants'
 import { getPackageInfo } from '#utils/api/package'
 import { jsrPackageUrl, npmxDocsUrl, npmxPackageUrl } from '#utils/links'
-import { resolveExactVersion, resolvePackageName } from '#utils/package'
+import { isJsrNpmPackage, jsrNpmToJsrName, resolveExactVersion, resolvePackageName } from '#utils/package'
 import { isSupportedProtocol, parseVersion } from '#utils/version'
 import { Hover, MarkdownString } from 'vscode'
 
@@ -33,16 +33,13 @@ export class NpmxHoverProvider<T extends Extractor> implements HoverProvider {
     if (!packageName)
       return
 
-    if (protocol === 'jsr') {
+    if (protocol === 'jsr' || isJsrNpmPackage(packageName)) {
       const jsrMd = new MarkdownString('', true)
-      const jsrUrl = jsrPackageUrl(packageName)
-
       jsrMd.isTrusted = true
 
-      const jsrPackageLink = `[$(package)${SPACER}View on jsr.io](${jsrUrl})`
-      const npmxWarning = '$(warning) Not on npmx'
-      jsrMd.appendMarkdown(`${jsrPackageLink} | ${npmxWarning}`)
-
+      const jsrName = jsrNpmToJsrName(packageName)
+      const jsrPackageLink = `[$(package)${SPACER}View on jsr.io](${jsrPackageUrl(jsrName)})`
+      jsrMd.appendMarkdown(`${jsrPackageLink} | $(warning) Not on npmx`)
       return new Hover(jsrMd)
     }
 
