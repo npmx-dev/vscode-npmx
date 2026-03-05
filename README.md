@@ -58,6 +58,31 @@
 
 <!-- configs -->
 
+## Ignore Diagnostics
+
+`npmx` supports ignore lists for selected diagnostics.
+
+Matching rules:
+
+- `npmx.ignore.upgrade`, `npmx.ignore.deprecation`, and `npmx.ignore.vulnerability` support `name` and `name@version`.
+- `npmx.ignore.replacement` supports `name` only.
+
+When a diagnostic supports ignore actions, quick fixes can add entries directly:
+
+- `Ignore ... (Workspace)` updates workspace settings.
+- `Ignore ... (User)` updates user settings.
+
+### Example
+
+```json
+{
+  "npmx.ignore.upgrade": ["lodash", "@babel/core@7.0.0"],
+  "npmx.ignore.deprecation": ["request"],
+  "npmx.ignore.replacement": ["find-up"],
+  "npmx.ignore.vulnerability": ["express@4.18.0"]
+}
+```
+
 ## Related
 
 - [npmx.dev](https://npmx.dev) &ndash; A fast, modern browser for the npm registry
