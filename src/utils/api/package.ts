@@ -10,7 +10,7 @@ export interface PackageInfo extends PackageVersionsInfoWithMetadata {
 
 function parsePackageInfo(name: string, pkg: MaybeError<PackageVersionsInfoWithMetadata>) {
   if ('error' in pkg) {
-    logger.warn(`Fetching package info for ${name} error: ${JSON.stringify(pkg)}`)
+    logger.warn(`[package] Fetching error(${name}): ${JSON.stringify(pkg)}`)
 
     // Return null to trigger a cache hit
     if (pkg.status === 404)
@@ -18,8 +18,6 @@ function parsePackageInfo(name: string, pkg: MaybeError<PackageVersionsInfoWithM
 
     throw pkg
   }
-
-  logger.info(`Fetched package info for ${name}`)
 
   const versionToTag = new Map<string, string>()
   if (pkg.distTags) {
@@ -33,10 +31,15 @@ function parsePackageInfo(name: string, pkg: MaybeError<PackageVersionsInfoWithM
 
 const getPackageInfoBatch = createBatchRunner<string, PackageInfo | null>({
   runBatch: async (names) => {
+    const logName = names.join(', ')
+    logger.info(`[package] Fetching ${logName}`)
+
     const list = await getVersionsBatch(names, {
       metadata: true,
       throw: false,
     })
+
+    logger.info(`[package] Fetched ${logName}`)
 
     const values = new Map<string, PackageInfo | null>()
     const errors = new Map<string, unknown>()
@@ -64,8 +67,4 @@ const getPackageInfoBatch = createBatchRunner<string, PackageInfo | null>({
  *
  * @see https://github.com/antfu/fast-npm-meta
  */
-export const getPackageInfo = memoize<string, Promise<PackageInfo | null>>(async (name) => {
-  logger.info(`Fetching package info for ${name}`)
-
-  return getPackageInfoBatch(name)
-})
+export const getPackageInfo = memoize<string, Promise<PackageInfo | null>>(async (name) => getPackageInfoBatch(name))
