@@ -32,7 +32,7 @@ export function parsePackageId(id: string): ParsedPackageId {
 
   return {
     name: id.slice(0, separatorIndex),
-    version: id.slice(separatorIndex + 1),
+    version: id.slice(separatorIndex + 1) || null,
   }
 }
 
