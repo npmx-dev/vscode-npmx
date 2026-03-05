@@ -4,6 +4,8 @@ import { createBatchRunner } from '#utils/batch'
 import { getVersionsBatch } from 'fast-npm-meta'
 import { memoize } from '../memoize'
 
+const BATCH_SIZE = 20
+
 export interface PackageInfo extends PackageVersionsInfoWithMetadata {
   versionToTag: Map<string, string>
 }
@@ -30,6 +32,7 @@ function parsePackageInfo(name: string, pkg: MaybeError<PackageVersionsInfoWithM
 }
 
 const getPackageInfoBatch = createBatchRunner<string, PackageInfo | null>({
+  maxSize: BATCH_SIZE,
   runBatch: async (names) => {
     const logName = names.join(', ')
     logger.info(`[package] Fetching ${logName}`)

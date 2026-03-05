@@ -73,6 +73,37 @@ describe('createBatchRunner', () => {
     expect(runBatch).toHaveBeenCalledTimes(1)
   })
 
+  it('should flush immediately when maxSize is reached and split into multiple batches', async () => {
+    const runBatch = vi.fn(async (tasks: string[]) => {
+      const values = new Map<string, string>()
+      tasks.forEach((task) => {
+        values.set(task, task.toUpperCase())
+      })
+      return { values, errors: new Map<string, unknown>() }
+    })
+
+    const run = createBatchRunner<string, string>({
+      maxSize: 2,
+      runBatch,
+    })
+
+    const a = run('a')
+    expect(runBatch).not.toHaveBeenCalled()
+
+    const [, b, c] = await Promise.all([
+      a,
+      run('b'),
+      run('c'),
+    ])
+
+    expect(await a).toBe('A')
+    expect(b).toBe('B')
+    expect(c).toBe('C')
+    expect(runBatch).toHaveBeenCalledTimes(2)
+    expect(runBatch).toHaveBeenNthCalledWith(1, ['a', 'b'])
+    expect(runBatch).toHaveBeenNthCalledWith(2, ['c'])
+  })
+
   it('should reject errored or missing outcomes', async () => {
     const runBatch = vi.fn(async () => ({
       values: new Map<string, string>([['a', 'A']]),

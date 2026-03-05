@@ -5,6 +5,7 @@ export interface BatchRunResult<TResult> {
 
 export interface BatchRunnerOptions<TTask, TResult> {
   getKey?: (task: TTask) => string
+  maxSize?: number
   runBatch: (tasks: TTask[]) => Promise<BatchRunResult<TResult>>
 }
 
@@ -21,6 +22,7 @@ interface PendingTaskGroup<TTask, TResult> {
 export function createBatchRunner<TTask, TResult>(options: BatchRunnerOptions<TTask, TResult>): (task: TTask) => Promise<TResult> {
   const {
     getKey = String,
+    maxSize,
     runBatch,
   } = options
   const pendingTasksByKey = new Map<string, PendingTaskGroup<TTask, TResult>>()
@@ -83,7 +85,9 @@ export function createBatchRunner<TTask, TResult>(options: BatchRunnerOptions<TT
       })
     }
 
-    if (!isFlushScheduled) {
+    if (maxSize && pendingTasksByKey.size >= maxSize) {
+      void flushPendingTasks()
+    } else if (!isFlushScheduled) {
       isFlushScheduled = true
       queueMicrotask(() => {
         void flushPendingTasks()
