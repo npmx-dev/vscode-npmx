@@ -76,7 +76,7 @@ describe('quick fix provider', () => {
 
   it('mixed diagnostics', () => {
     const diagnostics = [
-      createDiagnostic('upgrade', '"vite@1.0.0" can be upgraded to ^2.0.0.'),
+      createDiagnostic('upgrade', '"vite" can be upgraded to ^2.0.0.'),
       createDiagnostic(
         { value: 'vulnerability', target: Uri.parse('https://npmx.dev') },
         '"lodash@4.17.20" has 1 high vulnerability. Upgrade to ^4.17.21 to fix.',
