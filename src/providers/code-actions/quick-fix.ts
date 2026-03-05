@@ -4,45 +4,101 @@ import { internalCommands } from '#state'
 import { parsePackageId } from '#utils/package'
 import { CodeAction, CodeActionKind, ConfigurationTarget, WorkspaceEdit } from 'vscode'
 
-interface QuickFixRule {
+type MatchGroups = NonNullable<RegExpExecArray['groups']>
+
+interface DiagnosticContext {
+  code: DiagnosticsCode
+  document: TextDocument
+  diagnostic: Diagnostic
+  groups: MatchGroups
+}
+
+type ActionBuilder = (context: DiagnosticContext) => CodeAction[]
+
+interface DiagnosticStrategy {
   pattern: RegExp
-  title: (target: string) => string
-  isPreferred?: boolean
+  actionBuilders: ActionBuilder[]
 }
 
-const quickFixRules: Partial<Record<DiagnosticsCode, QuickFixRule>> = {
-  upgrade: {
-    pattern: /^"\S+" can be upgraded to (?<target>\S+)\.$/,
-    title: (target) => `Update to ${target}`,
-  },
-  vulnerability: {
-    pattern: / Upgrade to (?<target>\S+) to fix\.$/,
-    title: (target) => `Update to ${target} to fix vulnerabilities`,
-    isPreferred: true,
-  },
+const ignoreScopes = [
+  { label: 'Workspace', target: ConfigurationTarget.Workspace },
+  { label: 'User', target: ConfigurationTarget.Global },
+]
+
+function quickFix(
+  resolveReplacement: (groups: MatchGroups) => string | undefined,
+  formatTitle: (replacement: string) => string,
+  isPreferred = false,
+): ActionBuilder {
+  return (context) => {
+    const replacement = resolveReplacement(context.groups)
+    if (!replacement)
+      return []
+
+    const action = new CodeAction(formatTitle(replacement), CodeActionKind.QuickFix)
+    action.diagnostics = [context.diagnostic]
+    action.isPreferred = isPreferred
+    action.edit = new WorkspaceEdit()
+    action.edit.replace(context.document.uri, context.diagnostic.range, replacement)
+
+    return [action]
+  }
 }
 
-interface AddIgnoreRule {
-  pattern: RegExp
-  getTarget?: (groups: Record<string, string>) => string
+function ignore(resolvePackageId: (groups: MatchGroups) => string | undefined): ActionBuilder {
+  return (context) => {
+    const packageId = resolvePackageId(context.groups)
+    if (!packageId)
+      return []
+
+    return ignoreScopes.map(({ label, target }) => {
+      const title = `Ignore ${context.code} for "${packageId}" (${label})`
+      const action = new CodeAction(title, CodeActionKind.QuickFix)
+      action.diagnostics = [context.diagnostic]
+      action.command = {
+        title,
+        command: internalCommands.addToIgnore,
+        arguments: [context.code, packageId, target],
+      }
+
+      return action
+    })
+  }
 }
 
-const addIgnoreRules: Partial<Record<DiagnosticsCode, AddIgnoreRule>> = {
+const strategies: Partial<Record<DiagnosticsCode, DiagnosticStrategy>> = {
   upgrade: {
     pattern: /^"(?<current>[^"]+)" can be upgraded to (?<targetVersion>[^"\s]+)\.$/,
-    getTarget: (groups) => {
-      const parsed = parsePackageId(groups.current)
-      return `${parsed.name}@${groups.targetVersion}`
-    },
-  },
-  deprecation: {
-    pattern: /^"(?<target>\S+)" has been deprecated/,
-  },
-  replacement: {
-    pattern: /^"(?<target>\S+)"/,
+    actionBuilders: [
+      quickFix((g) => g.targetVersion, (replacement) => `Update to ${replacement}`),
+      ignore((g) => {
+        const targetVersion = g.targetVersion
+        if (!targetVersion)
+          return
+
+        const parsed = parsePackageId(g.current)
+        return `${parsed.name}@${targetVersion}`
+      }),
+    ],
   },
   vulnerability: {
-    pattern: /^"(?<target>\S+)" has .+ vulnerabilit/,
+    pattern: /^"(?<packageId>\S+)" has .+ vulnerabilit(?:y|ies)\.(?: Upgrade to (?<targetVersion>\S+) to fix\.)?$/,
+    actionBuilders: [
+      quickFix((g) => g.targetVersion, (replacement) => `Update to ${replacement} to fix vulnerabilities`, true),
+      ignore((g) => g.packageId),
+    ],
+  },
+  deprecation: {
+    pattern: /^"(?<packageId>\S+)" has been deprecated/,
+    actionBuilders: [
+      ignore((g) => g.packageId),
+    ],
+  },
+  replacement: {
+    pattern: /^"(?<packageName>\S+)"/,
+    actionBuilders: [
+      ignore((g) => g.packageName),
+    ],
   },
 }
 
@@ -61,47 +117,17 @@ export class QuickFixProvider implements CodeActionProvider {
       if (!code)
         return []
 
-      const actions: CodeAction[] = []
+      const strategy = strategies[code]
+      if (!strategy)
+        return []
 
-      const quickFixRule = quickFixRules[code]
-      const target = quickFixRule?.pattern?.exec(diagnostic.message)?.groups?.target
-      if (target) {
-        const action = new CodeAction(quickFixRule.title(target), CodeActionKind.QuickFix)
-        action.isPreferred = quickFixRule.isPreferred ?? false
-        action.diagnostics = [diagnostic]
-        action.edit = new WorkspaceEdit()
-        action.edit.replace(document.uri, diagnostic.range, target)
-        actions.push(action)
-      }
+      const groups = strategy.pattern.exec(diagnostic.message)?.groups
+      if (!groups)
+        return []
 
-      const addIgnoreRule = addIgnoreRules[code]
-      if (addIgnoreRule) {
-        const {
-          pattern,
-          getTarget = (groups) => groups.target,
-        } = addIgnoreRule
+      const diagnosticContext: DiagnosticContext = { code, document, diagnostic, groups }
 
-        const addIgnoreMatch = pattern.exec(diagnostic.message)
-        const ignoreTarget = addIgnoreMatch?.groups && getTarget(addIgnoreMatch.groups)
-
-        if (ignoreTarget) {
-          for (const [title, configTarget] of [
-            [`Ignore ${code} for "${ignoreTarget}" (Workspace)`, ConfigurationTarget.Workspace],
-            [`Ignore ${code} for "${ignoreTarget}" (User)`, ConfigurationTarget.Global],
-          ] as const) {
-            const action = new CodeAction(title, CodeActionKind.QuickFix)
-            action.diagnostics = [diagnostic]
-            action.command = {
-              title,
-              command: internalCommands.addToIgnore,
-              arguments: [code, ignoreTarget, configTarget],
-            }
-            actions.push(action)
-          }
-        }
-      }
-
-      return actions
+      return strategy.actionBuilders.flatMap((build) => build(diagnosticContext))
     })
   }
 }
