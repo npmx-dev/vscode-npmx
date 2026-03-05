@@ -27,8 +27,7 @@ describe('checkUpgrade', () => {
 
     expect(result).toBeDefined()
     expect(result!.code).toMatchObject({ value: 'upgrade' })
-    expect(result!.message).toContain('"vite@1.0.0" can be upgraded to')
-    expect(result!.message).toContain('2.7.0')
+    expect(result!.message).toMatchInlineSnapshot('""vite" can be upgraded to ^2.7.0."')
   })
 
   it.each([
@@ -48,7 +47,7 @@ describe('checkUpgrade', () => {
     const result = await checkUpgrade(ctx)
 
     expect(result).toBeDefined()
-    expect(result!.message).toContain('3.0.0-alpha.5')
+    expect(result!.message).toMatchInlineSnapshot('""vite" can be upgraded to 3.0.0-alpha.5."')
   })
 
   it('should not flag when target upgrade version is ignored', async () => {
@@ -67,6 +66,6 @@ describe('checkUpgrade', () => {
     const result = await checkUpgrade(ctx)
 
     expect(result).toBeDefined()
-    expect(result!.message).toContain('npm:^2.7.0')
+    expect(result!.message).toMatchInlineSnapshot('""vite" can be upgraded to npm:^2.7.0."')
   })
 })

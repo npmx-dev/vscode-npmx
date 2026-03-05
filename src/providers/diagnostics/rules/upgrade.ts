@@ -3,18 +3,17 @@ import type { DiagnosticRule, NodeDiagnosticInfo } from '..'
 import { config } from '#state'
 import { checkIgnored } from '#utils/ignore'
 import { npmxPackageUrl } from '#utils/links'
-import { formatPackageId } from '#utils/package'
 import { formatUpgradeVersion } from '#utils/version'
 import gt from 'semver/functions/gt'
 import lte from 'semver/functions/lte'
 import prerelease from 'semver/functions/prerelease'
 import { DiagnosticSeverity, Uri } from 'vscode'
 
-function createUpgradeDiagnostic(dep: DependencyInfo, exactVersion: string, targetVersion: string): NodeDiagnosticInfo {
+function createUpgradeDiagnostic(dep: DependencyInfo, targetVersion: string): NodeDiagnosticInfo {
   return {
     node: dep.versionNode,
     severity: DiagnosticSeverity.Hint,
-    message: `"${formatPackageId(dep.name, exactVersion)}" can be upgraded to ${targetVersion}.`,
+    message: `"${dep.name}" can be upgraded to ${targetVersion}.`,
     code: {
       value: 'upgrade',
       target: Uri.parse(npmxPackageUrl(dep.name, targetVersion)),
@@ -34,7 +33,7 @@ export const checkUpgrade: DiagnosticRule = ({ dep, pkg, parsed, exactVersion })
     const targetVersion = formatUpgradeVersion(parsed, latest)
     if (checkIgnored({ ignoreList: config.ignore.upgrade, name: dep.name, version: targetVersion }))
       return
-    return createUpgradeDiagnostic(dep, exactVersion, targetVersion)
+    return createUpgradeDiagnostic(dep, targetVersion)
   }
 
   const currentPreId = prerelease(exactVersion)?.[0]
@@ -52,6 +51,6 @@ export const checkUpgrade: DiagnosticRule = ({ dep, pkg, parsed, exactVersion })
     if (checkIgnored({ ignoreList: config.ignore.upgrade, name: dep.name, version: targetVersion }))
       continue
 
-    return createUpgradeDiagnostic(dep, exactVersion, targetVersion)
+    return createUpgradeDiagnostic(dep, targetVersion)
   }
 }

@@ -1,7 +1,6 @@
 import type { DiagnosticsCode } from '#types/meta'
 import type { CodeActionContext, CodeActionProvider, Diagnostic, Range, TextDocument } from 'vscode'
 import { internalCommands } from '#state'
-import { parsePackageId } from '#utils/package'
 import { CodeAction, CodeActionKind, ConfigurationTarget, WorkspaceEdit } from 'vscode'
 
 type MatchGroups = NonNullable<RegExpExecArray['groups']>
@@ -68,23 +67,22 @@ function ignore(resolvePackageId: (groups: MatchGroups) => string | undefined): 
 
 const strategies: Partial<Record<DiagnosticsCode, DiagnosticStrategy>> = {
   upgrade: {
-    pattern: /^"(?<current>[^"]+)" can be upgraded to (?<targetVersion>[^"\s]+)\.$/,
+    pattern: /^"(?<packageName>\S+)" can be upgraded to (?<targetVersion>[^"\s]+)\.$/,
     actionBuilders: [
-      quickFix((g) => g.targetVersion, (replacement) => `Update to ${replacement}`),
+      quickFix((g) => g.targetVersion, (replacement) => `Upgrade to ${replacement}`),
       ignore((g) => {
         const targetVersion = g.targetVersion
         if (!targetVersion)
           return
 
-        const parsed = parsePackageId(g.current)
-        return `${parsed.name}@${targetVersion}`
+        return `${g.packageName}@${targetVersion}`
       }),
     ],
   },
   vulnerability: {
     pattern: /^"(?<packageId>\S+)" has .+ vulnerabilit(?:y|ies)\.(?: Upgrade to (?<targetVersion>\S+) to fix\.)?$/,
     actionBuilders: [
-      quickFix((g) => g.targetVersion, (replacement) => `Update to ${replacement} to fix vulnerabilities`, true),
+      quickFix((g) => g.targetVersion, (replacement) => `Upgrade to ${replacement} to fix vulnerabilities`, true),
       ignore((g) => g.packageId),
     ],
   },
