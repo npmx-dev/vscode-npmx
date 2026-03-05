@@ -115,8 +115,8 @@
           "enumDescriptions": [
             "Disable clickable links",
             "Link to package page (latest version)",
-            "Link to declared version page",
-            "Link to resolved version page"
+            "Use raw version from package.json (preserves ^1.0.0, latest, etc.)",
+            "Resolve to actual matching version via API (^18.0.0 → 18.2.0)"
           ],
           "default": "declared",
           "description": "Enable clickable links for package names"
