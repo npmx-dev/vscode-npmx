@@ -50,37 +50,13 @@
 | `npmx.diagnostics.vulnerability`    | Show warnings for packages with known vulnerabilities                                                                                                      | `boolean` | `true`              |
 | `npmx.diagnostics.distTag`          | Show warnings when a dependency uses a dist tag                                                                                                            | `boolean` | `true`              |
 | `npmx.diagnostics.engineMismatch`   | Show warnings when dependency engines mismatch with the current package                                                                                    | `boolean` | `true`              |
+| `npmx.packageLinks`                 | Enable clickable links for package names                                                                                                                   | `string`  | `"declared"`        |
 | `npmx.ignore.upgrade`               | Ignore list for upgrade diagnostics ("name" or "name@version"). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics)       | `array`   | `[]`                |
 | `npmx.ignore.deprecation`           | Ignore list for deprecation diagnostics ("name" or "name@version"). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics)   | `array`   | `[]`                |
 | `npmx.ignore.replacement`           | Ignore list for replacement diagnostics ("name" only). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics)                | `array`   | `[]`                |
 | `npmx.ignore.vulnerability`         | Ignore list for vulnerability diagnostics ("name" or "name@version"). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics) | `array`   | `[]`                |
 
 <!-- configs -->
-
-## Ignore Diagnostics
-
-`npmx` supports ignore lists for selected diagnostics.
-
-Matching rules:
-
-- `npmx.ignore.upgrade`, `npmx.ignore.deprecation`, and `npmx.ignore.vulnerability` support `name` and `name@version`.
-- `npmx.ignore.replacement` supports `name` only.
-
-When a diagnostic supports ignore actions, quick fixes can add entries directly:
-
-- `Ignore ... (Workspace)` updates workspace settings.
-- `Ignore ... (User)` updates user settings.
-
-### Example
-
-```json
-{
-  "npmx.ignore.upgrade": ["lodash", "@babel/core@7.0.0"],
-  "npmx.ignore.deprecation": ["request"],
-  "npmx.ignore.replacement": ["find-up"],
-  "npmx.ignore.vulnerability": ["express@4.18.0"]
-}
-```
 
 ## Related
 

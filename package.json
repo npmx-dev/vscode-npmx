@@ -104,6 +104,23 @@
           "default": true,
           "description": "Show warnings when dependency engines mismatch with the current package"
         },
+        "npmx.packageLinks": {
+          "type": "string",
+          "enum": [
+            "off",
+            "latest",
+            "declared",
+            "resolved"
+          ],
+          "enumDescriptions": [
+            "Disable clickable links",
+            "Link to package page (latest version)",
+            "Use raw version from package.json (preserves ^1.0.0, latest, etc.)",
+            "Resolve to actual matching version via API (^18.0.0 → 18.2.0)"
+          ],
+          "default": "declared",
+          "description": "Enable clickable links for package names"
+        },
         "npmx.ignore.upgrade": {
           "scope": "resource",
           "type": "array",
