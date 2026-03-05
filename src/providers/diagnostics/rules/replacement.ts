@@ -27,11 +27,11 @@ function getReplacementInfo(replacement: ModuleReplacement) {
       }
     case 'simple':
       return {
-        message: `has been flagged as redundant, with the advice:\n${replacement.replacement}.`,
+        message: `has been flagged as redundant by the community, with the advice:\n${replacement.replacement}.`,
       }
     case 'documented':
       return {
-        message: 'has been flagged as having more performant alternatives.',
+        message: 'has been flagged as having more performant alternatives by the community.',
         link: getReplacementsDocUrl(replacement.docPath),
       }
     case 'none':
