@@ -1,5 +1,8 @@
 import type { PackageInfo } from './api/package'
-import maxSatisfying from 'semver/ranges/max-satisfying'
+import Range from 'semver/classes/range'
+import gt from 'semver/functions/gt'
+import lte from 'semver/functions/lte'
+import satisfies from 'semver/functions/satisfies'
 
 /**
  * Encode a package name for use in npm registry URLs.
@@ -36,9 +39,51 @@ export function parsePackageId(id: string): ParsedPackageId {
   }
 }
 
+/**
+ * Resolve the maximum version satisfying the given range, capped by the `latest` dist-tag when possible.
+ *
+ * This first reads the `latest` tag, then selects the highest version that satisfies the range
+ * without exceeding that `latest` version.
+ *
+ * Inspired by:
+ * https://github.com/antfu-collective/taze/blob/fed751d777620ddb0a0e77a05ea1412f6332d043/src/utils/versions.ts#L66-L104
+ */
+function getMaxSatisfying(versions: string[], current: string, tags: PackageInfo['distTags']) {
+  let version: string | null = null
+
+  try {
+    const range = new Range(current)
+
+    let maxVersion: string | null = tags.latest
+    if (!satisfies(maxVersion, range))
+      maxVersion = null
+
+    for (const ver of versions) {
+      if (!satisfies(ver, range))
+        continue
+
+      if (!maxVersion || lte(ver, maxVersion)) {
+        if (!version || gt(ver, version)) {
+          version = ver
+        }
+      }
+    }
+    return version
+  } catch {
+    return null
+  }
+}
+
 export function resolveExactVersion(pkg: PackageInfo, version: string) {
+  if (version === '' || version === '*')
+    version = 'latest'
+
   if (Object.hasOwn(pkg.distTags, version))
     return pkg.distTags[version]
 
-  return maxSatisfying(Object.keys(pkg.versionsMeta), version)
+  const versions = Object.keys(pkg.versionsMeta)
+  if (versions.length === 0)
+    return null
+
+  return getMaxSatisfying(versions, version, pkg.distTags)
 }
