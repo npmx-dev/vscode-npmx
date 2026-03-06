@@ -1,4 +1,6 @@
 import type { DiagnosticRule } from '..'
+import { config } from '#state'
+import { checkIgnored } from '#utils/ignore'
 import { npmxPackageUrl } from '#utils/links'
 import { formatPackageId } from '#utils/package'
 import { DiagnosticSeverity, DiagnosticTag, Uri } from 'vscode'
@@ -10,6 +12,9 @@ export const checkDeprecation: DiagnosticRule = ({ dep, packageName, pkg, parsed
   const versionInfo = pkg.versionsMeta[exactVersion]
 
   if (!versionInfo.deprecated)
+    return
+
+  if (checkIgnored({ ignoreList: config.ignore.deprecation, name: dep.name, version: exactVersion }))
     return
 
   return {

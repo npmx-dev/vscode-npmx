@@ -3,15 +3,15 @@ import type { PackageInfo } from '#utils/api/package'
 import type { ParsedVersion } from '#utils/version'
 import type { Engines } from 'fast-npm-meta'
 import type { Awaitable } from 'reactive-vscode'
-import type { Diagnostic, TextDocument } from 'vscode'
+import type { Diagnostic, TextDocument, Uri } from 'vscode'
 import { extractorEntries } from '#extractors'
 import { config, logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
 import { resolveExactVersion, resolvePackageName } from '#utils/package'
 import { isSupportedProtocol, parseVersion } from '#utils/version'
 import { debounce } from 'perfect-debounce'
-import { computed, useActiveTextEditor, useDisposable, useDocumentText, watch } from 'reactive-vscode'
-import { languages } from 'vscode'
+import { computed, useActiveTextEditor, useDisposable, useDocumentText, useFileSystemWatcher, watch } from 'reactive-vscode'
+import { languages, TabInputText, window, workspace } from 'vscode'
 import { displayName } from '../../generated-meta'
 import { checkDeprecation } from './rules/deprecation'
 import { checkDistTag } from './rules/dist-tag'
@@ -63,7 +63,7 @@ export function useDiagnostics() {
 
   async function collectDiagnostics(document: TextDocument, extractor: Extractor) {
     logger.info(`[diagnostics] collect: ${document.uri.path}`)
-    diagnosticCollection.delete(document.uri)
+    diagnosticCollection.set(document.uri, [])
 
     const rules = enabledRules.value
     if (rules.length === 0)
@@ -147,4 +147,32 @@ export function useDiagnostics() {
 
     collectDiagnostics(document, extractor)
   }, { immediate: true })
+
+  async function recollectByUri(uri: Uri, extractor: Extractor) {
+    if (!diagnosticCollection.has(uri))
+      return
+
+    const doc = await workspace.openTextDocument(uri)
+
+    collectDiagnostics(doc, extractor)
+  }
+
+  extractorEntries.forEach(({ pattern, extractor }) => {
+    const { onDidCreate, onDidChange, onDidDelete } = useFileSystemWatcher(pattern)
+
+    onDidCreate((uri) => recollectByUri(uri, extractor))
+    onDidChange((uri) => recollectByUri(uri, extractor))
+    onDidDelete((uri) => diagnosticCollection.delete(uri))
+  })
+
+  useDisposable(window.tabGroups.onDidChangeTabs(({ closed }) => {
+    closed.forEach((tab) => {
+      if (!(tab.input instanceof TabInputText))
+        return
+
+      const uri = tab.input.uri
+      diagnosticCollection.delete(uri)
+      logger.debug(`[diagnostics] close and clear ${uri.path}`)
+    })
+  }))
 }

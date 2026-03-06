@@ -15,7 +15,13 @@ export default defineConfig(
     files: ['src/**/*'],
     rules: {
       'no-restricted-imports': ['error', {
-        patterns: [RESTRICTED_IMPORTS_NODE],
+        patterns: [
+          {
+            regex: '^semver$',
+            message: 'Please use the subpath import for smaller bundle size',
+          },
+          RESTRICTED_IMPORTS_NODE,
+        ],
       }],
     },
   },

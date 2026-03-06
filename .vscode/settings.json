@@ -1,8 +1,5 @@
 {
   "cSpell.words": [
     "npmx"
-  ],
-  "typescript.preferences.autoImportSpecifierExcludeRegexes": [
-    "tests/__mocks__"
   ]
 }

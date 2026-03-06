@@ -1,30 +1,111 @@
+import type { DiagnosticsCode } from '#types/meta'
 import type { CodeActionContext, CodeActionProvider, Diagnostic, Range, TextDocument } from 'vscode'
-import { CodeAction, CodeActionKind, WorkspaceEdit } from 'vscode'
+import { internalCommands } from '#state'
+import { CodeAction, CodeActionKind, ConfigurationTarget, WorkspaceEdit } from 'vscode'
 
-interface QuickFixRule {
-  pattern: RegExp
-  title: (target: string) => string
-  isPreferred?: boolean
+type MatchGroups = NonNullable<RegExpExecArray['groups']>
+
+interface DiagnosticContext {
+  code: DiagnosticsCode
+  document: TextDocument
+  diagnostic: Diagnostic
+  groups: MatchGroups
 }
 
-const quickFixRules: Record<string, QuickFixRule> = {
+type ActionBuilder = (context: DiagnosticContext) => CodeAction[]
+
+interface DiagnosticStrategy {
+  pattern: RegExp
+  actionBuilders: ActionBuilder[]
+}
+
+const ignoreScopes = [
+  { label: 'Workspace', target: ConfigurationTarget.Workspace },
+  { label: 'User', target: ConfigurationTarget.Global },
+]
+
+function quickFix(
+  resolveReplacement: (groups: MatchGroups) => string | undefined,
+  formatTitle: (replacement: string) => string,
+  isPreferred = false,
+): ActionBuilder {
+  return (context) => {
+    const replacement = resolveReplacement(context.groups)
+    if (!replacement)
+      return []
+
+    const action = new CodeAction(formatTitle(replacement), CodeActionKind.QuickFix)
+    action.diagnostics = [context.diagnostic]
+    action.isPreferred = isPreferred
+    action.edit = new WorkspaceEdit()
+    action.edit.replace(context.document.uri, context.diagnostic.range, replacement)
+
+    return [action]
+  }
+}
+
+function ignore(resolvePackageId: (groups: MatchGroups) => string | undefined): ActionBuilder {
+  return (context) => {
+    const packageId = resolvePackageId(context.groups)
+    if (!packageId)
+      return []
+
+    return ignoreScopes.map(({ label, target }) => {
+      const title = `Ignore ${context.code} for "${packageId}" (${label})`
+      const action = new CodeAction(title, CodeActionKind.QuickFix)
+      action.diagnostics = [context.diagnostic]
+      action.command = {
+        title,
+        command: internalCommands.addToIgnore,
+        arguments: [context.code, packageId, target],
+      }
+
+      return action
+    })
+  }
+}
+
+const strategies: Partial<Record<DiagnosticsCode, DiagnosticStrategy>> = {
   upgrade: {
-    pattern: /^New version available: (?<target>\S+)$/,
-    title: (target) => `Update to ${target}`,
+    pattern: /^"(?<packageName>\S+)" can be upgraded to (?<targetVersion>[^"\s]+)\.$/,
+    actionBuilders: [
+      quickFix((g) => g.targetVersion, (replacement) => `Upgrade to ${replacement}`),
+      ignore((g) => {
+        const targetVersion = g.targetVersion
+        if (!targetVersion)
+          return
+
+        return `${g.packageName}@${targetVersion}`
+      }),
+    ],
   },
   vulnerability: {
-    pattern: / Upgrade to (?<target>\S+) to fix\.$/,
-    title: (target) => `Update to ${target} to fix vulnerabilities`,
-    isPreferred: true,
+    pattern: /^"(?<packageId>\S+)" has .+ vulnerabilit(?:y|ies)\.(?: Upgrade to (?<targetVersion>\S+) to fix\.)?$/,
+    actionBuilders: [
+      quickFix((g) => g.targetVersion, (replacement) => `Upgrade to ${replacement} to fix vulnerabilities`, true),
+      ignore((g) => g.packageId),
+    ],
+  },
+  deprecation: {
+    pattern: /^"(?<packageId>\S+)" has been deprecated/,
+    actionBuilders: [
+      ignore((g) => g.packageId),
+    ],
+  },
+  replacement: {
+    pattern: /^"(?<packageName>\S+)"/,
+    actionBuilders: [
+      ignore((g) => g.packageName),
+    ],
   },
 }
 
-function getDiagnosticCodeValue(diagnostic: Diagnostic): string | undefined {
+function getDiagnosticCodeValue(diagnostic: Diagnostic): DiagnosticsCode | undefined {
   if (typeof diagnostic.code === 'string')
-    return diagnostic.code
+    return diagnostic.code as DiagnosticsCode
 
   if (typeof diagnostic.code === 'object' && typeof diagnostic.code.value === 'string')
-    return diagnostic.code.value
+    return diagnostic.code.value as DiagnosticsCode
 }
 
 export class QuickFixProvider implements CodeActionProvider {
@@ -34,20 +115,17 @@ export class QuickFixProvider implements CodeActionProvider {
       if (!code)
         return []
 
-      const rule = quickFixRules[code]
-      if (!rule)
+      const strategy = strategies[code]
+      if (!strategy)
         return []
 
-      const target = rule.pattern.exec(diagnostic.message)?.groups?.target
-      if (!target)
+      const groups = strategy.pattern.exec(diagnostic.message)?.groups
+      if (!groups)
         return []
 
-      const action = new CodeAction(rule.title(target), CodeActionKind.QuickFix)
-      action.isPreferred = rule.isPreferred ?? false
-      action.diagnostics = [diagnostic]
-      action.edit = new WorkspaceEdit()
-      action.edit.replace(document.uri, diagnostic.range, target)
-      return [action]
+      const diagnosticContext: DiagnosticContext = { code, document, diagnostic, groups }
+
+      return strategy.actionBuilders.flatMap((build) => build(diagnosticContext))
     })
   }
 }

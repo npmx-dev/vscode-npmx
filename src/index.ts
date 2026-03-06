@@ -8,6 +8,7 @@ import { commands, displayName, version } from './generated-meta'
 import { useCodeActions } from './providers/code-actions'
 import { VersionCompletionItemProvider } from './providers/completion-item/version'
 import { useDiagnostics } from './providers/diagnostics'
+import { NpmxDocumentLinkProvider } from './providers/document-link/npmx'
 import { NpmxHoverProvider } from './providers/hover/npmx'
 import { config, logger } from './state'
 
@@ -35,6 +36,17 @@ export const { activate, deactivate } = defineExtension(() => {
         new VersionCompletionItemProvider(extractor),
         ...VERSION_TRIGGER_CHARACTERS,
       ),
+    )
+
+    onCleanup(() => Disposable.from(...disposables).dispose())
+  })
+
+  watchEffect((onCleanup) => {
+    if (config.packageLinks === 'off')
+      return
+
+    const disposables = extractorEntries.map(({ pattern, extractor }) =>
+      languages.registerDocumentLinkProvider({ pattern }, new NpmxDocumentLinkProvider(extractor)),
     )
 
     onCleanup(() => Disposable.from(...disposables).dispose())
