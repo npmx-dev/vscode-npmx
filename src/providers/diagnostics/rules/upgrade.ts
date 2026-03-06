@@ -25,7 +25,7 @@ export const checkUpgrade: DiagnosticRule = ({ dep, name, pkg, parsed, exactVers
   if (!parsed || !exactVersion)
     return
 
-  if (Object.hasOwn(pkg.distTags, exactVersion))
+  if (Object.hasOwn(pkg.distTags, dep.version))
     return
 
   const { latest } = pkg.distTags
