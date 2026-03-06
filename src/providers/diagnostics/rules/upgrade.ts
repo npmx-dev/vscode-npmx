@@ -9,19 +9,19 @@ import lte from 'semver/functions/lte'
 import prerelease from 'semver/functions/prerelease'
 import { DiagnosticSeverity, Uri } from 'vscode'
 
-function createUpgradeDiagnostic(node: ValidNode, packageName: string, targetVersion: string): NodeDiagnosticInfo {
+function createUpgradeDiagnostic(node: ValidNode, name: string, targetVersion: string): NodeDiagnosticInfo {
   return {
     node,
     severity: DiagnosticSeverity.Hint,
-    message: `"${packageName}" can be upgraded to ${targetVersion}.`,
+    message: `"${name}" can be upgraded to ${targetVersion}.`,
     code: {
       value: 'upgrade',
-      target: Uri.parse(npmxPackageUrl(packageName, targetVersion)),
+      target: Uri.parse(npmxPackageUrl(name, targetVersion)),
     },
   }
 }
 
-export const checkUpgrade: DiagnosticRule = ({ dep, packageName, pkg, parsed, exactVersion }) => {
+export const checkUpgrade: DiagnosticRule = ({ dep, name, pkg, parsed, exactVersion }) => {
   if (!parsed || !exactVersion)
     return
 
@@ -31,9 +31,9 @@ export const checkUpgrade: DiagnosticRule = ({ dep, packageName, pkg, parsed, ex
   const { latest } = pkg.distTags
   if (gt(latest, exactVersion)) {
     const targetVersion = formatUpgradeVersion(parsed, latest)
-    if (checkIgnored({ ignoreList: config.ignore.upgrade, name: dep.name, version: targetVersion }))
+    if (checkIgnored({ ignoreList: config.ignore.upgrade, name, version: targetVersion }))
       return
-    return createUpgradeDiagnostic(dep.versionNode, packageName, targetVersion)
+    return createUpgradeDiagnostic(dep.versionNode, name, targetVersion)
   }
 
   const currentPreId = prerelease(exactVersion)?.[0]
@@ -48,9 +48,9 @@ export const checkUpgrade: DiagnosticRule = ({ dep, packageName, pkg, parsed, ex
     if (lte(tagVersion, exactVersion))
       continue
     const targetVersion = formatUpgradeVersion(parsed, tagVersion)
-    if (checkIgnored({ ignoreList: config.ignore.upgrade, name: dep.name, version: targetVersion }))
+    if (checkIgnored({ ignoreList: config.ignore.upgrade, name, version: targetVersion }))
       continue
 
-    return createUpgradeDiagnostic(dep.versionNode, packageName, targetVersion)
+    return createUpgradeDiagnostic(dep.versionNode, name, targetVersion)
   }
 }

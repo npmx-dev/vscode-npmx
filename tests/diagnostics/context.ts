@@ -24,5 +24,5 @@ export function createContext(options: CreateContextOptions): DiagnosticContext 
   const exactVersion = parsed && isSupportedProtocol(parsed.protocol)
     ? resolveExactVersion(pkg, parsed.version)
     : null
-  return { dep, packageName: resolvePackageName(name, parsed), pkg, parsed, exactVersion, engines }
+  return { dep, name: resolvePackageName(name, parsed), pkg, parsed, exactVersion, engines }
 }

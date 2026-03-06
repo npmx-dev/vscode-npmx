@@ -2,7 +2,7 @@ import type { DiagnosticRule } from '..'
 import { npmxPackageUrl } from '#utils/links'
 import { DiagnosticSeverity, Uri } from 'vscode'
 
-export const checkDistTag: DiagnosticRule = ({ dep, packageName, pkg, parsed, exactVersion }) => {
+export const checkDistTag: DiagnosticRule = ({ dep, name, pkg, parsed, exactVersion }) => {
   if (!parsed || !exactVersion)
     return
 
@@ -12,11 +12,11 @@ export const checkDistTag: DiagnosticRule = ({ dep, packageName, pkg, parsed, ex
 
   return {
     node: dep.versionNode,
-    message: `"${packageName}" uses the "${tag}" version tag. This may lead to unexpected breaking changes. Consider pinning to a specific version.`,
+    message: `"${name}" uses the "${tag}" version tag. This may lead to unexpected breaking changes. Consider pinning to a specific version.`,
     severity: DiagnosticSeverity.Warning,
     code: {
       value: 'dist-tag',
-      target: Uri.parse(npmxPackageUrl(packageName)),
+      target: Uri.parse(npmxPackageUrl(name)),
     },
   }
 }

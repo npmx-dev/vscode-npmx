@@ -22,7 +22,7 @@ import { checkVulnerability } from './rules/vulnerability'
 
 export interface DiagnosticContext {
   dep: DependencyInfo
-  packageName: string
+  name: string
   pkg: PackageInfo
   parsed: ParsedVersion | null
   exactVersion: string | null
@@ -110,11 +110,11 @@ export function useDiagnostics() {
     const collect = async (dep: DependencyInfo) => {
       try {
         const parsed = parseVersion(dep.version)
-        const packageName = resolvePackageName(dep.name, parsed)
-        if (!packageName)
+        const name = resolvePackageName(dep.name, parsed)
+        if (!name)
           return
 
-        const pkg = await getPackageInfo(packageName)
+        const pkg = await getPackageInfo(name)
         if (!pkg || isStale(document, targetVersion))
           return
 
@@ -123,7 +123,7 @@ export function useDiagnostics() {
           : null
 
         for (const rule of rules) {
-          runRule(rule, { dep, packageName, pkg, parsed, exactVersion, engines })
+          runRule(rule, { dep, name, pkg, parsed, exactVersion, engines })
         }
       } catch (err) {
         logger.warn(`[diagnostics] fail to check ${dep.name}: ${err}`)
