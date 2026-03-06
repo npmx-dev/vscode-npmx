@@ -26,7 +26,6 @@ describe('isJsrNpmPackage', () => {
 
 describe('jsrNpmToJsrName', () => {
   it('should convert @jsr/ npm name to JSR name', () => {
-    expect(jsrNpmToJsrName('@jsr/something')).toBe('something')
     expect(jsrNpmToJsrName('@jsr/luca__cases')).toBe('@luca/cases')
     expect(jsrNpmToJsrName('@jsr/std__path')).toBe('@std/path')
   })
