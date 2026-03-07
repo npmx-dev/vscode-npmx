@@ -6,5 +6,10 @@ export default defineConfig({
   test: {
     include: ['tests/**/*.test.ts'],
     setupFiles: ['tests/__setup__/index.ts'],
+    server: {
+      deps: {
+        inline: ['vscode-find-up'],
+      },
+    },
   },
 })

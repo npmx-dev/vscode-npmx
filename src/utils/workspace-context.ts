@@ -11,6 +11,7 @@ import { resolveExactVersion } from '#utils/package'
 import { detectPackageManager, readWorkspaceCatalogs } from '#utils/package-manager'
 import { dirname, join, normalize, resolve } from 'pathe'
 import { Uri, workspace } from 'vscode'
+import { findUp } from 'vscode-find-up'
 
 interface PackageRecord {
   packageJsonPath: string
@@ -316,22 +317,22 @@ async function buildWorkspaceContext(folder: WorkspaceFolder): Promise<Workspace
   }
 }
 
-function findNearestPackageContext(workspaceContext: WorkspaceContext, uri: Uri, workspacePath: string): PackageContext | undefined {
+async function findNearestPackageContext(
+  workspaceContext: WorkspaceContext,
+  uri: Uri,
+): Promise<PackageContext | undefined> {
   const normalizedPath = normalize(uri.path)
   if (normalizedPath.endsWith(`/${packageManifestExtractorEntry.basename}`))
     return workspaceContext.packages.get(normalizedPath)
 
-  let currentDirectory = dirname(normalizedPath)
-  while (currentDirectory.startsWith(workspacePath)) {
-    const packageContext = workspaceContext.packages.get(join(currentDirectory, packageManifestExtractorEntry.basename))
-    if (packageContext)
-      return packageContext
+  const packageJsonUri = await findUp(packageManifestExtractorEntry.basename, {
+    cwd: uri,
+  })
+  if (!packageJsonUri)
+    return
 
-    const parentDirectory = dirname(currentDirectory)
-    if (parentDirectory === currentDirectory)
-      break
-    currentDirectory = parentDirectory
-  }
+  const packageJsonPath = normalize(packageJsonUri.path)
+  return workspaceContext.packages.get(packageJsonPath)
 }
 
 export function invalidateWorkspaceContext(workspacePath: string) {
@@ -373,12 +374,11 @@ export async function getPackageContext(uri: Uri): Promise<PackageContext | unde
   if (!folder)
     return
 
-  const workspacePath = normalize(folder.uri.path)
   const workspaceContext = await getWorkspaceContext(uri)
   if (!workspaceContext)
     return
 
-  return findNearestPackageContext(workspaceContext, uri, workspacePath)
+  return await findNearestPackageContext(workspaceContext, uri)
 }
 
 async function getWorkspaceContextState(uri: Uri): Promise<WorkspaceContextState | undefined> {
