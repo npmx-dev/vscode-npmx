@@ -59,7 +59,3 @@ export function isSupportedDependencyDocument(documentOrUri: TextDocument | Uri)
   const path = 'uri' in documentOrUri ? documentOrUri.uri.path : documentOrUri.path
   return SUPPORTED_BASENAMES.has(basename(path))
 }
-
-export function getWorkspaceCatalogExtractorEntry(packageManager: Exclude<PackageManager, 'npm'>): WorkspaceCatalogExtractorEntry | undefined {
-  return workspaceCatalogExtractorEntries.find((entry) => entry.packageManager === packageManager)
-}

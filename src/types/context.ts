@@ -20,7 +20,6 @@ export interface WorkspaceContext {
 }
 
 export interface PackageContext {
-  workspaceContext: WorkspaceContext
   packageJsonPath: string
   engines?: Engines
   dependencies: Map<string, ResolvedDependencyInfo>

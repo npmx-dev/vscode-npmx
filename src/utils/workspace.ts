@@ -1,9 +1,10 @@
 import type { PackageContext, PackageManager, ResolvedDependencyInfo, WorkspaceContext } from '#types/context'
 import type { DependencyInfo, PackageManifestInfo } from '#types/extractor'
 import type { PackageInfo } from '#utils/api/package'
+import type { CatalogsInfo } from '#utils/dependency'
 import type { MemoizedFunction } from '#utils/memoize'
 import type { WorkspaceFolder } from 'vscode'
-import { getWorkspaceCatalogExtractorEntry, isSupportedDependencyDocument, packageManifestExtractorEntry, workspaceCatalogExtractorEntries } from '#extractors'
+import { isSupportedDependencyDocument, packageManifestExtractorEntry, workspaceCatalogExtractorEntries } from '#extractors'
 import { logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
 import { isOffsetInRange } from '#utils/ast'
@@ -83,14 +84,11 @@ function createResolvedDependencies(
   )
 }
 
-export async function readWorkspaceCatalogs(
-  folder: WorkspaceFolder,
-  packageManager: PackageManager,
-) {
+export async function readWorkspaceCatalogs(folder: WorkspaceFolder, packageManager: PackageManager): Promise<CatalogsInfo | undefined> {
   if (packageManager === 'npm')
     return
 
-  const entry = getWorkspaceCatalogExtractorEntry(packageManager)
+  const entry = workspaceCatalogExtractorEntries.find((entry) => entry.packageManager === packageManager)
   if (!entry)
     return
 
@@ -100,76 +98,45 @@ export async function readWorkspaceCatalogs(
   return entry.extractor.getWorkspaceCatalogInfo(text)?.catalogs
 }
 
-async function buildWorkspaceContext(folder: WorkspaceFolder): Promise<WorkspaceContextState> {
+const loadPackageRecord = memoize<Uri, Promise<PackageRecord | undefined>>(async (uri) => {
+  const text = await getText(uri)
+
+  const manifestInfo = packageManifestExtractorEntry.extractor.getPackageManifestInfo(text)
+  if (!manifestInfo)
+    return
+
+  return {
+    packageJsonPath: uri.path,
+    name: manifestInfo.name,
+    version: manifestInfo.version,
+    engines: manifestInfo.engines,
+    dependencies: manifestInfo.dependencies,
+  }
+}, { ttl: false, maxSize: Number.POSITIVE_INFINITY, fallbackToCachedOnError: false })
+
+async function createWorkspaceContext(folder: WorkspaceFolder): Promise<WorkspaceContextState> {
   const workspacePath = folder.uri.path
   const packageManager = await detectPackageManager(folder)
   const catalogs = await readWorkspaceCatalogs(folder, packageManager)
 
   logger.info(`[workspace-context] built ${workspacePath}`)
 
-  const state = {
-    folder,
-    workspaceContext: {
-      packageManager,
-      catalogs,
-    },
-  } as WorkspaceContextState
+  const workspaceContext = {
+    packageManager,
+    catalogs,
+  }
 
-  state.loadPackageRecord = memoize<Uri, Promise<PackageRecord | undefined>>(async (uri) => {
-    if (workspace.getWorkspaceFolder(uri)?.uri.path !== state.folder.uri.path)
-      return
+  const loadDocumentDependencies = memoize<Uri, Promise<ResolvedDependencyInfo[]>>(async (uri) => {
+    if (workspace.getWorkspaceFolder(uri)?.uri.path !== folder.uri.path)
+      return []
 
-    const text = await getText(uri)
-
-    const manifestInfo = packageManifestExtractorEntry.extractor.getPackageManifestInfo(text)
-    if (!manifestInfo)
-      return
-
-    return {
-      packageJsonPath: uri.path,
-      name: manifestInfo.name,
-      version: manifestInfo.version,
-      engines: manifestInfo.engines,
-      dependencies: manifestInfo.dependencies,
-    }
-  }, {
-    ttl: 0,
-    maxSize: Number.POSITIVE_INFINITY,
-    fallbackToCachedOnError: false,
-  })
-
-  state.loadPackageContext = memoize<Uri, Promise<PackageContext | undefined>>(async (uri) => {
-    const packageRecord = await state.loadPackageRecord(uri)
-    if (!packageRecord)
-      return
-
-    const dependencies = await state.loadDocumentDependencies(uri) ?? []
-
-    const packageContext: PackageContext = {
-      workspaceContext: state.workspaceContext,
-      packageJsonPath: uri.path,
-      engines: packageRecord.engines,
-      dependencies: new Map(),
-    }
-
-    for (const dependency of dependencies)
-      packageContext.dependencies.set(dependency.resolvedName, dependency)
-
-    return packageContext
-  }, {
-    ttl: 0,
-    maxSize: Number.POSITIVE_INFINITY,
-    fallbackToCachedOnError: false,
-  })
-
-  state.loadDocumentDependencies = memoize<Uri, Promise<ResolvedDependencyInfo[]>>(async (uri) => {
     const path = uri.path
     if (isPackageManifestPath(path)) {
-      const packageRecord = await state.loadPackageRecord(uri)
+      const packageRecord = await loadPackageRecord(uri)
       if (!packageRecord)
         return []
 
-      return createResolvedDependencies(packageRecord.dependencies, state.workspaceContext)
+      return createResolvedDependencies(packageRecord.dependencies, workspaceContext)
     } else {
       for (const entry of workspaceCatalogExtractorEntries) {
         if (!path.endsWith(`/${entry.basename}`))
@@ -181,18 +148,37 @@ async function buildWorkspaceContext(folder: WorkspaceFolder): Promise<Workspace
         if (!catalogInfo)
           return []
 
-        return createResolvedDependencies(catalogInfo.dependencies, state.workspaceContext)
+        return createResolvedDependencies(catalogInfo.dependencies, workspaceContext)
       }
 
       return []
     }
-  }, {
-    ttl: 0,
-    maxSize: Number.POSITIVE_INFINITY,
-    fallbackToCachedOnError: false,
-  })
+  }, { ttl: false, maxSize: Number.POSITIVE_INFINITY, fallbackToCachedOnError: false })
 
-  return state
+  return {
+    folder,
+    workspaceContext,
+    loadPackageRecord,
+    loadPackageContext: memoize<Uri, Promise<PackageContext | undefined>>(async (uri) => {
+      const packageRecord = await loadPackageRecord(uri)
+      if (!packageRecord)
+        return
+
+      const dependencies = await loadDocumentDependencies(uri) ?? []
+
+      const packageContext: PackageContext = {
+        packageJsonPath: uri.path,
+        engines: packageRecord.engines,
+        dependencies: new Map(),
+      }
+
+      for (const dependency of dependencies)
+        packageContext.dependencies.set(dependency.resolvedName, dependency)
+
+      return packageContext
+    }, { ttl: false, maxSize: Number.POSITIVE_INFINITY, fallbackToCachedOnError: false }),
+    loadDocumentDependencies,
+  }
 }
 
 const getWorkspaceContextState = memoize<Uri, Promise<WorkspaceContextState | undefined>>(async (uri) => {
@@ -200,11 +186,10 @@ const getWorkspaceContextState = memoize<Uri, Promise<WorkspaceContextState | un
   if (!folder)
     return
 
-  return buildWorkspaceContext(folder)
+  return createWorkspaceContext(folder)
 }, {
   getKey: (uri: Uri) => workspace.getWorkspaceFolder(uri)!.uri.path,
-  ttl: 0,
-  maxSize: Number.POSITIVE_INFINITY,
+  ttl: false,
   fallbackToCachedOnError: false,
 })
 

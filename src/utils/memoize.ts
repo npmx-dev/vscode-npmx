@@ -5,7 +5,7 @@ type MemoizeKey = string | Uri
 
 export interface MemoizeOptions<K> {
   getKey?: (params: K) => MemoizeKey
-  ttl?: number
+  ttl?: number | false
   /** Max number of entries to keep; evicts one when exceeded (prefer null/undefined values, else oldest). */
   maxSize?: number
   fallbackToCachedOnError?: boolean

@@ -15,6 +15,7 @@
     "resolveJsonModule": true,
     "strict": true,
     "noFallthroughCasesInSwitch": true,
+    "noImplicitThis": true,
     "noUnusedLocals": true,
     "noEmit": true,
     "allowSyntheticDefaultImports": true,

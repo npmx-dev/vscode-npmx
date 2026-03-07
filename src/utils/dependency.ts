@@ -1,7 +1,7 @@
 import type { DependencyProtocol, ResolvedDependencyInfo } from '#types/context'
 import { isJsrNpmPackage, jsrNpmToJsrName, parsePackageId } from '#utils/package'
 
-export type CatalogsEntry = Record<string, Record<string, string>>
+export type CatalogsInfo = Record<string, Record<string, string>>
 
 interface FinalResolution extends Pick<ResolvedDependencyInfo, 'resolvedName' | 'resolvedSpec'> {
   resolvedProtocol: DependencyProtocol
@@ -43,7 +43,7 @@ function resolveNpmSpec(rawName: string, spec: string): FinalResolution {
   }
 }
 
-function resolveEffectiveSpec(rawName: string, rawSpec: string, catalogs?: CatalogsEntry, seenCatalogs = new Set<string>()): FinalResolution {
+function resolveEffectiveSpec(rawName: string, rawSpec: string, catalogs?: CatalogsInfo, seenCatalogs = new Set<string>()): FinalResolution {
   const spec = rawSpec.trim()
 
   if (spec.startsWith('catalog:')) {
@@ -121,7 +121,7 @@ function resolveEffectiveSpec(rawName: string, rawSpec: string, catalogs?: Catal
   }
 }
 
-export function resolveDependencySpec(rawName: string, rawSpec: string, catalogs: CatalogsEntry = {}): DependencySpecResolution {
+export function resolveDependencySpec(rawName: string, rawSpec: string, catalogs: CatalogsInfo = {}): DependencySpecResolution {
   const spec = rawSpec.trim()
   const effective = resolveEffectiveSpec(rawName, rawSpec, catalogs)
 
