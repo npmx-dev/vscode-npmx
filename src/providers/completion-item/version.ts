@@ -15,7 +15,7 @@ export class VersionCompletionItemProvider<T extends Extractor> implements Compl
   }
 
   async provideCompletionItems(document: TextDocument, position: Position) {
-    const root = this.extractor.parse(document)
+    const root = this.extractor.parse(document.getText())
     if (!root)
       return
 

@@ -27,7 +27,7 @@ export interface DependencyInfo<T extends ValidNode = any> {
 }
 
 export interface Extractor<T extends ValidNode = any> {
-  parse: (document: TextDocument) => T | null | undefined
+  parse: (text: string) => T | null | undefined
 
   getNodeRange: (document: TextDocument, node: T) => Range
 

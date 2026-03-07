@@ -2,7 +2,6 @@ import type { DependencyInfo, Extractor } from '#types/extractor'
 import type { TextDocument } from 'vscode'
 import type { Node, Pair, Scalar, YAMLMap } from 'yaml'
 import { isInRange } from '#utils/ast'
-import { createMemoizedParse } from '#utils/memoize'
 import { Range } from 'vscode'
 import { isMap, isPair, isScalar, parseDocument } from 'yaml'
 
@@ -20,7 +19,7 @@ type CatalogEntryVisitor = (
 ) => boolean | void
 
 export class PnpmWorkspaceYamlExtractor implements Extractor<Node> {
-  parse = createMemoizedParse((text) => parseDocument(text).contents)
+  parse = (text: string) => parseDocument(text).contents
 
   getNodeRange(doc: TextDocument, node: Node) {
     const [start, end] = node.range!

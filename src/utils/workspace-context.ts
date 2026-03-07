@@ -22,15 +22,6 @@ interface PackageRecord {
 const decoder = new TextDecoder()
 const workspaceContextCache = new Map<string, WorkspaceContext>()
 const pendingWorkspaceContext = new Map<string, Promise<WorkspaceContext | undefined>>()
-let virtualDocumentVersion = 0
-
-function createVirtualDocument(uri: Uri, text: string): TextDocument {
-  return {
-    uri,
-    version: ++virtualDocumentVersion,
-    getText: () => text,
-  } as TextDocument
-}
 
 function getDependencyKey(dep: DependencyInfo): string {
   return `${dep.category}:${dep.rawName}`
@@ -55,18 +46,15 @@ function getOpenDependencyDocuments(workspacePath: string): Map<string, TextDocu
   return documents
 }
 
-async function readDocument(uri: Uri, openDocuments: Map<string, TextDocument>): Promise<TextDocument | undefined> {
-  const path = normalize(uri.path)
-  const openDocument = openDocuments.get(path)
+async function readDocumentText(uri: Uri, openDocuments: Map<string, TextDocument>): Promise<string | undefined> {
+  const openDocument = openDocuments.get(normalize(uri.path))
   if (openDocument)
-    return openDocument
+    return openDocument.getText()
 
   try {
     const content = await workspace.fs.readFile(uri)
-    return createVirtualDocument(uri, decoder.decode(content))
-  } catch {
-
-  }
+    return decoder.decode(content)
+  } catch {}
 }
 
 async function collectPackageUris(folder: WorkspaceFolder, openDocuments: Map<string, TextDocument>) {
@@ -90,11 +78,11 @@ async function collectPackageUris(folder: WorkspaceFolder, openDocuments: Map<st
 }
 
 async function readPackageRecord(uri: Uri, openDocuments: Map<string, TextDocument>): Promise<PackageRecord | undefined> {
-  const document = await readDocument(uri, openDocuments)
-  if (!document)
+  const text = await readDocumentText(uri, openDocuments)
+  if (!text)
     return
 
-  const root = packageJsonExtractor.parse(document)
+  const root = packageJsonExtractor.parse(text)
   if (!root)
     return
 
@@ -189,19 +177,19 @@ function createResolvedDependencyInfo(
 
 async function detectPackageManager(folder: WorkspaceFolder, openDocuments: Map<string, TextDocument>): Promise<PackageManager> {
   const rootPackageJsonUri = Uri.joinPath(folder.uri, PACKAGE_JSON_BASENAME)
-  const rootPackageJsonDocument = await readDocument(rootPackageJsonUri, openDocuments)
-  if (rootPackageJsonDocument) {
-    const root = packageJsonExtractor.parse(rootPackageJsonDocument)
+  const rootPackageJsonText = await readDocumentText(rootPackageJsonUri, openDocuments)
+  if (rootPackageJsonText) {
+    const root = packageJsonExtractor.parse(rootPackageJsonText)
     const declaredPackageManager = root ? packageJsonExtractor.getPackageManager(root) : undefined
     const packageManagerName = declaredPackageManager?.split('@')[0]
     if (packageManagerName === 'npm' || packageManagerName === 'pnpm' || packageManagerName === 'yarn')
       return packageManagerName
   }
 
-  if (await readDocument(Uri.joinPath(folder.uri, PNPM_WORKSPACE_BASENAME), openDocuments))
+  if (await readDocumentText(Uri.joinPath(folder.uri, PNPM_WORKSPACE_BASENAME), openDocuments))
     return 'pnpm'
 
-  if (await readDocument(Uri.joinPath(folder.uri, YARN_WORKSPACE_BASENAME), openDocuments))
+  if (await readDocumentText(Uri.joinPath(folder.uri, YARN_WORKSPACE_BASENAME), openDocuments))
     return 'yarn'
 
   return 'npm'
@@ -216,11 +204,11 @@ async function readCatalogs(
     return
 
   const configUri = Uri.joinPath(folder.uri, packageManager === 'pnpm' ? PNPM_WORKSPACE_BASENAME : YARN_WORKSPACE_BASENAME)
-  const document = await readDocument(configUri, openDocuments)
-  if (!document)
+  const text = await readDocumentText(configUri, openDocuments)
+  if (!text)
     return
 
-  const root = workspaceCatalogExtractor.parse(document)
+  const root = workspaceCatalogExtractor.parse(text)
   if (!root)
     return
 

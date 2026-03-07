@@ -15,7 +15,7 @@ export class NpmxHoverProvider<T extends Extractor> implements HoverProvider {
   }
 
   async provideHover(document: TextDocument, position: Position) {
-    const root = this.extractor.parse(document)
+    const root = this.extractor.parse(document.getText())
     if (!root)
       return
 

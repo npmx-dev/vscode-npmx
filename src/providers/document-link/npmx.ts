@@ -15,7 +15,7 @@ export class NpmxDocumentLinkProvider<T extends Extractor> implements DocumentLi
   }
 
   async provideDocumentLinks(document: TextDocument): Promise<DocumentLink[]> {
-    const root = this.extractor.parse(document)
+    const root = this.extractor.parse(document.getText())
     if (!root)
       return []
 

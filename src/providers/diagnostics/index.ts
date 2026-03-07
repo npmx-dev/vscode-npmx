@@ -69,7 +69,7 @@ export function useDiagnostics() {
     if (rules.length === 0)
       return
 
-    const root = extractor.parse(document)
+    const root = extractor.parse(document.getText())
     if (!root)
       return
 

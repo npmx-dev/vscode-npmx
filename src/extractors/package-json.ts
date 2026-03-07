@@ -3,7 +3,6 @@ import type { Engines } from 'fast-npm-meta'
 import type { Node } from 'jsonc-parser'
 import type { TextDocument } from 'vscode'
 import { isInRange } from '#utils/ast'
-import { createMemoizedParse } from '#utils/memoize'
 import { findNodeAtLocation, findNodeAtOffset, parseTree } from 'jsonc-parser'
 import { Range } from 'vscode'
 
@@ -15,7 +14,7 @@ const DEPENDENCY_SECTIONS: DependencyCategory[] = [
 ]
 
 export class PackageJsonExtractor implements Extractor<Node> {
-  parse = createMemoizedParse((text) => parseTree(text) ?? null)
+  parse = (text: string) => parseTree(text) ?? null
 
   getNodeRange(doc: TextDocument, node: Node) {
     const start = doc.positionAt(node.offset + 1)
