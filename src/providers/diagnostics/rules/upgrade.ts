@@ -1,4 +1,4 @@
-import type { OffsetRange } from '#types/range'
+import type { OffsetRange } from '#types/extractor'
 import type { DiagnosticRule, RangeDiagnosticInfo } from '..'
 import { config } from '#state'
 import { checkIgnored } from '#utils/ignore'

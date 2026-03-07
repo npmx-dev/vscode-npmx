@@ -1,5 +1,4 @@
-import type { DependencyCategory, DependencyInfo, JsonNode, PackageManifestExtractor } from '#types/extractor'
-import type { OffsetRange } from '#types/range'
+import type { DependencyCategory, DependencyInfo, JsonNode, OffsetRange, PackageManifestExtractor } from '#types/extractor'
 import type { Engines } from 'fast-npm-meta'
 import { findNodeAtLocation, parseTree } from 'jsonc-parser'
 
@@ -10,7 +9,7 @@ const DEPENDENCY_SECTIONS: DependencyCategory[] = [
   'optionalDependencies',
 ]
 
-export class PackageManifestDocumentExtractor implements PackageManifestExtractor<JsonNode> {
+export class PackageJsonDocumentExtractor implements PackageManifestExtractor<JsonNode> {
   parse = (text: string) => parseTree(text) ?? null
 
   private getStringValue(root: JsonNode, key: string): string | undefined {

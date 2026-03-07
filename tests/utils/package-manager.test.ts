@@ -1,8 +1,6 @@
 import { join } from 'node:path'
-import { createTextDocument } from 'jest-mock-vscode'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Uri, workspace } from 'vscode'
-import { packageManifestExtractorEntry } from '../../src/extractors'
 import { detectPackageManager } from '../../src/utils/package-manager'
 
 const FIXTURES_ROOT = join(process.cwd(), 'tests/fixtures/workspace')

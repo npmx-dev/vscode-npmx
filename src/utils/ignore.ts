@@ -14,7 +14,7 @@ export function checkIgnored(options: {
     return ignoreList.includes(formatPackageId(name, version))
 
   const parsed = parsePackageId(name)
-  if (!parsed)
+  if (!parsed.version)
     return false
 
   return ignoreList.includes(parsed.name)

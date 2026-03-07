@@ -1,4 +1,4 @@
-import type { OffsetRange } from '#types/range'
+import type { OffsetRange } from '#types/extractor'
 import type { TextDocument } from 'vscode'
 import { Range } from 'vscode'
 

@@ -1,5 +1,5 @@
 import type { ResolvedDependencyInfo } from '#types/context'
-import type { OffsetRange } from '#types/range'
+import type { OffsetRange } from '#types/extractor'
 import type { Engines } from 'fast-npm-meta'
 import type { Awaitable } from 'reactive-vscode'
 import type { Diagnostic, TextDocument, Uri } from 'vscode'

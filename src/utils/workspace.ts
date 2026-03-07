@@ -13,7 +13,7 @@ import { resolveExactVersion } from '#utils/package'
 import { detectPackageManager } from '#utils/package-manager'
 import { Uri, workspace } from 'vscode'
 import { findUp } from 'vscode-find-up'
-import { getText } from './resolve'
+import { getDocumentText } from './resolve'
 
 interface PackageRecord extends PackageManifestInfo {
   packageJsonPath: string
@@ -24,7 +24,7 @@ interface WorkspaceContextState {
   workspaceContext: WorkspaceContext
   loadPackageRecord: MemoizedFunction<Uri, Promise<PackageRecord | undefined>>
   loadPackageContext: MemoizedFunction<Uri, Promise<PackageContext | undefined>>
-  loadDocumentDependencies: MemoizedFunction<Uri, Promise<ResolvedDependencyInfo[]>>
+  loadDocumentDependencies: MemoizedFunction<Uri, Promise<ResolvedDependencyInfo[] | undefined>>
 }
 
 function isPackageManifestPath(path: string) {
@@ -68,15 +68,6 @@ function createResolvedDependencyInfo(
   }
 }
 
-function createResolvedDependencies(
-  dependencies: DependencyInfo[],
-  workspaceContext: WorkspaceContext,
-) {
-  return dependencies.map((dependency) =>
-    createResolvedDependencyInfo(dependency, workspaceContext),
-  )
-}
-
 export async function readWorkspaceCatalogs(folder: WorkspaceFolder, packageManager: PackageManager): Promise<CatalogsInfo | undefined> {
   if (packageManager === 'npm')
     return
@@ -86,13 +77,13 @@ export async function readWorkspaceCatalogs(folder: WorkspaceFolder, packageMana
     return
 
   const uri = Uri.joinPath(folder.uri, entry.basename)
-  const text = await getText(uri)
+  const text = await getDocumentText(uri)
 
   return entry.extractor.getWorkspaceCatalogInfo(text)?.catalogs
 }
 
 const loadPackageRecord = memoize<Uri, Promise<PackageRecord | undefined>>(async (uri) => {
-  const text = await getText(uri)
+  const text = await getDocumentText(uri)
 
   const manifestInfo = packageManifestExtractorEntry.extractor.getPackageManifestInfo(text)
   if (!manifestInfo)
@@ -119,33 +110,34 @@ async function createWorkspaceContext(folder: WorkspaceFolder): Promise<Workspac
     catalogs,
   }
 
-  const loadDocumentDependencies = memoize<Uri, Promise<ResolvedDependencyInfo[]>>(async (uri) => {
+  const loadDocumentDependencies = memoize<Uri, Promise<ResolvedDependencyInfo[] | undefined>>(async (uri) => {
     if (workspace.getWorkspaceFolder(uri)?.uri.path !== folder.uri.path)
       return []
 
     const path = uri.path
+    let dependencies: DependencyInfo[] | undefined
     if (isPackageManifestPath(path)) {
       const packageRecord = await loadPackageRecord(uri)
       if (!packageRecord)
-        return []
+        return
 
-      return createResolvedDependencies(packageRecord.dependencies, workspaceContext)
+      dependencies = packageRecord.dependencies
     } else {
       for (const entry of workspaceCatalogExtractorEntries) {
         if (!path.endsWith(`/${entry.basename}`))
           continue
 
-        const text = await getText(uri)
+        const text = await getDocumentText(uri)
 
         const catalogInfo = entry.extractor.getWorkspaceCatalogInfo(text)
         if (!catalogInfo)
-          return []
+          return
 
-        return createResolvedDependencies(catalogInfo.dependencies, workspaceContext)
+        dependencies = catalogInfo.dependencies
       }
-
-      return []
     }
+
+    return dependencies?.map((dependency) => createResolvedDependencyInfo(dependency, workspaceContext))
   }, { ttl: false, maxSize: Number.POSITIVE_INFINITY, fallbackToCachedOnError: false })
 
   return {

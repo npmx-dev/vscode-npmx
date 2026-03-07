@@ -1,5 +1,4 @@
-import type { DependencyInfo, WorkspaceCatalogExtractor, YamlNode } from '#types/extractor'
-import type { OffsetRange } from '#types/range'
+import type { DependencyInfo, OffsetRange, WorkspaceCatalogExtractor, YamlNode } from '#types/extractor'
 import type { Pair, Scalar, YAMLMap } from 'yaml'
 import { isMap, isPair, isScalar, parseDocument } from 'yaml'
 

@@ -2,7 +2,7 @@ import type { TextDocument, Uri } from 'vscode'
 import { extractorEntries, isSupportedDependencyDocument } from '#extractors'
 import { logger } from '#state'
 import { deleteWorkspaceContext, getWorkspaceContext } from '#utils/workspace'
-import { useActiveTextEditor, useDisposable, useFileSystemWatcher, watch } from 'reactive-vscode'
+import { useActiveTextEditor, useDisposable, useFileSystemWatcher, watchEffect } from 'reactive-vscode'
 import { workspace } from 'vscode'
 
 function invalidateByUri(uri: Uri) {
@@ -26,9 +26,9 @@ function warmDocument(document: TextDocument | undefined) {
 export function useWorkspaceContextLifecycle() {
   const activeEditor = useActiveTextEditor()
 
-  watch(() => activeEditor.value?.document, (document) => {
-    warmDocument(document)
-  }, { immediate: true })
+  watchEffect(() => {
+    warmDocument(activeEditor.value?.document)
+  })
 
   useDisposable(workspace.onDidOpenTextDocument((document) => {
     warmDocument(document)

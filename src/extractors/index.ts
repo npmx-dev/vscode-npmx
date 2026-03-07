@@ -3,7 +3,7 @@ import type { Extractor, PackageManifestExtractor, WorkspaceCatalogExtractor } f
 import type { TextDocument, Uri } from 'vscode'
 import { PACKAGE_JSON_BASENAME, PNPM_WORKSPACE_BASENAME, YARN_WORKSPACE_BASENAME } from '#constants'
 import { basename } from 'pathe'
-import { PackageManifestDocumentExtractor } from './package-manifest'
+import { PackageJsonDocumentExtractor } from './package-json'
 import { WorkspaceCatalogDocumentExtractor } from './workspace-catalog'
 
 interface BaseExtractorEntry<TExtractor extends Extractor = Extractor> {
@@ -20,7 +20,7 @@ interface WorkspaceCatalogExtractorEntry extends BaseExtractorEntry<WorkspaceCat
 
 type DependencyExtractorEntry = PackageManifestExtractorEntry | WorkspaceCatalogExtractorEntry
 
-const packageJsonExtractor = new PackageManifestDocumentExtractor()
+const packageJsonExtractor = new PackageJsonDocumentExtractor()
 const workspaceCatalogExtractor = new WorkspaceCatalogDocumentExtractor()
 
 export const packageManifestExtractorEntry: PackageManifestExtractorEntry = {

@@ -1,4 +1,3 @@
-import type { OffsetRange } from '#types/range'
 import type { Engines } from 'fast-npm-meta'
 
 export type {
@@ -8,6 +7,8 @@ export type {
 export type {
   Node as YamlNode,
 } from 'yaml'
+
+export type OffsetRange = [start: number, end: number]
 
 export type DependencyCategory
   = | 'dependencies'
