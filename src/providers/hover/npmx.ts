@@ -24,12 +24,12 @@ export class NpmxHoverProvider<T extends Extractor> implements HoverProvider {
     if (!dep)
       return
 
-    const parsed = parseVersion(dep.version)
+    const parsed = parseVersion(dep.rawSpec)
     if (!parsed)
       return
 
     const { protocol, version } = parsed
-    const packageName = resolvePackageName(dep.name, parsed)
+    const packageName = resolvePackageName(dep.rawName, parsed)
     if (!packageName)
       return
 

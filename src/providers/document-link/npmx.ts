@@ -26,7 +26,7 @@ export class NpmxDocumentLinkProvider<T extends Extractor> implements DocumentLi
     const parsedDeps: { dep: typeof dependencies[number], parsed: NonNullable<ReturnType<typeof parseVersion>> }[] = []
 
     for (const dep of dependencies) {
-      const parsed = parseVersion(dep.version)
+      const parsed = parseVersion(dep.rawSpec)
       if (!parsed)
         continue
 
@@ -38,25 +38,26 @@ export class NpmxDocumentLinkProvider<T extends Extractor> implements DocumentLi
     }
 
     for (const { dep, parsed } of parsedDeps) {
-      const { name, nameNode } = dep
+      const { rawName, nameNode } = dep
+      const packageName = rawName
 
       let targetVersion: string | undefined
 
       if (linkMode === 'declared') {
         targetVersion = parsed.version
       } else if (linkMode === 'resolved') {
-        const pkg = await getPackageInfo(name)
+        const pkg = await getPackageInfo(packageName)
         const exactVersion = pkg ? resolveExactVersion(pkg, parsed.version) : null
         targetVersion = exactVersion ?? parsed.version
       }
 
       const url = targetVersion
-        ? npmxPackageUrl(name, targetVersion)
-        : npmxPackageUrl(name)
+        ? npmxPackageUrl(packageName, targetVersion)
+        : npmxPackageUrl(packageName)
       // Create link for package name
       const nameRange = this.extractor.getNodeRange(document, nameNode)
       const link = new VscodeDocumentLink(nameRange, Uri.parse(url))
-      link.tooltip = `Open ${name}@${targetVersion ?? 'latest'} on npmx`
+      link.tooltip = `Open ${packageName}@${targetVersion ?? 'latest'} on npmx`
       links.push(link)
     }
 

@@ -19,11 +19,7 @@ export interface DependencyInfo<T extends ValidNode = any> {
   rawSpec: string
   nameNode: T
   specNode: T
-  versionNode: T
   catalogName?: string
-  // Backward-compatible aliases used by current providers.
-  name: string
-  version: string
 }
 
 export interface Extractor<T extends ValidNode = any> {

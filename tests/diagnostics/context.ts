@@ -24,9 +24,6 @@ export function createContext(options: CreateContextOptions): DiagnosticContext 
     rawSpec: version,
     nameNode: {},
     specNode: {},
-    versionNode: {},
-    name,
-    version,
   }
   const pkg = { distTags, versionsMeta, versionToTag: new Map() } as PackageInfo
   const parsed = parseVersion(version)

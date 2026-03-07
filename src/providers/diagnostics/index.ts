@@ -103,14 +103,14 @@ export function useDiagnostics() {
         flush()
         logger.debug(`[diagnostics] set flush: ${document.uri.path}`)
       } catch (err) {
-        logger.warn(`[diagnostics] fail to check ${ctx.dep.name} (${rule.name}): ${err}`)
+        logger.warn(`[diagnostics] fail to check ${ctx.dep.rawName} (${rule.name}): ${err}`)
       }
     }
 
     const collect = async (dep: DependencyInfo) => {
       try {
-        const parsed = parseVersion(dep.version)
-        const name = resolvePackageName(dep.name, parsed)
+        const parsed = parseVersion(dep.rawSpec)
+        const name = resolvePackageName(dep.rawName, parsed)
         if (!name)
           return
 
@@ -126,7 +126,7 @@ export function useDiagnostics() {
           runRule(rule, { dep, name, pkg, parsed, exactVersion, engines })
         }
       } catch (err) {
-        logger.warn(`[diagnostics] fail to check ${dep.name}: ${err}`)
+        logger.warn(`[diagnostics] fail to check ${dep.rawName}: ${err}`)
       }
     }
 

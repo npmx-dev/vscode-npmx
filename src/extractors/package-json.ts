@@ -71,9 +71,6 @@ export class PackageJsonExtractor implements Extractor<Node> {
       rawSpec: specNode.value,
       nameNode,
       specNode,
-      versionNode: specNode,
-      name: nameNode.value,
-      version: specNode.value,
     }
   }
 

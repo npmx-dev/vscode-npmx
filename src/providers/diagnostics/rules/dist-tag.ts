@@ -11,7 +11,7 @@ export const checkDistTag: DiagnosticRule = ({ dep, name, pkg, parsed, exactVers
     return
 
   return {
-    node: dep.versionNode,
+    node: dep.specNode,
     message: `"${name}" uses the "${tag}" version tag. This may lead to unexpected breaking changes. Consider pinning to a specific version.`,
     severity: DiagnosticSeverity.Warning,
     code: {

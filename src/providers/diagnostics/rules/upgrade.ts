@@ -25,7 +25,7 @@ export const checkUpgrade: DiagnosticRule = ({ dep, name, pkg, parsed, exactVers
   if (!parsed || !exactVersion)
     return
 
-  if (Object.hasOwn(pkg.distTags, dep.version))
+  if (Object.hasOwn(pkg.distTags, dep.rawSpec))
     return
 
   const { latest } = pkg.distTags
@@ -33,7 +33,7 @@ export const checkUpgrade: DiagnosticRule = ({ dep, name, pkg, parsed, exactVers
     const targetVersion = formatUpgradeVersion(parsed, latest)
     if (checkIgnored({ ignoreList: config.ignore.upgrade, name, version: targetVersion }))
       return
-    return createUpgradeDiagnostic(dep.versionNode, name, targetVersion)
+    return createUpgradeDiagnostic(dep.specNode, name, targetVersion)
   }
 
   const currentPreId = prerelease(exactVersion)?.[0]
@@ -51,6 +51,6 @@ export const checkUpgrade: DiagnosticRule = ({ dep, name, pkg, parsed, exactVers
     if (checkIgnored({ ignoreList: config.ignore.upgrade, name, version: targetVersion }))
       continue
 
-    return createUpgradeDiagnostic(dep.versionNode, name, targetVersion)
+    return createUpgradeDiagnostic(dep.specNode, name, targetVersion)
   }
 }

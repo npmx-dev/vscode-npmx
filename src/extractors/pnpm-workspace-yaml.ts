@@ -43,10 +43,7 @@ export class PnpmWorkspaceYamlExtractor implements Extractor<Node> {
         rawSpec: String(item.value!.value),
         nameNode: item.key,
         specNode: item.value!,
-        versionNode: item.value!,
         catalogName: meta.catalogName,
-        name: String(item.key.value),
-        version: String(item.value!.value),
       })
     })
 
@@ -110,10 +107,7 @@ export class PnpmWorkspaceYamlExtractor implements Extractor<Node> {
           rawSpec: String(item.value!.value),
           nameNode: item.key,
           specNode: item.value!,
-          versionNode: item.value!,
           catalogName: meta.catalogName,
-          name: String(item.key.value),
-          version: String(item.value!.value),
         }
         return true
       }

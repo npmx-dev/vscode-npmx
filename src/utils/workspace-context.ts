@@ -142,7 +142,6 @@ function createResolvedDependencyInfo(
     rawSpec: dependency.rawSpec,
     nameNode: dependency.nameNode,
     specNode: dependency.specNode,
-    versionNode: dependency.versionNode,
     protocol: resolution.protocol,
     catalogName: dependency.catalogName ?? resolution.catalogName,
     resolvedName: resolution.resolvedName,

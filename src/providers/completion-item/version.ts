@@ -8,7 +8,7 @@ import { formatUpgradeVersion, isSupportedProtocol, parseVersion } from '#utils/
 import { CompletionItem, CompletionItemKind } from 'vscode'
 
 export class VersionCompletionItemProvider<T extends Extractor> implements CompletionItemProvider {
-  extractor: T
+  readonly extractor: T
 
   constructor(extractor: T) {
     this.extractor = extractor
@@ -25,16 +25,16 @@ export class VersionCompletionItemProvider<T extends Extractor> implements Compl
       return
 
     const {
-      versionNode,
-      name,
-      version,
+      specNode,
+      rawName,
+      rawSpec,
     } = info
 
-    const parsed = parseVersion(version)
+    const parsed = parseVersion(rawSpec)
     if (!parsed || !isSupportedProtocol(parsed.protocol))
       return
 
-    const packageName = resolvePackageName(name, parsed)
+    const packageName = resolvePackageName(rawName, parsed)
     if (!packageName)
       return
 
@@ -59,7 +59,7 @@ export class VersionCompletionItemProvider<T extends Extractor> implements Compl
       const text = formatUpgradeVersion(parsed, version)
       const item = new CompletionItem(text, CompletionItemKind.Value)
 
-      item.range = this.extractor.getNodeRange(document, versionNode)
+      item.range = this.extractor.getNodeRange(document, specNode)
       item.insertText = text
 
       const tag = pkg.versionToTag.get(version)

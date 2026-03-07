@@ -32,7 +32,6 @@ export interface ResolvedDependencyInfo {
   rawSpec: string
   nameNode: ValidNode
   specNode: ValidNode
-  versionNode: ValidNode
   protocol: DependencyProtocol
   catalogName?: string
   resolvedName: string
