@@ -1,31 +1,22 @@
-import type { Extractor } from '#types/extractor'
 import type { CompletionItemProvider, Position, TextDocument } from 'vscode'
 import { PRERELEASE_PATTERN } from '#constants'
 import { config } from '#state'
 import { getPackageInfo } from '#utils/api/package'
+import { offsetRangeToRange } from '#utils/ast'
 import { resolvePackageName } from '#utils/package'
 import { formatUpgradeVersion, isSupportedProtocol, parseVersion } from '#utils/version'
+import { getResolvedDependencyByOffset } from '#utils/workspace-context'
 import { CompletionItem, CompletionItemKind } from 'vscode'
 
-export class VersionCompletionItemProvider<T extends Extractor> implements CompletionItemProvider {
-  readonly extractor: T
-
-  constructor(extractor: T) {
-    this.extractor = extractor
-  }
-
+export class VersionCompletionItemProvider implements CompletionItemProvider {
   async provideCompletionItems(document: TextDocument, position: Position) {
-    const root = this.extractor.parse(document.getText())
-    if (!root)
-      return
-
     const offset = document.offsetAt(position)
-    const info = this.extractor.getDependencyInfoByOffset(root, offset)
+    const info = await getResolvedDependencyByOffset(document.uri, offset)
     if (!info)
       return
 
     const {
-      specNode,
+      specRange,
       rawName,
       rawSpec,
     } = info
@@ -59,7 +50,7 @@ export class VersionCompletionItemProvider<T extends Extractor> implements Compl
       const text = formatUpgradeVersion(parsed, version)
       const item = new CompletionItem(text, CompletionItemKind.Value)
 
-      item.range = this.extractor.getNodeRange(document, specNode)
+      item.range = offsetRangeToRange(document, specRange)
       item.insertText = text
 
       const tag = pkg.versionToTag.get(version)

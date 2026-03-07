@@ -52,7 +52,7 @@ export const checkReplacement: DiagnosticRule = async ({ dep, name }) => {
   const { message, link } = getReplacementInfo(replacement)
 
   return {
-    node: dep.nameNode,
+    range: dep.nameRange,
     message: `"${name}" ${message}`,
     severity: DiagnosticSeverity.Warning,
     code: link ? { value: 'replacement', target: Uri.parse(link) } : 'replacement',

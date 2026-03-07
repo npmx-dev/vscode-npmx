@@ -1,9 +1,9 @@
-import { readdir } from 'node:fs/promises'
+import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createTextDocument } from 'jest-mock-vscode'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Uri, workspace } from 'vscode'
-import { getPackageContext, getWorkspaceContext, invalidateWorkspaceContext } from '../../src/utils/workspace-context'
+import { getPackageContext, getResolvedDependencies, getResolvedDependencyByOffset, getWorkspaceContext, invalidateWorkspaceContext } from '../../src/utils/workspace-context'
 
 const FIXTURES_ROOT = join(process.cwd(), 'tests/fixtures/workspace-context')
 const FIXTURE_NAMES = [
@@ -128,6 +128,35 @@ describe('workspace context', () => {
     expect(rootPackageContext?.packageJsonPath).toBe(join(root, 'package.json'))
   })
 
+  it('collects resolved dependencies for workspace catalog documents', async () => {
+    const root = getFixtureRoot('pnpm-workspace')
+    setWorkspaceRoot(root)
+    await setFixturePackageFiles(root)
+
+    const dependencies = await getResolvedDependencies(Uri.file(join(root, 'pnpm-workspace.yaml')))
+    expect(dependencies).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          category: 'catalog',
+          rawName: 'lodash',
+          rawSpec: '^4.17.21',
+          protocol: 'npm',
+          resolvedName: 'lodash',
+          resolvedSpec: '^4.17.21',
+        }),
+        expect.objectContaining({
+          category: 'catalogs',
+          rawName: 'vite',
+          rawSpec: 'npm:vite@latest',
+          protocol: 'npm',
+          catalogName: 'dev',
+          resolvedName: 'vite',
+          resolvedSpec: 'latest',
+        }),
+      ]),
+    )
+  })
+
   it.each([
     ['prefers packageManager in root package.json over workspace files', 'package-manager-npm', 'npm'],
     ['falls back to pnpm workspace file', 'package-manager-pnpm', 'pnpm'],
@@ -197,5 +226,39 @@ describe('workspace context', () => {
     const thirdContext = await getWorkspaceContext(target)
     expect(workspace.findFiles).toHaveBeenCalledTimes(2)
     expect(thirdContext).toBeDefined()
+  })
+
+  it('finds resolved dependencies by offset across supported documents', async () => {
+    const root = getFixtureRoot('pnpm-workspace')
+    setWorkspaceRoot(root)
+    await setFixturePackageFiles(root)
+
+    const appPackageJsonPath = join(root, 'packages/app/package.json')
+    const appPackageJsonText = await readFile(appPackageJsonPath, 'utf8')
+    const packageDependency = await getResolvedDependencyByOffset(
+      Uri.file(appPackageJsonPath),
+      appPackageJsonText.indexOf('"pkg-core"') + 2,
+    )
+
+    expect(packageDependency).toMatchObject({
+      rawName: 'pkg-core',
+      protocol: 'workspace',
+      resolvedName: 'pkg-core',
+      resolvedSpec: '2.3.4',
+    })
+
+    const workspaceYamlPath = join(root, 'pnpm-workspace.yaml')
+    const workspaceYamlText = await readFile(workspaceYamlPath, 'utf8')
+    const catalogDependency = await getResolvedDependencyByOffset(
+      Uri.file(workspaceYamlPath),
+      workspaceYamlText.indexOf('npm:vite@latest') + 1,
+    )
+
+    expect(catalogDependency).toMatchObject({
+      category: 'catalogs',
+      rawName: 'vite',
+      rawSpec: 'npm:vite@latest',
+      catalogName: 'dev',
+    })
   })
 })

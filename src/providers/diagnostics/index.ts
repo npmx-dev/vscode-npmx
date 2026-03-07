@@ -1,14 +1,17 @@
-import type { DependencyInfo, Extractor, ValidNode } from '#types/extractor'
+import type { ResolvedDependencyInfo } from '#types/context'
+import type { OffsetRange } from '#types/range'
 import type { PackageInfo } from '#utils/api/package'
 import type { ParsedVersion } from '#utils/version'
 import type { Engines } from 'fast-npm-meta'
 import type { Awaitable } from 'reactive-vscode'
 import type { Diagnostic, TextDocument, Uri } from 'vscode'
-import { extractorEntries } from '#extractors'
+import { extractorEntries, isSupportedDependencyDocument } from '#extractors'
 import { config, logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
+import { offsetRangeToRange } from '#utils/ast'
 import { resolveExactVersion, resolvePackageName } from '#utils/package'
 import { isSupportedProtocol, parseVersion } from '#utils/version'
+import { getPackageContext, getResolvedDependencies } from '#utils/workspace-context'
 import { debounce } from 'perfect-debounce'
 import { computed, useActiveTextEditor, useDisposable, useDocumentText, useFileSystemWatcher, watch } from 'reactive-vscode'
 import { languages, TabInputText, window, workspace } from 'vscode'
@@ -20,8 +23,10 @@ import { checkReplacement } from './rules/replacement'
 import { checkUpgrade } from './rules/upgrade'
 import { checkVulnerability } from './rules/vulnerability'
 
+type DiagnosticDependency = Pick<ResolvedDependencyInfo, 'nameRange' | 'rawName' | 'rawSpec' | 'specRange'>
+
 export interface DiagnosticContext {
-  dep: DependencyInfo
+  dep: DiagnosticDependency
   name: string
   pkg: PackageInfo
   parsed: ParsedVersion | null
@@ -29,10 +34,10 @@ export interface DiagnosticContext {
   engines: Engines | undefined
 }
 
-export interface NodeDiagnosticInfo extends Omit<Diagnostic, 'range' | 'source'> {
-  node: ValidNode
+export interface RangeDiagnosticInfo extends Omit<Diagnostic, 'range' | 'source'> {
+  range: OffsetRange
 }
-export type DiagnosticRule = (ctx: DiagnosticContext) => Awaitable<NodeDiagnosticInfo | undefined>
+export type DiagnosticRule = (ctx: DiagnosticContext) => Awaitable<RangeDiagnosticInfo | undefined>
 
 export function useDiagnostics() {
   const diagnosticCollection = useDisposable(languages.createDiagnosticCollection(displayName))
@@ -61,7 +66,7 @@ export function useDiagnostics() {
     return document.isClosed || document.version !== targetVersion
   }
 
-  async function collectDiagnostics(document: TextDocument, extractor: Extractor) {
+  async function collectDiagnostics(document: TextDocument) {
     logger.info(`[diagnostics] collect: ${document.uri.path}`)
     diagnosticCollection.set(document.uri, [])
 
@@ -69,14 +74,12 @@ export function useDiagnostics() {
     if (rules.length === 0)
       return
 
-    const root = extractor.parse(document.getText())
-    if (!root)
-      return
-
     const targetVersion = document.version
-
-    const dependencies = extractor.getDependenciesInfo(root)
-    const engines = extractor.getEngines?.(root)
+    const [dependencies, packageContext] = await Promise.all([
+      getResolvedDependencies(document.uri),
+      getPackageContext(document.uri),
+    ])
+    const engines = packageContext?.engines
     const diagnostics: Diagnostic[] = []
 
     const flush = debounce(() => {
@@ -95,10 +98,12 @@ export function useDiagnostics() {
         if (!diagnostic)
           return
 
+        const { range, ...rest } = diagnostic
+
         diagnostics.push({
           source: displayName,
-          range: extractor.getNodeRange(document, diagnostic.node),
-          ...diagnostic,
+          ...rest,
+          range: offsetRangeToRange(document, range),
         })
         flush()
         logger.debug(`[diagnostics] set flush: ${document.uri.path}`)
@@ -107,7 +112,7 @@ export function useDiagnostics() {
       }
     }
 
-    const collect = async (dep: DependencyInfo) => {
+    const collect = async (dep: ResolvedDependencyInfo) => {
       try {
         const parsed = parseVersion(dep.rawSpec)
         const name = resolvePackageName(dep.rawName, parsed)
@@ -141,27 +146,26 @@ export function useDiagnostics() {
       return
 
     const document = activeEditor.value.document
-    const extractor = extractorEntries.find(({ pattern }) => languages.match({ pattern }, document))?.extractor
-    if (!extractor)
+    if (!isSupportedDependencyDocument(document))
       return
 
-    collectDiagnostics(document, extractor)
+    collectDiagnostics(document)
   }, { immediate: true })
 
-  async function recollectByUri(uri: Uri, extractor: Extractor) {
+  async function recollectByUri(uri: Uri) {
     if (!diagnosticCollection.has(uri))
       return
 
     const doc = await workspace.openTextDocument(uri)
 
-    collectDiagnostics(doc, extractor)
+    collectDiagnostics(doc)
   }
 
-  extractorEntries.forEach(({ pattern, extractor }) => {
+  extractorEntries.forEach(({ pattern }) => {
     const { onDidCreate, onDidChange, onDidDelete } = useFileSystemWatcher(pattern)
 
-    onDidCreate((uri) => recollectByUri(uri, extractor))
-    onDidChange((uri) => recollectByUri(uri, extractor))
+    onDidCreate(recollectByUri)
+    onDidChange(recollectByUri)
     onDidDelete((uri) => diagnosticCollection.delete(uri))
   })
 

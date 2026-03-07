@@ -1,4 +1,5 @@
-import type { DependencyCategory, ValidNode } from '#types/extractor'
+import type { DependencyCategory } from '#types/extractor'
+import type { OffsetRange } from '#types/range'
 import type { PackageInfo } from '#utils/api/package'
 import type { Engines } from 'fast-npm-meta'
 
@@ -30,8 +31,8 @@ export interface ResolvedDependencyInfo {
   category: DependencyCategory
   rawName: string
   rawSpec: string
-  nameNode: ValidNode
-  specNode: ValidNode
+  nameRange: OffsetRange
+  specRange: OffsetRange
   protocol: DependencyProtocol
   catalogName?: string
   resolvedName: string

@@ -18,7 +18,7 @@ export const checkDeprecation: DiagnosticRule = ({ dep, name, pkg, parsed, exact
     return
 
   return {
-    node: dep.specNode,
+    range: dep.specRange,
     message: `"${formatPackageId(name, exactVersion)}" has been deprecated: ${versionInfo.deprecated}`,
     severity: DiagnosticSeverity.Error,
     code: {

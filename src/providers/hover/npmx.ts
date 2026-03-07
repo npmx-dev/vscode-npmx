@@ -1,26 +1,16 @@
-import type { Extractor } from '#types/extractor'
 import type { HoverProvider, Position, TextDocument } from 'vscode'
 import { SPACER } from '#constants'
 import { getPackageInfo } from '#utils/api/package'
 import { jsrPackageUrl, npmxDocsUrl, npmxPackageUrl } from '#utils/links'
 import { isJsrNpmPackage, jsrNpmToJsrName, resolveExactVersion, resolvePackageName } from '#utils/package'
 import { isSupportedProtocol, parseVersion } from '#utils/version'
+import { getResolvedDependencyByOffset } from '#utils/workspace-context'
 import { Hover, MarkdownString } from 'vscode'
 
-export class NpmxHoverProvider<T extends Extractor> implements HoverProvider {
-  extractor: T
-
-  constructor(extractor: T) {
-    this.extractor = extractor
-  }
-
+export class NpmxHoverProvider implements HoverProvider {
   async provideHover(document: TextDocument, position: Position) {
-    const root = this.extractor.parse(document.getText())
-    if (!root)
-      return
-
     const offset = document.offsetAt(position)
-    const dep = this.extractor.getDependencyInfoByOffset(root, offset)
+    const dep = await getResolvedDependencyByOffset(document.uri, offset)
     if (!dep)
       return
 

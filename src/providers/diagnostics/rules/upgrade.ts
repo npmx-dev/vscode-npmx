@@ -1,5 +1,5 @@
-import type { ValidNode } from '#types/extractor'
-import type { DiagnosticRule, NodeDiagnosticInfo } from '..'
+import type { OffsetRange } from '#types/range'
+import type { DiagnosticRule, RangeDiagnosticInfo } from '..'
 import { config } from '#state'
 import { checkIgnored } from '#utils/ignore'
 import { npmxPackageUrl } from '#utils/links'
@@ -9,9 +9,9 @@ import lte from 'semver/functions/lte'
 import prerelease from 'semver/functions/prerelease'
 import { DiagnosticSeverity, Uri } from 'vscode'
 
-function createUpgradeDiagnostic(node: ValidNode, name: string, targetVersion: string): NodeDiagnosticInfo {
+function createUpgradeDiagnostic(range: OffsetRange, name: string, targetVersion: string): RangeDiagnosticInfo {
   return {
-    node,
+    range,
     severity: DiagnosticSeverity.Hint,
     message: `"${name}" can be upgraded to ${targetVersion}.`,
     code: {
@@ -33,7 +33,7 @@ export const checkUpgrade: DiagnosticRule = ({ dep, name, pkg, parsed, exactVers
     const targetVersion = formatUpgradeVersion(parsed, latest)
     if (checkIgnored({ ignoreList: config.ignore.upgrade, name, version: targetVersion }))
       return
-    return createUpgradeDiagnostic(dep.specNode, name, targetVersion)
+    return createUpgradeDiagnostic(dep.specRange, name, targetVersion)
   }
 
   const currentPreId = prerelease(exactVersion)?.[0]
@@ -51,6 +51,6 @@ export const checkUpgrade: DiagnosticRule = ({ dep, name, pkg, parsed, exactVers
     if (checkIgnored({ ignoreList: config.ignore.upgrade, name, version: targetVersion }))
       continue
 
-    return createUpgradeDiagnostic(dep.specNode, name, targetVersion)
+    return createUpgradeDiagnostic(dep.specRange, name, targetVersion)
   }
 }

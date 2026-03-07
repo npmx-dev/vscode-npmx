@@ -20,8 +20,8 @@ export const { activate, deactivate } = defineExtension(() => {
     if (!config.hover.enabled)
       return
 
-    const disposables = extractorEntries.map(({ pattern, extractor }) =>
-      languages.registerHoverProvider({ pattern }, new NpmxHoverProvider(extractor)),
+    const disposables = extractorEntries.map(({ pattern }) =>
+      languages.registerHoverProvider({ pattern }, new NpmxHoverProvider()),
     )
 
     onCleanup(() => Disposable.from(...disposables).dispose())
@@ -31,10 +31,10 @@ export const { activate, deactivate } = defineExtension(() => {
     if (config.completion.version === 'off')
       return
 
-    const disposables = extractorEntries.map(({ pattern, extractor }) =>
+    const disposables = extractorEntries.map(({ pattern }) =>
       languages.registerCompletionItemProvider(
         { pattern },
-        new VersionCompletionItemProvider(extractor),
+        new VersionCompletionItemProvider(),
         ...VERSION_TRIGGER_CHARACTERS,
       ),
     )
@@ -46,8 +46,8 @@ export const { activate, deactivate } = defineExtension(() => {
     if (config.packageLinks === 'off')
       return
 
-    const disposables = extractorEntries.map(({ pattern, extractor }) =>
-      languages.registerDocumentLinkProvider({ pattern }, new NpmxDocumentLinkProvider(extractor)),
+    const disposables = extractorEntries.map(({ pattern }) =>
+      languages.registerDocumentLinkProvider({ pattern }, new NpmxDocumentLinkProvider()),
     )
 
     onCleanup(() => Disposable.from(...disposables).dispose())

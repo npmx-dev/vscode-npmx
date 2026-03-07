@@ -63,7 +63,7 @@ export const checkEngineMismatch: DiagnosticRule = ({ dep, name, pkg, parsed, ex
     .join('; ')
 
   return {
-    node: dep.specNode,
+    range: dep.specRange,
     message: `Engines mismatch for "${formatPackageId(name, exactVersion)}": ${mismatchDetails}.`,
     severity: DiagnosticSeverity.Warning,
     code: {
