@@ -1,6 +1,5 @@
 import type { PackageContext, PackageManager, ResolvedDependencyInfo, WorkspaceContext } from '#types/context'
 import type { DependencyInfo, PackageManifestInfo } from '#types/extractor'
-import type { PackageInfo } from '#utils/api/package'
 import type { CatalogsInfo } from '#utils/dependency'
 import type { MemoizedFunction } from '#utils/memoize'
 import type { WorkspaceFolder } from 'vscode'
@@ -32,44 +31,40 @@ function isPackageManifestPath(path: string) {
   return path.endsWith(`/${packageManifestExtractorEntry.basename}`)
 }
 
+function lazyInit<T>(factory: () => T): () => T {
+  let cached: { value: T } | undefined
+  return () => {
+    if (!cached)
+      cached = { value: factory() }
+    return cached.value
+  }
+}
+
 function createResolvedDependencyInfo(
   dependency: DependencyInfo,
   workspaceContext: WorkspaceContext,
 ): ResolvedDependencyInfo {
   const resolution = resolveDependencySpec(dependency.rawName, dependency.rawSpec, workspaceContext.catalogs)
 
-  let packageInfoPromise: Promise<PackageInfo | null> | undefined
-  let resolvedVersionPromise: Promise<string | null> | undefined
-
   return {
     ...dependency,
     ...resolution,
     categoryName: dependency.categoryName ?? resolution.categoryName,
-    packageInfo: () => {
-      if (!packageInfoPromise) {
-        packageInfoPromise = resolution.resolvedProtocol === 'npm'
-          ? getPackageInfo(resolution.resolvedName).then((pkg) => pkg ?? null)
-          : Promise.resolve(null)
-      }
+    packageInfo: lazyInit(
+      () => resolution.resolvedProtocol === 'npm'
+        ? getPackageInfo(resolution.resolvedName).then((pkg) => pkg ?? null)
+        : Promise.resolve(null),
+    ),
+    resolvedVersion: lazyInit(async () => {
+      if (resolution.resolvedProtocol !== 'npm')
+        return null
 
-      return packageInfoPromise
-    },
-    resolvedVersion: () => {
-      if (!resolvedVersionPromise) {
-        resolvedVersionPromise = (async () => {
-          if (resolution.resolvedProtocol !== 'npm')
-            return null
+      const pkg = await getPackageInfo(resolution.resolvedName)
+      if (!pkg)
+        return null
 
-          const pkg = await getPackageInfo(resolution.resolvedName)
-          if (!pkg)
-            return null
-
-          return resolveExactVersion(pkg, resolution.resolvedSpec)
-        })()
-      }
-
-      return resolvedVersionPromise
-    },
+      return resolveExactVersion(pkg, resolution.resolvedSpec)
+    }),
   }
 }
 
