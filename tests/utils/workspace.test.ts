@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { createTextDocument } from 'jest-mock-vscode'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Uri, workspace } from 'vscode'
-import { getPackageContext, getResolvedDependencies, getResolvedDependencyByOffset, getWorkspaceContext, invalidateWorkspaceContext } from '../../src/utils/workspace'
+import { deleteWorkspaceContext, getPackageContext, getResolvedDependencies, getResolvedDependencyByOffset, getWorkspaceContext, readWorkspaceCatalogs } from '../../src/utils/workspace'
 
 const FIXTURES_ROOT = join(process.cwd(), 'tests/fixtures/workspace')
 const FIXTURE_NAMES = [
@@ -63,7 +63,7 @@ describe('workspace context', () => {
 
   afterEach(() => {
     FIXTURE_NAMES.forEach((fixtureName) => {
-      invalidateWorkspaceContext(getFixtureRoot(fixtureName))
+      deleteWorkspaceContext(getFixtureRoot(fixtureName))
     })
     resetWorkspaceState()
   })
@@ -236,5 +236,42 @@ describe('workspace context', () => {
       rawSpec: 'npm:vite@latest',
       categoryName: 'dev',
     })
+  })
+})
+
+describe('readWorkspaceCatalogs', () => {
+  function createWorkspaceFolder(root: string) {
+    return {
+      uri: Uri.file(root),
+      name: 'workspace',
+      index: 0,
+    }
+  }
+
+  it('reads catalogs from fixture workspace config files', async () => {
+    const root = getFixtureRoot('pnpm-workspace')
+    const catalogs = await readWorkspaceCatalogs(
+      createWorkspaceFolder(root) as any,
+      'pnpm',
+    )
+
+    expect(catalogs).toEqual({
+      default: {
+        lodash: '^4.17.21',
+      },
+      dev: {
+        vite: 'npm:vite@latest',
+      },
+    })
+  })
+
+  it('returns undefined catalogs for npm workspaces', async () => {
+    const root = getFixtureRoot('package-manager-npm')
+    const catalogs = await readWorkspaceCatalogs(
+      createWorkspaceFolder(root) as any,
+      'npm',
+    )
+
+    expect(catalogs).toBeUndefined()
   })
 })

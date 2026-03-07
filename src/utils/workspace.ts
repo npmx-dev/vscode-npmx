@@ -1,17 +1,16 @@
-import type { PackageContext, ResolvedDependencyInfo, WorkspaceContext } from '#types/context'
-import type { DependencyInfo } from '#types/extractor'
+import type { PackageContext, PackageManager, ResolvedDependencyInfo, WorkspaceContext } from '#types/context'
+import type { DependencyInfo, Extractor } from '#types/extractor'
 import type { PackageInfo } from '#utils/api/package'
 import type { MemoizedFunction } from '#utils/memoize'
 import type { WorkspaceFolder } from 'vscode'
-import { isSupportedDependencyDocument, packageManifestExtractorEntry, workspaceCatalogExtractorEntries } from '#extractors'
+import { getWorkspaceCatalogExtractorEntry, isSupportedDependencyDocument, packageManifestExtractorEntry, workspaceCatalogExtractorEntries } from '#extractors'
 import { logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
 import { isOffsetInRange } from '#utils/ast'
 import { resolveDependencySpec } from '#utils/dependency'
-import { readExtractorRoot } from '#utils/document'
 import { memoize } from '#utils/memoize'
 import { resolveExactVersion } from '#utils/package'
-import { detectPackageManager, readWorkspaceCatalogs } from '#utils/package-manager'
+import { detectPackageManager } from '#utils/package-manager'
 import { normalize } from 'pathe'
 import { Uri, workspace } from 'vscode'
 import { findUp } from 'vscode-find-up'
@@ -34,6 +33,16 @@ interface WorkspaceContextState {
 
 function isPackageManifestPath(path: string) {
   return path.endsWith(`/${packageManifestExtractorEntry.basename}`)
+}
+
+async function readExtractorRoot<T>(
+  uri: Uri,
+  extractor: Extractor<T>,
+): Promise<T | undefined> {
+  const document = await workspace.openTextDocument(uri)
+  const text = document.getText()
+
+  return extractor.parse(text) ?? undefined
 }
 
 async function readPackageRecord(uri: Uri): Promise<PackageRecord | undefined> {
@@ -123,10 +132,7 @@ async function readWorkspaceCatalogDocumentDependencies(
 
   const dependencies = extractor.getWorkspaceCatalogInfo(root).dependencies
 
-  return createResolvedDependencies(
-    dependencies,
-    state.workspaceContext,
-  )
+  return createResolvedDependencies(dependencies, state.workspaceContext)
 }
 
 async function readPackageDocumentDependencies(
@@ -137,10 +143,7 @@ async function readPackageDocumentDependencies(
   if (!packageRecord)
     return []
 
-  return createResolvedDependencies(
-    packageRecord.dependencies,
-    state.workspaceContext,
-  )
+  return createResolvedDependencies(packageRecord.dependencies, state.workspaceContext)
 }
 
 async function ensurePackageContextByPath(
@@ -155,6 +158,24 @@ async function ensureResolvedDependencies(
   uri: Uri,
 ): Promise<ResolvedDependencyInfo[]> {
   return await state.loadDocumentDependencies(normalize(uri.path)) ?? []
+}
+
+export async function readWorkspaceCatalogs(
+  folder: WorkspaceFolder,
+  packageManager: PackageManager,
+) {
+  if (packageManager === 'npm')
+    return
+
+  const entry = getWorkspaceCatalogExtractorEntry(packageManager)
+  if (!entry)
+    return
+
+  const root = await readExtractorRoot(Uri.joinPath(folder.uri, entry.basename), entry.extractor)
+  if (!root)
+    return
+
+  return entry.extractor.getWorkspaceCatalogInfo(root).catalogs
 }
 
 async function buildWorkspaceContext(folder: WorkspaceFolder): Promise<WorkspaceContextState> {
@@ -248,19 +269,8 @@ const getWorkspaceContextState = memoize<Uri, Promise<WorkspaceContextState | un
   fallbackToCachedOnError: false,
 })
 
-async function findNearestPackageJsonUri(uri: Uri) {
-  if (isPackageManifestPath(uri.path))
-    return uri
-
-  return findUp(packageManifestExtractorEntry.basename, {
-    cwd: uri,
-  })
-}
-
-export function invalidateWorkspaceContext(workspacePath: string) {
-  const key = normalize(workspacePath)
-  getWorkspaceContextState.deleteByKey(key)
-  logger.info(`[workspace-context] invalidated ${key}`)
+export function deleteWorkspaceContext(workspacePath: string) {
+  getWorkspaceContextState.deleteByKey(workspacePath)
 }
 
 export async function getWorkspaceContext(uri: Uri): Promise<WorkspaceContext | undefined> {
@@ -280,12 +290,12 @@ export async function getWorkspaceContext(uri: Uri): Promise<WorkspaceContext | 
 }
 
 export async function getPackageContext(uri: Uri): Promise<PackageContext | undefined> {
-  const state = await getWorkspaceContextState(uri)
-  if (!state)
+  const packageJsonUri = await findUp(packageManifestExtractorEntry.basename, { cwd: uri })
+  if (!packageJsonUri)
     return
 
-  const packageJsonUri = await findNearestPackageJsonUri(uri)
-  if (!packageJsonUri)
+  const state = await getWorkspaceContextState(uri)
+  if (!state)
     return
 
   return ensurePackageContextByPath(state, packageJsonUri.path)

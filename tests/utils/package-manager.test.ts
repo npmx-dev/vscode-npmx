@@ -3,7 +3,7 @@ import { createTextDocument } from 'jest-mock-vscode'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Uri, workspace } from 'vscode'
 import { packageManifestExtractorEntry } from '../../src/extractors'
-import { detectPackageManager, readWorkspaceCatalogs } from '../../src/utils/package-manager'
+import { detectPackageManager } from '../../src/utils/package-manager'
 
 const FIXTURES_ROOT = join(process.cwd(), 'tests/fixtures/workspace')
 
@@ -58,32 +58,5 @@ describe('package manager', () => {
     const packageManager = await detectPackageManager(createWorkspaceFolder(root) as any)
 
     expect(packageManager).toBe('pnpm')
-  })
-
-  it('reads catalogs from fixture workspace config files', async () => {
-    const root = getFixtureRoot('pnpm-workspace')
-    const catalogs = await readWorkspaceCatalogs(
-      createWorkspaceFolder(root) as any,
-      'pnpm',
-    )
-
-    expect(catalogs).toEqual({
-      default: {
-        lodash: '^4.17.21',
-      },
-      dev: {
-        vite: 'npm:vite@latest',
-      },
-    })
-  })
-
-  it('returns undefined catalogs for npm workspaces', async () => {
-    const root = getFixtureRoot('package-manager-npm')
-    const catalogs = await readWorkspaceCatalogs(
-      createWorkspaceFolder(root) as any,
-      'npm',
-    )
-
-    expect(catalogs).toBeUndefined()
   })
 })

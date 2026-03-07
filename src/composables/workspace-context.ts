@@ -1,7 +1,7 @@
 import type { TextDocument, Uri } from 'vscode'
 import { extractorEntries, isSupportedDependencyDocument } from '#extractors'
 import { logger } from '#state'
-import { getWorkspaceContext, invalidateWorkspaceContext } from '#utils/workspace'
+import { deleteWorkspaceContext, getWorkspaceContext } from '#utils/workspace'
 import { useActiveTextEditor, useDisposable, useFileSystemWatcher, watch } from 'reactive-vscode'
 import { workspace } from 'vscode'
 
@@ -10,7 +10,8 @@ function invalidateByUri(uri: Uri) {
   if (!folder)
     return
 
-  invalidateWorkspaceContext(folder.uri.path)
+  deleteWorkspaceContext(folder.uri.path)
+  logger.info(`[workspace-context] invalidated ${folder.uri.path}`)
 }
 
 function warmDocument(document: TextDocument | undefined) {

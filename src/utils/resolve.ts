@@ -1,3 +1,4 @@
+import type { PackageManager } from '#types/context'
 import type { Uri } from 'vscode'
 import { workspace } from 'vscode'
 
@@ -7,6 +8,7 @@ interface PackageManifest {
   name: string
   /** Package version specifier. */
   version: string
+  packageManager?: PackageManager
 }
 
 /**
