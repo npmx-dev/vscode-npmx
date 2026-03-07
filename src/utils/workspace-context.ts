@@ -6,7 +6,7 @@ import { PACKAGE_JSON_BASENAME, PNPM_WORKSPACE_BASENAME, YARN_WORKSPACE_BASENAME
 import { isSupportedDependencyDocument, packageJsonExtractor, workspaceCatalogExtractor } from '#extractors'
 import { logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
-import { getNodeOffsetRange, isOffsetInRange } from '#utils/ast'
+import { isOffsetInRange } from '#utils/ast'
 import { resolveDependencySpec } from '#utils/dependency-spec'
 import { resolveExactVersion } from '#utils/package'
 import { dirname, join, normalize, resolve } from 'pathe'
@@ -148,13 +148,9 @@ function createResolvedDependencyInfo(
   let resolvedVersionPromise: Promise<string | null> | undefined
 
   return {
-    category: dependency.category,
-    rawName: dependency.rawName,
-    rawSpec: dependency.rawSpec,
-    nameRange: getNodeOffsetRange(dependency.nameNode),
-    specRange: getNodeOffsetRange(dependency.specNode),
+    ...dependency,
     protocol: resolution.protocol,
-    catalogName: dependency.catalogName ?? resolution.catalogName,
+    categoryName: dependency.categoryName ?? resolution.categoryName,
     resolvedName: resolution.resolvedName,
     resolvedSpec: resolution.resolvedSpec,
     packageInfo: () => {
@@ -236,9 +232,9 @@ async function readCatalogs(
   const catalogs: Record<string, Record<string, string>> = {}
 
   for (const dependency of workspaceCatalogExtractor.getDependenciesInfo(root)) {
-    const catalogName = dependency.category === 'catalog' ? 'default' : dependency.catalogName || 'default'
-    catalogs[catalogName] ??= {}
-    catalogs[catalogName][dependency.rawName] = dependency.rawSpec
+    const categoryName = dependency.category === 'catalog' ? 'default' : dependency.categoryName || 'default'
+    catalogs[categoryName] ??= {}
+    catalogs[categoryName][dependency.rawName] = dependency.rawSpec
   }
 
   return Object.keys(catalogs).length > 0 ? catalogs : undefined

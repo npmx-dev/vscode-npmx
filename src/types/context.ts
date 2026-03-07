@@ -1,5 +1,4 @@
-import type { DependencyCategory } from '#types/extractor'
-import type { OffsetRange } from '#types/range'
+import type { DependencyInfo } from '#types/extractor'
 import type { PackageInfo } from '#utils/api/package'
 import type { Engines } from 'fast-npm-meta'
 
@@ -27,14 +26,8 @@ export interface PackageContext {
   dependencies: Map<string, ResolvedDependencyInfo>
 }
 
-export interface ResolvedDependencyInfo {
-  category: DependencyCategory
-  rawName: string
-  rawSpec: string
-  nameRange: OffsetRange
-  specRange: OffsetRange
+export interface ResolvedDependencyInfo extends DependencyInfo {
   protocol: DependencyProtocol
-  catalogName?: string
   resolvedName: string
   resolvedSpec: string
   packageInfo: () => Promise<PackageInfo | null>

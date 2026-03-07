@@ -1,10 +1,8 @@
 import type { DependencyCategory, DependencyInfo, Extractor } from '#types/extractor'
+import type { OffsetRange } from '#types/range'
 import type { Engines } from 'fast-npm-meta'
 import type { Node } from 'jsonc-parser'
-import type { TextDocument } from 'vscode'
-import { isInRange } from '#utils/ast'
-import { findNodeAtLocation, findNodeAtOffset, parseTree } from 'jsonc-parser'
-import { Range } from 'vscode'
+import { findNodeAtLocation, parseTree } from 'jsonc-parser'
 
 const DEPENDENCY_SECTIONS: DependencyCategory[] = [
   'dependencies',
@@ -15,13 +13,6 @@ const DEPENDENCY_SECTIONS: DependencyCategory[] = [
 
 export class PackageJsonExtractor implements Extractor<Node> {
   parse = (text: string) => parseTree(text) ?? null
-
-  getNodeRange(doc: TextDocument, node: Node) {
-    const start = doc.positionAt(node.offset + 1)
-    const end = doc.positionAt(node.offset + node.length - 1)
-
-    return new Range(start, end)
-  }
 
   private getStringValue(root: Node, key: string): string | undefined {
     const node = findNodeAtLocation(root, [key])
@@ -40,19 +31,11 @@ export class PackageJsonExtractor implements Extractor<Node> {
     return this.getStringValue(root, 'packageManager')
   }
 
-  private getDependencySection(root: Node, node: Node): DependencyCategory | undefined {
-    return DEPENDENCY_SECTIONS.find((section) => {
-      const dep = findNodeAtLocation(root, [section])
-      if (!dep || !dep.parent)
-        return false
-
-      const { offset, length } = dep.parent.children![1]
-
-      return isInRange(node.offset, [offset, offset + length])
-    })
+  private getStringNodeRange(node: Node): OffsetRange {
+    return [node.offset + 1, node.offset + node.length - 1]
   }
 
-  private parseDependencyNode(node: Node, category: DependencyCategory): DependencyInfo<Node> | undefined {
+  private parseDependencyNode(node: Node, category: DependencyCategory): DependencyInfo | undefined {
     if (!node.children?.length)
       return
 
@@ -69,13 +52,13 @@ export class PackageJsonExtractor implements Extractor<Node> {
       category,
       rawName: nameNode.value,
       rawSpec: specNode.value,
-      nameNode,
-      specNode,
+      nameRange: this.getStringNodeRange(nameNode),
+      specRange: this.getStringNodeRange(specNode),
     }
   }
 
   getDependenciesInfo(root: Node) {
-    const result: DependencyInfo<Node>[] = []
+    const result: DependencyInfo[] = []
 
     DEPENDENCY_SECTIONS.forEach((section) => {
       const node = findNodeAtLocation(root, [section])
@@ -110,17 +93,5 @@ export class PackageJsonExtractor implements Extractor<Node> {
     }
 
     return engines
-  }
-
-  getDependencyInfoByOffset(root: Node, offset: number) {
-    const node = findNodeAtOffset(root, offset)
-    if (!node || node.type !== 'string')
-      return
-
-    const category = this.getDependencySection(root, node)
-    if (!category)
-      return
-
-    return this.parseDependencyNode(node.parent!, category)
   }
 }

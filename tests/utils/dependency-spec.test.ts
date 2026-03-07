@@ -61,7 +61,7 @@ describe('resolveDependencySpec', () => {
       },
     })).toMatchObject({
       protocol: 'catalog',
-      catalogName: 'default',
+      categoryName: 'default',
       resolvedName: 'lodash',
       resolvedSpec: '^4.17.21',
     })
@@ -74,7 +74,7 @@ describe('resolveDependencySpec', () => {
       },
     })).toMatchObject({
       protocol: 'catalog',
-      catalogName: 'dev',
+      categoryName: 'dev',
       resolvedName: 'vite',
       resolvedSpec: 'latest',
     })

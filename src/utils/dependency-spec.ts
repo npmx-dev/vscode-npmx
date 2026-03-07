@@ -14,18 +14,18 @@ export interface ResolveDependencySpecOptions {
 
 export interface DependencySpecResolution {
   protocol: DependencyProtocol
-  catalogName?: string
+  categoryName?: string
   resolvedName: string
   resolvedSpec: string
   finalProtocol: DependencyProtocol
 }
 
-const DEFAULT_CATALOG_NAME = 'default'
+const DEFAULT_CATEGORY_NAME = 'default'
 const GIT_PATTERN = /^(?:git\+|git:\/\/|github:|gitlab:|bitbucket:|ssh:\/\/git@)/i
 const HTTP_PATTERN = /^https?:/i
 
-export function normalizeCatalogName(name: string | undefined): string {
-  return name?.trim() || DEFAULT_CATALOG_NAME
+export function normalizeCategoryName(name: string | undefined): string {
+  return name?.trim() || DEFAULT_CATEGORY_NAME
 }
 
 function splitAliasSpec(value: string): { name: string, spec: string } | undefined {
@@ -104,9 +104,9 @@ function resolveEffectiveSpec(rawName: string, rawSpec: string, options: Resolve
   const spec = rawSpec.trim()
 
   if (spec.startsWith('catalog:')) {
-    const catalogName = normalizeCatalogName(spec.slice('catalog:'.length))
-    const catalogKey = `${catalogName}:${rawName}`
-    if (seenCatalogs.has(catalogKey)) {
+    const categoryName = normalizeCategoryName(spec.slice('catalog:'.length))
+    const categoryKey = `${categoryName}:${rawName}`
+    if (seenCatalogs.has(categoryKey)) {
       return {
         resolvedName: rawName,
         resolvedSpec: spec,
@@ -114,7 +114,7 @@ function resolveEffectiveSpec(rawName: string, rawSpec: string, options: Resolve
       }
     }
 
-    const catalogSpec = options.catalogs?.[catalogName]?.[rawName]
+    const catalogSpec = options.catalogs?.[categoryName]?.[rawName]
     if (!catalogSpec) {
       return {
         resolvedName: rawName,
@@ -124,7 +124,7 @@ function resolveEffectiveSpec(rawName: string, rawSpec: string, options: Resolve
     }
 
     const nextSeenCatalogs = new Set(seenCatalogs)
-    nextSeenCatalogs.add(catalogKey)
+    nextSeenCatalogs.add(categoryKey)
     return resolveEffectiveSpec(rawName, catalogSpec, options, nextSeenCatalogs)
   }
 
@@ -180,7 +180,7 @@ export function resolveDependencySpec(rawName: string, rawSpec: string, options:
   if (spec.startsWith('catalog:')) {
     return {
       protocol: 'catalog',
-      catalogName: normalizeCatalogName(spec.slice('catalog:'.length)),
+      categoryName: normalizeCategoryName(spec.slice('catalog:'.length)),
       ...effective,
     }
   }

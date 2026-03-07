@@ -149,7 +149,7 @@ describe('workspace context', () => {
           rawName: 'vite',
           rawSpec: 'npm:vite@latest',
           protocol: 'npm',
-          catalogName: 'dev',
+          categoryName: 'dev',
           resolvedName: 'vite',
           resolvedSpec: 'latest',
         }),
@@ -258,7 +258,7 @@ describe('workspace context', () => {
       category: 'catalogs',
       rawName: 'vite',
       rawSpec: 'npm:vite@latest',
-      catalogName: 'dev',
+      categoryName: 'dev',
     })
   })
 })
