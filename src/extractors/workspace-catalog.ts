@@ -1,6 +1,6 @@
-import type { DependencyInfo, WorkspaceCatalogExtractor } from '#types/extractor'
+import type { DependencyInfo, WorkspaceCatalogExtractor, YamlNode } from '#types/extractor'
 import type { OffsetRange } from '#types/range'
-import type { Node, Pair, Scalar, YAMLMap } from 'yaml'
+import type { Pair, Scalar, YAMLMap } from 'yaml'
 import { isMap, isPair, isScalar, parseDocument } from 'yaml'
 
 const CATALOG_SECTION = 'catalog'
@@ -16,15 +16,15 @@ type CatalogEntryVisitor = (
   },
 ) => boolean | void
 
-export class WorkspaceCatalogDocumentExtractor implements WorkspaceCatalogExtractor<Node> {
+export class WorkspaceCatalogDocumentExtractor implements WorkspaceCatalogExtractor<YamlNode> {
   parse = (text: string) => parseDocument(text).contents
 
-  private getScalarRange(node: Node): OffsetRange {
+  private getScalarRange(node: YamlNode): OffsetRange {
     const [start, end] = node.range!
     return [start, end]
   }
 
-  getDependenciesInfo(root: Node): DependencyInfo[] {
+  getDependenciesInfo(root: YamlNode): DependencyInfo[] {
     if (!isMap(root))
       return []
 
@@ -44,7 +44,11 @@ export class WorkspaceCatalogDocumentExtractor implements WorkspaceCatalogExtrac
     return result
   }
 
-  getWorkspaceCatalogInfo(root: Node) {
+  getWorkspaceCatalogInfo(text: string) {
+    const root = this.parse(text)
+    if (!root)
+      return
+
     const dependencies = this.getDependenciesInfo(root)
     const catalogs: Record<string, Record<string, string>> = {}
 

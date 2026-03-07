@@ -1,5 +1,5 @@
 import type { PackageContext, PackageManager, ResolvedDependencyInfo, WorkspaceContext } from '#types/context'
-import type { DependencyInfo, Extractor } from '#types/extractor'
+import type { DependencyInfo, PackageManifestInfo } from '#types/extractor'
 import type { PackageInfo } from '#utils/api/package'
 import type { MemoizedFunction } from '#utils/memoize'
 import type { WorkspaceFolder } from 'vscode'
@@ -11,58 +11,24 @@ import { resolveDependencySpec } from '#utils/dependency'
 import { memoize } from '#utils/memoize'
 import { resolveExactVersion } from '#utils/package'
 import { detectPackageManager } from '#utils/package-manager'
-import { normalize } from 'pathe'
 import { Uri, workspace } from 'vscode'
 import { findUp } from 'vscode-find-up'
+import { getText } from './resolve'
 
-interface PackageRecord {
+interface PackageRecord extends PackageManifestInfo {
   packageJsonPath: string
-  name?: string
-  version?: string
-  engines?: PackageContext['engines']
-  dependencies: DependencyInfo[]
 }
 
 interface WorkspaceContextState {
   folder: WorkspaceFolder
   workspaceContext: WorkspaceContext
-  loadPackageRecord: MemoizedFunction<string, Promise<PackageRecord | undefined>>
-  loadPackageContext: MemoizedFunction<string, Promise<PackageContext | undefined>>
-  loadDocumentDependencies: MemoizedFunction<string, Promise<ResolvedDependencyInfo[]>>
+  loadPackageRecord: MemoizedFunction<Uri, Promise<PackageRecord | undefined>>
+  loadPackageContext: MemoizedFunction<Uri, Promise<PackageContext | undefined>>
+  loadDocumentDependencies: MemoizedFunction<Uri, Promise<ResolvedDependencyInfo[]>>
 }
 
 function isPackageManifestPath(path: string) {
   return path.endsWith(`/${packageManifestExtractorEntry.basename}`)
-}
-
-async function readExtractorRoot<T>(
-  uri: Uri,
-  extractor: Extractor<T>,
-): Promise<T | undefined> {
-  const document = await workspace.openTextDocument(uri)
-  const text = document.getText()
-
-  return extractor.parse(text) ?? undefined
-}
-
-async function readPackageRecord(uri: Uri): Promise<PackageRecord | undefined> {
-  const root = await readExtractorRoot(uri, packageManifestExtractorEntry.extractor)
-  if (!root)
-    return
-
-  const manifestInfo = packageManifestExtractorEntry.extractor.getPackageManifestInfo(root)
-
-  return {
-    packageJsonPath: normalize(uri.path),
-    name: manifestInfo.name,
-    version: manifestInfo.version,
-    engines: manifestInfo.engines,
-    dependencies: manifestInfo.dependencies,
-  }
-}
-
-async function ensurePackageRecordByPath(state: WorkspaceContextState, packageJsonPath: string): Promise<PackageRecord | undefined> {
-  return state.loadPackageRecord(normalize(packageJsonPath))
 }
 
 function createResolvedDependencyInfo(
@@ -117,49 +83,6 @@ function createResolvedDependencies(
   )
 }
 
-async function readWorkspaceCatalogDocumentDependencies(
-  state: WorkspaceContextState,
-  basename: string,
-  extractor: (typeof workspaceCatalogExtractorEntries)[number]['extractor'],
-  uri: Uri,
-) {
-  if (!uri.path.endsWith(`/${basename}`))
-    return []
-
-  const root = await readExtractorRoot(uri, extractor)
-  if (!root)
-    return []
-
-  const dependencies = extractor.getWorkspaceCatalogInfo(root).dependencies
-
-  return createResolvedDependencies(dependencies, state.workspaceContext)
-}
-
-async function readPackageDocumentDependencies(
-  state: WorkspaceContextState,
-  packageJsonPath: string,
-) {
-  const packageRecord = await ensurePackageRecordByPath(state, packageJsonPath)
-  if (!packageRecord)
-    return []
-
-  return createResolvedDependencies(packageRecord.dependencies, state.workspaceContext)
-}
-
-async function ensurePackageContextByPath(
-  state: WorkspaceContextState,
-  packageJsonPath: string,
-): Promise<PackageContext | undefined> {
-  return state.loadPackageContext(normalize(packageJsonPath))
-}
-
-async function ensureResolvedDependencies(
-  state: WorkspaceContextState,
-  uri: Uri,
-): Promise<ResolvedDependencyInfo[]> {
-  return await state.loadDocumentDependencies(normalize(uri.path)) ?? []
-}
-
 export async function readWorkspaceCatalogs(
   folder: WorkspaceFolder,
   packageManager: PackageManager,
@@ -171,15 +94,14 @@ export async function readWorkspaceCatalogs(
   if (!entry)
     return
 
-  const root = await readExtractorRoot(Uri.joinPath(folder.uri, entry.basename), entry.extractor)
-  if (!root)
-    return
+  const uri = Uri.joinPath(folder.uri, entry.basename)
+  const text = await getText(uri)
 
-  return entry.extractor.getWorkspaceCatalogInfo(root).catalogs
+  return entry.extractor.getWorkspaceCatalogInfo(text)?.catalogs
 }
 
 async function buildWorkspaceContext(folder: WorkspaceFolder): Promise<WorkspaceContextState> {
-  const workspacePath = normalize(folder.uri.path)
+  const workspacePath = folder.uri.path
   const packageManager = await detectPackageManager(folder)
   const catalogs = await readWorkspaceCatalogs(folder, packageManager)
 
@@ -193,27 +115,39 @@ async function buildWorkspaceContext(folder: WorkspaceFolder): Promise<Workspace
     },
   } as WorkspaceContextState
 
-  state.loadPackageRecord = memoize<string, Promise<PackageRecord | undefined>>(async (normalizedPath) => {
-    if (workspace.getWorkspaceFolder(Uri.file(normalizedPath))?.uri.path !== state.folder.uri.path)
+  state.loadPackageRecord = memoize<Uri, Promise<PackageRecord | undefined>>(async (uri) => {
+    if (workspace.getWorkspaceFolder(uri)?.uri.path !== state.folder.uri.path)
       return
 
-    return readPackageRecord(Uri.file(normalizedPath))
+    const text = await getText(uri)
+
+    const manifestInfo = packageManifestExtractorEntry.extractor.getPackageManifestInfo(text)
+    if (!manifestInfo)
+      return
+
+    return {
+      packageJsonPath: uri.path,
+      name: manifestInfo.name,
+      version: manifestInfo.version,
+      engines: manifestInfo.engines,
+      dependencies: manifestInfo.dependencies,
+    }
   }, {
     ttl: 0,
     maxSize: Number.POSITIVE_INFINITY,
     fallbackToCachedOnError: false,
   })
 
-  state.loadPackageContext = memoize<string, Promise<PackageContext | undefined>>(async (normalizedPath) => {
-    const packageRecord = await ensurePackageRecordByPath(state, normalizedPath)
+  state.loadPackageContext = memoize<Uri, Promise<PackageContext | undefined>>(async (uri) => {
+    const packageRecord = await state.loadPackageRecord(uri)
     if (!packageRecord)
       return
 
-    const dependencies = await state.loadDocumentDependencies(normalizedPath) ?? []
+    const dependencies = await state.loadDocumentDependencies(uri) ?? []
 
     const packageContext: PackageContext = {
       workspaceContext: state.workspaceContext,
-      packageJsonPath: normalizedPath,
+      packageJsonPath: uri.path,
       engines: packageRecord.engines,
       dependencies: new Map(),
     }
@@ -228,25 +162,30 @@ async function buildWorkspaceContext(folder: WorkspaceFolder): Promise<Workspace
     fallbackToCachedOnError: false,
   })
 
-  state.loadDocumentDependencies = memoize<string, Promise<ResolvedDependencyInfo[]>>(async (normalizedPath) => {
-    if (isPackageManifestPath(normalizedPath)) {
-      return readPackageDocumentDependencies(state, normalizedPath)
+  state.loadDocumentDependencies = memoize<Uri, Promise<ResolvedDependencyInfo[]>>(async (uri) => {
+    const path = uri.path
+    if (isPackageManifestPath(path)) {
+      const packageRecord = await state.loadPackageRecord(uri)
+      if (!packageRecord)
+        return []
+
+      return createResolvedDependencies(packageRecord.dependencies, state.workspaceContext)
+    } else {
+      for (const entry of workspaceCatalogExtractorEntries) {
+        if (!path.endsWith(`/${entry.basename}`))
+          continue
+
+        const text = await getText(uri)
+
+        const catalogInfo = entry.extractor.getWorkspaceCatalogInfo(text)
+        if (!catalogInfo)
+          return []
+
+        return createResolvedDependencies(catalogInfo.dependencies, state.workspaceContext)
+      }
+
+      return []
     }
-
-    for (const entry of workspaceCatalogExtractorEntries) {
-      if (!normalizedPath.endsWith(`/${entry.basename}`))
-        continue
-
-      const dependencies = await readWorkspaceCatalogDocumentDependencies(
-        state,
-        entry.basename,
-        entry.extractor,
-        Uri.file(normalizedPath),
-      )
-      return dependencies
-    }
-
-    return []
   }, {
     ttl: 0,
     maxSize: Number.POSITIVE_INFINITY,
@@ -282,9 +221,9 @@ export async function getWorkspaceContext(uri: Uri): Promise<WorkspaceContext | 
     return
 
   if (isPackageManifestPath(uri.path))
-    await ensurePackageContextByPath(state, uri.path)
+    await state.loadPackageContext(uri)
   else
-    await ensureResolvedDependencies(state, uri)
+    await state.loadDocumentDependencies(uri)
 
   return state.workspaceContext
 }
@@ -298,7 +237,7 @@ export async function getPackageContext(uri: Uri): Promise<PackageContext | unde
   if (!state)
     return
 
-  return ensurePackageContextByPath(state, packageJsonUri.path)
+  return state.loadPackageContext(packageJsonUri)
 }
 
 export async function getResolvedDependencies(uri: Uri): Promise<ResolvedDependencyInfo[]> {
@@ -306,7 +245,7 @@ export async function getResolvedDependencies(uri: Uri): Promise<ResolvedDepende
   if (!state)
     return []
 
-  return ensureResolvedDependencies(state, uri)
+  return await state.loadDocumentDependencies(uri) ?? []
 }
 
 export async function getResolvedDependencyByOffset(uri: Uri, offset: number): Promise<ResolvedDependencyInfo | undefined> {

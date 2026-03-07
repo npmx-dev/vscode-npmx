@@ -2,6 +2,11 @@ import type { PackageManager } from '#types/context'
 import type { Uri } from 'vscode'
 import { workspace } from 'vscode'
 
+export async function getText(uri: Uri) {
+  const document = await workspace.openTextDocument(uri)
+  return document.getText()
+}
+
 /** A parsed `package.json` manifest file. */
 interface PackageManifest {
   /** Package name. */

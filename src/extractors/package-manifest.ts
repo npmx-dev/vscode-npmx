@@ -1,7 +1,6 @@
-import type { DependencyCategory, DependencyInfo, PackageManifestExtractor } from '#types/extractor'
+import type { DependencyCategory, DependencyInfo, JsonNode, PackageManifestExtractor } from '#types/extractor'
 import type { OffsetRange } from '#types/range'
 import type { Engines } from 'fast-npm-meta'
-import type { Node } from 'jsonc-parser'
 import { findNodeAtLocation, parseTree } from 'jsonc-parser'
 
 const DEPENDENCY_SECTIONS: DependencyCategory[] = [
@@ -11,31 +10,31 @@ const DEPENDENCY_SECTIONS: DependencyCategory[] = [
   'optionalDependencies',
 ]
 
-export class PackageManifestDocumentExtractor implements PackageManifestExtractor<Node> {
+export class PackageManifestDocumentExtractor implements PackageManifestExtractor<JsonNode> {
   parse = (text: string) => parseTree(text) ?? null
 
-  private getStringValue(root: Node, key: string): string | undefined {
+  private getStringValue(root: JsonNode, key: string): string | undefined {
     const node = findNodeAtLocation(root, [key])
     return typeof node?.value === 'string' ? node.value : undefined
   }
 
-  getPackageName(root: Node): string | undefined {
+  getPackageName(root: JsonNode): string | undefined {
     return this.getStringValue(root, 'name')
   }
 
-  getPackageVersion(root: Node): string | undefined {
+  getPackageVersion(root: JsonNode): string | undefined {
     return this.getStringValue(root, 'version')
   }
 
-  getPackageManager(root: Node): string | undefined {
+  getPackageManager(root: JsonNode): string | undefined {
     return this.getStringValue(root, 'packageManager')
   }
 
-  private getStringNodeRange(node: Node): OffsetRange {
+  private getStringNodeRange(node: JsonNode): OffsetRange {
     return [node.offset + 1, node.offset + node.length - 1]
   }
 
-  private parseDependencyNode(node: Node, category: DependencyCategory): DependencyInfo | undefined {
+  private parseDependencyNode(node: JsonNode, category: DependencyCategory): DependencyInfo | undefined {
     if (!node.children?.length)
       return
 
@@ -57,7 +56,7 @@ export class PackageManifestDocumentExtractor implements PackageManifestExtracto
     }
   }
 
-  getDependenciesInfo(root: Node) {
+  getDependenciesInfo(root: JsonNode) {
     const result: DependencyInfo[] = []
 
     DEPENDENCY_SECTIONS.forEach((section) => {
@@ -76,7 +75,7 @@ export class PackageManifestDocumentExtractor implements PackageManifestExtracto
     return result
   }
 
-  getEngines(root: Node): Engines | undefined {
+  getEngines(root: JsonNode): Engines | undefined {
     const enginesNode = findNodeAtLocation(root, ['engines'])
     if (enginesNode?.type !== 'object' || !enginesNode.children?.length)
       return
@@ -95,7 +94,11 @@ export class PackageManifestDocumentExtractor implements PackageManifestExtracto
     return engines
   }
 
-  getPackageManifestInfo(root: Node) {
+  getPackageManifestInfo(text: string) {
+    const root = this.parse(text)
+    if (!root)
+      return
+
     return {
       name: this.getPackageName(root),
       version: this.getPackageVersion(root),

@@ -1,6 +1,14 @@
 import type { OffsetRange } from '#types/range'
 import type { Engines } from 'fast-npm-meta'
 
+export type {
+  Node as JsonNode,
+} from 'jsonc-parser'
+
+export type {
+  Node as YamlNode,
+} from 'yaml'
+
 export type DependencyCategory
   = | 'dependencies'
     | 'devDependencies'
@@ -40,9 +48,9 @@ export interface Extractor<T = any> {
 }
 
 export interface PackageManifestExtractor<T = any> extends Extractor<T> {
-  getPackageManifestInfo: (root: T) => PackageManifestInfo
+  getPackageManifestInfo: (text: string) => PackageManifestInfo | undefined
 }
 
 export interface WorkspaceCatalogExtractor<T = any> extends Extractor<T> {
-  getWorkspaceCatalogInfo: (root: T) => WorkspaceCatalogInfo
+  getWorkspaceCatalogInfo: (text: string) => WorkspaceCatalogInfo | undefined
 }
