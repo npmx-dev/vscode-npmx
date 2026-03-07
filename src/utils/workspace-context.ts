@@ -1,13 +1,14 @@
-import type { PackageContext, PackageManager, ResolvedDependencyInfo, WorkspaceContext } from '#types/context'
+import type { PackageContext, ResolvedDependencyInfo, WorkspaceContext } from '#types/context'
 import type { DependencyInfo, Extractor } from '#types/extractor'
 import type { PackageInfo } from '#utils/api/package'
 import type { TextDocument, WorkspaceFolder } from 'vscode'
-import { getWorkspaceCatalogExtractorEntry, isSupportedDependencyDocument, packageManifestExtractorEntry, workspaceCatalogExtractorEntries } from '#extractors'
+import { isSupportedDependencyDocument, packageManifestExtractorEntry, workspaceCatalogExtractorEntries } from '#extractors'
 import { logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
 import { isOffsetInRange } from '#utils/ast'
 import { resolveDependencySpec } from '#utils/dependency-spec'
 import { resolveExactVersion } from '#utils/package'
+import { detectPackageManager, readWorkspaceCatalogs } from '#utils/package-manager'
 import { dirname, join, normalize, resolve } from 'pathe'
 import { Uri, workspace } from 'vscode'
 
@@ -205,43 +206,6 @@ function createResolvedDependencies(
   )
 }
 
-async function detectPackageManager(folder: WorkspaceFolder, openDocuments: Map<string, TextDocument>): Promise<PackageManager> {
-  const rootPackageUri = Uri.joinPath(folder.uri, packageManifestExtractorEntry.basename)
-  const rootPackage = await readExtractorRoot(rootPackageUri, packageManifestExtractorEntry.extractor, openDocuments)
-  if (rootPackage) {
-    const declaredPackageManager = packageManifestExtractorEntry.extractor.getPackageManifestInfo(rootPackage).packageManager
-    const packageManagerName = declaredPackageManager?.split('@')[0]
-    if (packageManagerName === 'npm' || packageManagerName === 'pnpm' || packageManagerName === 'yarn')
-      return packageManagerName
-  }
-
-  for (const entry of workspaceCatalogExtractorEntries) {
-    if (await readDocumentText(Uri.joinPath(folder.uri, entry.basename), openDocuments))
-      return entry.packageManager
-  }
-
-  return 'npm'
-}
-
-async function readCatalogs(
-  folder: WorkspaceFolder,
-  packageManager: PackageManager,
-  openDocuments: Map<string, TextDocument>,
-) {
-  if (packageManager === 'npm')
-    return
-
-  const entry = getWorkspaceCatalogExtractorEntry(packageManager)
-  if (!entry)
-    return
-
-  const root = await readExtractorRoot(Uri.joinPath(folder.uri, entry.basename), entry.extractor, openDocuments)
-  if (!root)
-    return
-
-  return entry.extractor.getWorkspaceCatalogInfo(root).catalogs
-}
-
 async function readWorkspaceCatalogDocumentDependencies(
   basename: string,
   extractor: (typeof workspaceCatalogExtractorEntries)[number]['extractor'],
@@ -272,8 +236,8 @@ async function readWorkspaceCatalogDocumentDependencies(
 async function buildWorkspaceContext(folder: WorkspaceFolder): Promise<WorkspaceContextState> {
   const workspacePath = normalize(folder.uri.path)
   const openDocuments = getOpenDependencyDocuments(workspacePath)
-  const packageManager = await detectPackageManager(folder, openDocuments)
-  const catalogs = await readCatalogs(folder, packageManager, openDocuments)
+  const packageManager = await detectPackageManager(folder, openDocuments, readDocumentText, readExtractorRoot)
+  const catalogs = await readWorkspaceCatalogs(folder, packageManager, openDocuments, readExtractorRoot)
   const packageUris = await collectPackageUris(folder, openDocuments)
   const packageRecords = (await Promise.all(packageUris.map((uri: Uri) => readPackageRecord(uri, openDocuments))))
     .filter((record: PackageRecord | undefined): record is PackageRecord => record != null)
