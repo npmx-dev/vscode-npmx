@@ -46,12 +46,12 @@ interface PackageContext {
 上下文服务按 workspace path 做缓存，并提供这些方法：
 
 ```ts
-getWorkspaceContext(uri: Uri): Promise<WorkspaceContext | undefined>
-getPackageContext(uri: Uri): Promise<PackageContext | undefined>
-getResolvedDependencies(uri: Uri): Promise<ResolvedDependencyInfo[]>
-getResolvedDependencyByOffset(uri: Uri, offset: number): Promise<ResolvedDependencyInfo | undefined>
-warmWorkspaceContext(uri: Uri): Promise<void>
-invalidateWorkspaceContext(workspacePath: string): void
+function getWorkspaceContext(uri: Uri): Promise<WorkspaceContext | undefined>
+function getPackageContext(uri: Uri): Promise<PackageContext | undefined>
+function getResolvedDependencies(uri: Uri): Promise<ResolvedDependencyInfo[]>
+function getResolvedDependencyByOffset(uri: Uri, offset: number): Promise<ResolvedDependencyInfo | undefined>
+function warmWorkspaceContext(uri: Uri): Promise<void>
+function invalidateWorkspaceContext(workspacePath: string): void
 ```
 
 其中：
@@ -68,7 +68,12 @@ invalidateWorkspaceContext(workspacePath: string): void
 
 1. spec -> resolvedSpec -> packageInfo -> resolvedVersion
 
-Extractor 直接返回 range-only 的 `DependencyInfo`，不再向上暴露 AST node：
+Extractor 直接返回 range-only 的 `DependencyInfo`，不再向上暴露 AST node。同时由不同 extractor 自己承载文件特定的附加解析能力：
+
+- `package.json` extractor 负责提供 `name`、`version`、`packageManager`、`engines` 和 `dependencies`
+- workspace catalog extractor 负责提供 `catalogs` 和 `dependencies`
+
+基础依赖结构：
 
 ```ts
 interface DependencyInfo {

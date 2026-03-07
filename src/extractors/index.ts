@@ -1,16 +1,52 @@
+import type { PackageManager } from '#types/context'
+import type { Extractor, PackageManifestExtractor, WorkspaceCatalogExtractor } from '#types/extractor'
 import type { TextDocument, Uri } from 'vscode'
 import { PACKAGE_JSON_BASENAME, PNPM_WORKSPACE_BASENAME, YARN_WORKSPACE_BASENAME } from '#constants'
 import { basename } from 'pathe'
-import { PackageJsonExtractor } from './package-json'
-import { PnpmWorkspaceYamlExtractor } from './pnpm-workspace-yaml'
+import { PackageManifestDocumentExtractor } from './package-manifest'
+import { WorkspaceCatalogDocumentExtractor } from './workspace-catalog'
 
-export const packageJsonExtractor = new PackageJsonExtractor()
-export const workspaceCatalogExtractor = new PnpmWorkspaceYamlExtractor()
+interface BaseExtractorEntry<TExtractor extends Extractor = Extractor> {
+  basename: string
+  pattern: string
+  extractor: TExtractor
+}
 
-export const extractorEntries = [
-  { pattern: `**/${PACKAGE_JSON_BASENAME}`, extractor: packageJsonExtractor },
-  { pattern: `**/${PNPM_WORKSPACE_BASENAME}`, extractor: workspaceCatalogExtractor },
-  { pattern: `**/${YARN_WORKSPACE_BASENAME}`, extractor: workspaceCatalogExtractor },
+interface PackageManifestExtractorEntry extends BaseExtractorEntry<PackageManifestExtractor> {}
+
+interface WorkspaceCatalogExtractorEntry extends BaseExtractorEntry<WorkspaceCatalogExtractor> {
+  packageManager: Exclude<PackageManager, 'npm'>
+}
+
+type DependencyExtractorEntry = PackageManifestExtractorEntry | WorkspaceCatalogExtractorEntry
+
+const packageJsonExtractor = new PackageManifestDocumentExtractor()
+const workspaceCatalogExtractor = new WorkspaceCatalogDocumentExtractor()
+
+export const packageManifestExtractorEntry: PackageManifestExtractorEntry = {
+  basename: PACKAGE_JSON_BASENAME,
+  pattern: `**/${PACKAGE_JSON_BASENAME}`,
+  extractor: packageJsonExtractor,
+}
+
+export const workspaceCatalogExtractorEntries: WorkspaceCatalogExtractorEntry[] = [
+  {
+    basename: PNPM_WORKSPACE_BASENAME,
+    pattern: `**/${PNPM_WORKSPACE_BASENAME}`,
+    extractor: workspaceCatalogExtractor,
+    packageManager: 'pnpm',
+  },
+  {
+    basename: YARN_WORKSPACE_BASENAME,
+    pattern: `**/${YARN_WORKSPACE_BASENAME}`,
+    extractor: workspaceCatalogExtractor,
+    packageManager: 'yarn',
+  },
+]
+
+export const extractorEntries: DependencyExtractorEntry[] = [
+  packageManifestExtractorEntry,
+  ...workspaceCatalogExtractorEntries,
 ]
 
 const SUPPORTED_BASENAMES = new Set([
@@ -22,4 +58,8 @@ const SUPPORTED_BASENAMES = new Set([
 export function isSupportedDependencyDocument(documentOrUri: TextDocument | Uri): boolean {
   const path = 'uri' in documentOrUri ? documentOrUri.uri.path : documentOrUri.path
   return SUPPORTED_BASENAMES.has(basename(path))
+}
+
+export function getWorkspaceCatalogExtractorEntry(packageManager: Exclude<PackageManager, 'npm'>): WorkspaceCatalogExtractorEntry | undefined {
+  return workspaceCatalogExtractorEntries.find((entry) => entry.packageManager === packageManager)
 }

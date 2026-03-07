@@ -1,4 +1,4 @@
-import type { DependencyInfo, Extractor } from '#types/extractor'
+import type { DependencyInfo, WorkspaceCatalogExtractor } from '#types/extractor'
 import type { OffsetRange } from '#types/range'
 import type { Node, Pair, Scalar, YAMLMap } from 'yaml'
 import { isMap, isPair, isScalar, parseDocument } from 'yaml'
@@ -16,7 +16,7 @@ type CatalogEntryVisitor = (
   },
 ) => boolean | void
 
-export class PnpmWorkspaceYamlExtractor implements Extractor<Node> {
+export class WorkspaceCatalogDocumentExtractor implements WorkspaceCatalogExtractor<Node> {
   parse = (text: string) => parseDocument(text).contents
 
   private getScalarRange(node: Node): OffsetRange {
@@ -42,6 +42,22 @@ export class PnpmWorkspaceYamlExtractor implements Extractor<Node> {
     })
 
     return result
+  }
+
+  getWorkspaceCatalogInfo(root: Node) {
+    const dependencies = this.getDependenciesInfo(root)
+    const catalogs: Record<string, Record<string, string>> = {}
+
+    for (const dependency of dependencies) {
+      const categoryName = dependency.category === 'catalog' ? 'default' : dependency.categoryName || 'default'
+      catalogs[categoryName] ??= {}
+      catalogs[categoryName][dependency.rawName] = dependency.rawSpec
+    }
+
+    return {
+      dependencies,
+      catalogs: Object.keys(catalogs).length > 0 ? catalogs : undefined,
+    }
   }
 
   private traverseCatalogs(root: YAMLMap, callback: CatalogEntryVisitor): boolean {

@@ -1,9 +1,8 @@
 import type { PackageContext, PackageManager, ResolvedDependencyInfo, WorkspaceContext } from '#types/context'
-import type { DependencyInfo } from '#types/extractor'
+import type { DependencyInfo, Extractor } from '#types/extractor'
 import type { PackageInfo } from '#utils/api/package'
 import type { TextDocument, WorkspaceFolder } from 'vscode'
-import { PACKAGE_JSON_BASENAME, PNPM_WORKSPACE_BASENAME, YARN_WORKSPACE_BASENAME } from '#constants'
-import { isSupportedDependencyDocument, packageJsonExtractor, workspaceCatalogExtractor } from '#extractors'
+import { getWorkspaceCatalogExtractorEntry, isSupportedDependencyDocument, packageManifestExtractorEntry, workspaceCatalogExtractorEntries } from '#extractors'
 import { logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
 import { isOffsetInRange } from '#utils/ast'
@@ -68,10 +67,26 @@ async function readDocumentText(uri: Uri, openDocuments: Map<string, TextDocumen
   } catch {}
 }
 
+async function readExtractorRoot<T>(
+  uri: Uri,
+  extractor: Extractor<T>,
+  openDocuments: Map<string, TextDocument>,
+): Promise<T | undefined> {
+  const text = await readDocumentText(uri, openDocuments)
+  if (!text)
+    return
+
+  const root = extractor.parse(text)
+  if (!root)
+    return
+
+  return root
+}
+
 async function collectPackageUris(folder: WorkspaceFolder, openDocuments: Map<string, TextDocument>) {
   const uris = new Map<string, Uri>()
   const scanned = await workspace.findFiles(
-    `**/${PACKAGE_JSON_BASENAME}`,
+    `**/${packageManifestExtractorEntry.basename}`,
     '**/node_modules/**',
   ) ?? []
 
@@ -81,7 +96,7 @@ async function collectPackageUris(folder: WorkspaceFolder, openDocuments: Map<st
   }
 
   for (const document of openDocuments.values()) {
-    if (document.uri.path.endsWith(`/${PACKAGE_JSON_BASENAME}`))
+    if (document.uri.path.endsWith(`/${packageManifestExtractorEntry.basename}`))
       uris.set(normalize(document.uri.path), document.uri)
   }
 
@@ -89,29 +104,27 @@ async function collectPackageUris(folder: WorkspaceFolder, openDocuments: Map<st
 }
 
 async function readPackageRecord(uri: Uri, openDocuments: Map<string, TextDocument>): Promise<PackageRecord | undefined> {
-  const text = await readDocumentText(uri, openDocuments)
-  if (!text)
-    return
-
-  const root = packageJsonExtractor.parse(text)
+  const root = await readExtractorRoot(uri, packageManifestExtractorEntry.extractor, openDocuments)
   if (!root)
     return
 
+  const manifestInfo = packageManifestExtractorEntry.extractor.getPackageManifestInfo(root)
+
   return {
     packageJsonPath: normalize(uri.path),
-    name: packageJsonExtractor.getPackageName(root),
-    version: packageJsonExtractor.getPackageVersion(root),
-    engines: packageJsonExtractor.getEngines(root),
-    dependencies: packageJsonExtractor.getDependenciesInfo(root),
+    name: manifestInfo.name,
+    version: manifestInfo.version,
+    engines: manifestInfo.engines,
+    dependencies: manifestInfo.dependencies,
   }
 }
 
 function getWorkspaceReferenceByPath(sourcePath: string, reference: string, packageRecordsByPath: Map<string, PackageRecord>) {
   const baseDir = dirname(sourcePath)
   const absolutePath = normalize(resolve(baseDir, reference))
-  const packageJsonPathCandidate = absolutePath.endsWith(PACKAGE_JSON_BASENAME)
+  const packageJsonPathCandidate = absolutePath.endsWith(packageManifestExtractorEntry.basename)
     ? absolutePath
-    : normalize(join(absolutePath, PACKAGE_JSON_BASENAME))
+    : normalize(join(absolutePath, packageManifestExtractorEntry.basename))
 
   const record = packageRecordsByPath.get(packageJsonPathCandidate)
   if (!record)
@@ -193,21 +206,19 @@ function createResolvedDependencies(
 }
 
 async function detectPackageManager(folder: WorkspaceFolder, openDocuments: Map<string, TextDocument>): Promise<PackageManager> {
-  const rootPackageJsonUri = Uri.joinPath(folder.uri, PACKAGE_JSON_BASENAME)
-  const rootPackageJsonText = await readDocumentText(rootPackageJsonUri, openDocuments)
-  if (rootPackageJsonText) {
-    const root = packageJsonExtractor.parse(rootPackageJsonText)
-    const declaredPackageManager = root ? packageJsonExtractor.getPackageManager(root) : undefined
+  const rootPackageUri = Uri.joinPath(folder.uri, packageManifestExtractorEntry.basename)
+  const rootPackage = await readExtractorRoot(rootPackageUri, packageManifestExtractorEntry.extractor, openDocuments)
+  if (rootPackage) {
+    const declaredPackageManager = packageManifestExtractorEntry.extractor.getPackageManifestInfo(rootPackage).packageManager
     const packageManagerName = declaredPackageManager?.split('@')[0]
     if (packageManagerName === 'npm' || packageManagerName === 'pnpm' || packageManagerName === 'yarn')
       return packageManagerName
   }
 
-  if (await readDocumentText(Uri.joinPath(folder.uri, PNPM_WORKSPACE_BASENAME), openDocuments))
-    return 'pnpm'
-
-  if (await readDocumentText(Uri.joinPath(folder.uri, YARN_WORKSPACE_BASENAME), openDocuments))
-    return 'yarn'
+  for (const entry of workspaceCatalogExtractorEntries) {
+    if (await readDocumentText(Uri.joinPath(folder.uri, entry.basename), openDocuments))
+      return entry.packageManager
+  }
 
   return 'npm'
 }
@@ -217,46 +228,38 @@ async function readCatalogs(
   packageManager: PackageManager,
   openDocuments: Map<string, TextDocument>,
 ) {
-  if (packageManager !== 'pnpm' && packageManager !== 'yarn')
+  if (packageManager === 'npm')
     return
 
-  const configUri = Uri.joinPath(folder.uri, packageManager === 'pnpm' ? PNPM_WORKSPACE_BASENAME : YARN_WORKSPACE_BASENAME)
-  const text = await readDocumentText(configUri, openDocuments)
-  if (!text)
+  const entry = getWorkspaceCatalogExtractorEntry(packageManager)
+  if (!entry)
     return
 
-  const root = workspaceCatalogExtractor.parse(text)
+  const root = await readExtractorRoot(Uri.joinPath(folder.uri, entry.basename), entry.extractor, openDocuments)
   if (!root)
     return
 
-  const catalogs: Record<string, Record<string, string>> = {}
-
-  for (const dependency of workspaceCatalogExtractor.getDependenciesInfo(root)) {
-    const categoryName = dependency.category === 'catalog' ? 'default' : dependency.categoryName || 'default'
-    catalogs[categoryName] ??= {}
-    catalogs[categoryName][dependency.rawName] = dependency.rawSpec
-  }
-
-  return Object.keys(catalogs).length > 0 ? catalogs : undefined
+  return entry.extractor.getWorkspaceCatalogInfo(root).catalogs
 }
 
 async function readWorkspaceCatalogDocumentDependencies(
+  basename: string,
+  extractor: (typeof workspaceCatalogExtractorEntries)[number]['extractor'],
   uri: Uri,
   workspaceContext: WorkspaceContext,
   openDocuments: Map<string, TextDocument>,
   packageRecordsByName: Map<string, PackageRecord>,
   packageRecordsByPath: Map<string, PackageRecord>,
 ) {
-  const text = await readDocumentText(uri, openDocuments)
-  if (!text)
+  if (!uri.path.endsWith(`/${basename}`))
     return
 
-  const root = workspaceCatalogExtractor.parse(text)
+  const root = await readExtractorRoot(uri, extractor, openDocuments)
   if (!root)
     return
 
   return createResolvedDependencies(
-    workspaceCatalogExtractor.getDependenciesInfo(root),
+    extractor.getWorkspaceCatalogInfo(root).dependencies,
     {
       sourcePath: normalize(uri.path),
       workspaceContext,
@@ -325,13 +328,11 @@ async function buildWorkspaceContext(folder: WorkspaceFolder): Promise<Workspace
     }
   }
 
-  const workspaceCatalogUris = [
-    Uri.joinPath(folder.uri, PNPM_WORKSPACE_BASENAME),
-    Uri.joinPath(folder.uri, YARN_WORKSPACE_BASENAME),
-  ]
-
-  for (const uri of workspaceCatalogUris) {
+  for (const entry of workspaceCatalogExtractorEntries) {
+    const uri = Uri.joinPath(folder.uri, entry.basename)
     const dependencies = await readWorkspaceCatalogDocumentDependencies(
+      entry.basename,
+      entry.extractor,
       uri,
       workspaceContext,
       openDocuments,
@@ -353,12 +354,12 @@ async function buildWorkspaceContext(folder: WorkspaceFolder): Promise<Workspace
 
 function findNearestPackageContext(workspaceContext: WorkspaceContext, uri: Uri, workspacePath: string): PackageContext | undefined {
   const normalizedPath = normalize(uri.path)
-  if (normalizedPath.endsWith(`/${PACKAGE_JSON_BASENAME}`))
+  if (normalizedPath.endsWith(`/${packageManifestExtractorEntry.basename}`))
     return workspaceContext.packages.get(normalizedPath)
 
   let currentDirectory = dirname(normalizedPath)
   while (currentDirectory.startsWith(workspacePath)) {
-    const packageContext = workspaceContext.packages.get(join(currentDirectory, PACKAGE_JSON_BASENAME))
+    const packageContext = workspaceContext.packages.get(join(currentDirectory, packageManifestExtractorEntry.basename))
     if (packageContext)
       return packageContext
 

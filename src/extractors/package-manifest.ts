@@ -1,4 +1,4 @@
-import type { DependencyCategory, DependencyInfo, Extractor } from '#types/extractor'
+import type { DependencyCategory, DependencyInfo, PackageManifestExtractor } from '#types/extractor'
 import type { OffsetRange } from '#types/range'
 import type { Engines } from 'fast-npm-meta'
 import type { Node } from 'jsonc-parser'
@@ -11,7 +11,7 @@ const DEPENDENCY_SECTIONS: DependencyCategory[] = [
   'optionalDependencies',
 ]
 
-export class PackageJsonExtractor implements Extractor<Node> {
+export class PackageManifestDocumentExtractor implements PackageManifestExtractor<Node> {
   parse = (text: string) => parseTree(text) ?? null
 
   private getStringValue(root: Node, key: string): string | undefined {
@@ -93,5 +93,15 @@ export class PackageJsonExtractor implements Extractor<Node> {
     }
 
     return engines
+  }
+
+  getPackageManifestInfo(root: Node) {
+    return {
+      name: this.getPackageName(root),
+      version: this.getPackageVersion(root),
+      packageManager: this.getPackageManager(root),
+      engines: this.getEngines(root),
+      dependencies: this.getDependenciesInfo(root),
+    }
   }
 }
