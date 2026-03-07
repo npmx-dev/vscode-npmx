@@ -43,6 +43,9 @@ catalogs:
     ofetch:
       specifier: ^2.0.0-alpha.3
       version: 2.0.0-alpha.3
+    pathe:
+      specifier: ^2.0.3
+      version: 2.0.3
     perfect-debounce:
       specifier: ^2.1.0
       version: 2.1.0
@@ -118,6 +121,9 @@ importers:
       ofetch:
         specifier: catalog:inline
         version: 2.0.0-alpha.3
+      pathe:
+        specifier: catalog:inline
+        version: 2.0.3
       perfect-debounce:
         specifier: catalog:inline
         version: 2.1.0

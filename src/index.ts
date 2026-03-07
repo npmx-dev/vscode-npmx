@@ -1,3 +1,4 @@
+import { useWorkspaceContextLifecycle } from '#composables/workspace-context'
 import { VERSION_TRIGGER_CHARACTERS } from '#constants'
 import { defineExtension, useCommands, watchEffect } from 'reactive-vscode'
 import { Disposable, languages } from 'vscode'
@@ -51,6 +52,8 @@ export const { activate, deactivate } = defineExtension(() => {
 
     onCleanup(() => Disposable.from(...disposables).dispose())
   })
+
+  useWorkspaceContextLifecycle()
 
   useDiagnostics()
 

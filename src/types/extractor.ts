@@ -5,9 +5,23 @@ import type { Node as YamlNode } from 'yaml'
 
 export type ValidNode = JsonNode | YamlNode
 
+export type DependencyCategory
+  = | 'dependencies'
+    | 'devDependencies'
+    | 'peerDependencies'
+    | 'optionalDependencies'
+    | 'catalog'
+    | 'catalogs'
+
 export interface DependencyInfo<T extends ValidNode = any> {
+  category: DependencyCategory
+  rawName: string
+  rawSpec: string
   nameNode: T
+  specNode: T
   versionNode: T
+  catalogName?: string
+  // Backward-compatible aliases used by current providers.
   name: string
   version: string
 }

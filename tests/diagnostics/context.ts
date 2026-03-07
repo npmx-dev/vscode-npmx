@@ -18,7 +18,16 @@ interface CreateContextOptions {
 
 export function createContext(options: CreateContextOptions): DiagnosticContext {
   const { name, version, distTags = {}, versionsMeta = {}, engines } = options
-  const dep: DependencyInfo = { name, version, nameNode: {}, versionNode: {} }
+  const dep: DependencyInfo = {
+    category: 'dependencies',
+    rawName: name,
+    rawSpec: version,
+    nameNode: {},
+    specNode: {},
+    versionNode: {},
+    name,
+    version,
+  }
   const pkg = { distTags, versionsMeta, versionToTag: new Map() } as PackageInfo
   const parsed = parseVersion(version)
   const exactVersion = parsed && isSupportedProtocol(parsed.protocol)

@@ -15,6 +15,7 @@ export default defineConfig({
       'fast-npm-meta',
       'jsonc-parser',
       'ofetch',
+      'pathe',
       'perfect-debounce',
       'semver',
       'vscode-find-up',

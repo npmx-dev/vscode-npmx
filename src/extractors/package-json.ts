@@ -1,4 +1,4 @@
-import type { DependencyInfo, Extractor } from '#types/extractor'
+import type { DependencyCategory, DependencyInfo, Extractor } from '#types/extractor'
 import type { Engines } from 'fast-npm-meta'
 import type { Node } from 'jsonc-parser'
 import type { TextDocument } from 'vscode'
@@ -7,7 +7,7 @@ import { createMemoizedParse } from '#utils/memoize'
 import { findNodeAtLocation, findNodeAtOffset, parseTree } from 'jsonc-parser'
 import { Range } from 'vscode'
 
-const DEPENDENCY_SECTIONS = [
+const DEPENDENCY_SECTIONS: DependencyCategory[] = [
   'dependencies',
   'devDependencies',
   'peerDependencies',
@@ -24,8 +24,25 @@ export class PackageJsonExtractor implements Extractor<Node> {
     return new Range(start, end)
   }
 
-  isInDependencySection(root: Node, node: Node) {
-    return DEPENDENCY_SECTIONS.some((section) => {
+  private getStringValue(root: Node, key: string): string | undefined {
+    const node = findNodeAtLocation(root, [key])
+    return typeof node?.value === 'string' ? node.value : undefined
+  }
+
+  getPackageName(root: Node): string | undefined {
+    return this.getStringValue(root, 'name')
+  }
+
+  getPackageVersion(root: Node): string | undefined {
+    return this.getStringValue(root, 'version')
+  }
+
+  getPackageManager(root: Node): string | undefined {
+    return this.getStringValue(root, 'packageManager')
+  }
+
+  private getDependencySection(root: Node, node: Node): DependencyCategory | undefined {
+    return DEPENDENCY_SECTIONS.find((section) => {
       const dep = findNodeAtLocation(root, [section])
       if (!dep || !dep.parent)
         return false
@@ -36,24 +53,28 @@ export class PackageJsonExtractor implements Extractor<Node> {
     })
   }
 
-  private parseDependencyNode(node: Node): DependencyInfo<Node> | undefined {
+  private parseDependencyNode(node: Node, category: DependencyCategory): DependencyInfo<Node> | undefined {
     if (!node.children?.length)
       return
 
-    const [nameNode, versionNode] = node.children
+    const [nameNode, specNode] = node.children
 
     if (
       typeof nameNode?.value !== 'string'
-      || typeof versionNode.value !== 'string'
+      || typeof specNode?.value !== 'string'
     ) {
       return
     }
 
     return {
+      category,
+      rawName: nameNode.value,
+      rawSpec: specNode.value,
       nameNode,
-      versionNode,
+      specNode,
+      versionNode: specNode,
       name: nameNode.value,
-      version: versionNode.value,
+      version: specNode.value,
     }
   }
 
@@ -66,7 +87,7 @@ export class PackageJsonExtractor implements Extractor<Node> {
         return
 
       for (const dep of node.children) {
-        const info = this.parseDependencyNode(dep)
+        const info = this.parseDependencyNode(dep, section)
 
         if (info)
           result.push(info)
@@ -97,9 +118,13 @@ export class PackageJsonExtractor implements Extractor<Node> {
 
   getDependencyInfoByOffset(root: Node, offset: number) {
     const node = findNodeAtOffset(root, offset)
-    if (!node || node.type !== 'string' || !this.isInDependencySection(root, node))
+    if (!node || node.type !== 'string')
       return
 
-    return this.parseDependencyNode(node.parent!)
+    const category = this.getDependencySection(root, node)
+    if (!category)
+      return
+
+    return this.parseDependencyNode(node.parent!, category)
   }
 }

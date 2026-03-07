@@ -41,9 +41,7 @@
     "vscode": "^1.101.0"
   },
   "activationEvents": [
-    "workspaceContains:package.json",
-    "workspaceContains:pnpm-workspace.yaml",
-    "workspaceContains:.yarnrc.yml"
+    "workspaceContains:package.json"
   ],
   "contributes": {
     "configuration": {
@@ -230,6 +228,7 @@
     "msw": "catalog:test",
     "nano-staged": "catalog:dev",
     "ofetch": "catalog:inline",
+    "pathe": "catalog:inline",
     "perfect-debounce": "catalog:inline",
     "reactive-vscode": "catalog:inline",
     "semver": "catalog:inline",

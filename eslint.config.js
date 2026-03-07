@@ -8,7 +8,7 @@ const RESTRICTED_IMPORTS_NODE = {
 export default defineConfig(
   {
     pnpm: true,
-    ignores: ['playground'],
+    ignores: ['playground', 'tests/fixtures'],
   },
   {
     name: 'extensions/all',
