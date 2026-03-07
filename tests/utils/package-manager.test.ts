@@ -5,7 +5,7 @@ import { Uri, workspace } from 'vscode'
 import { packageManifestExtractorEntry } from '../../src/extractors'
 import { detectPackageManager, readWorkspaceCatalogs } from '../../src/utils/package-manager'
 
-const FIXTURES_ROOT = join(process.cwd(), 'tests/fixtures/workspace-context')
+const FIXTURES_ROOT = join(process.cwd(), 'tests/fixtures/workspace')
 
 function getFixtureRoot(name: string) {
   return join(FIXTURES_ROOT, name)

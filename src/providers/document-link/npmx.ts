@@ -5,7 +5,7 @@ import { offsetRangeToRange } from '#utils/ast'
 import { npmxPackageUrl } from '#utils/links'
 import { resolveExactVersion } from '#utils/package'
 import { isSupportedProtocol } from '#utils/version'
-import { getResolvedDependencies } from '#utils/workspace-context'
+import { getResolvedDependencies } from '#utils/workspace'
 import { Uri, DocumentLink as VscodeDocumentLink } from 'vscode'
 
 export class NpmxDocumentLinkProvider implements DocumentLinkProvider {

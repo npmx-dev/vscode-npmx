@@ -1,7 +1,7 @@
 import type { TextDocument, Uri } from 'vscode'
 import { extractorEntries, isSupportedDependencyDocument } from '#extractors'
 import { logger } from '#state'
-import { invalidateWorkspaceContext, warmWorkspaceContext } from '#utils/workspace-context'
+import { getWorkspaceContext, invalidateWorkspaceContext } from '#utils/workspace'
 import { useActiveTextEditor, useDisposable, useFileSystemWatcher, watch } from 'reactive-vscode'
 import { workspace } from 'vscode'
 
@@ -17,7 +17,7 @@ function warmDocument(document: TextDocument | undefined) {
   if (!document || document.uri.scheme !== 'file' || !isSupportedDependencyDocument(document))
     return
 
-  void warmWorkspaceContext(document.uri).catch((error) => {
+  void getWorkspaceContext(document.uri).catch((error) => {
     logger.warn(`[workspace-context] warm failed for ${document.uri.path}: ${error}`)
   })
 }

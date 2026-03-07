@@ -242,7 +242,7 @@ const getWorkspaceContextState = memoize<Uri, Promise<WorkspaceContextState | un
 
   return buildWorkspaceContext(folder)
 }, {
-  getKey: (uri: Uri) => normalize(workspace.getWorkspaceFolder(uri)?.uri.path ?? uri.path),
+  getKey: (uri: Uri) => workspace.getWorkspaceFolder(uri)!.uri.path,
   ttl: 0,
   maxSize: Number.POSITIVE_INFINITY,
   fallbackToCachedOnError: false,
@@ -264,16 +264,17 @@ export function invalidateWorkspaceContext(workspacePath: string) {
 }
 
 export async function getWorkspaceContext(uri: Uri): Promise<WorkspaceContext | undefined> {
+  if (uri.scheme !== 'file' || !isSupportedDependencyDocument(uri))
+    return
+
   const state = await getWorkspaceContextState(uri)
   if (!state)
     return
 
-  if (uri.scheme === 'file' && isSupportedDependencyDocument(uri)) {
-    if (isPackageManifestPath(uri.path))
-      await ensurePackageContextByPath(state, uri.path)
-    else
-      await ensureResolvedDependencies(state, uri)
-  }
+  if (isPackageManifestPath(uri.path))
+    await ensurePackageContextByPath(state, uri.path)
+  else
+    await ensureResolvedDependencies(state, uri)
 
   return state.workspaceContext
 }
@@ -302,11 +303,4 @@ export async function getResolvedDependencyByOffset(uri: Uri, offset: number): P
   const dependencies = await getResolvedDependencies(uri)
 
   return dependencies.find((dependency) => isOffsetInRange(offset, dependency.nameRange) || isOffsetInRange(offset, dependency.specRange))
-}
-
-export async function warmWorkspaceContext(uri: Uri) {
-  if (uri.scheme !== 'file' || !isSupportedDependencyDocument(uri))
-    return
-
-  await getWorkspaceContext(uri)
 }

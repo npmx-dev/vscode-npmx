@@ -4,7 +4,7 @@ import { getPackageInfo } from '#utils/api/package'
 import { jsrPackageUrl, npmxDocsUrl, npmxPackageUrl } from '#utils/links'
 import { isJsrNpmPackage, jsrNpmToJsrName, resolveExactVersion } from '#utils/package'
 import { isSupportedProtocol } from '#utils/version'
-import { getResolvedDependencyByOffset } from '#utils/workspace-context'
+import { getResolvedDependencyByOffset } from '#utils/workspace'
 import { Hover, MarkdownString } from 'vscode'
 
 export class NpmxHoverProvider implements HoverProvider {

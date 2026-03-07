@@ -4,7 +4,7 @@ import { config } from '#state'
 import { getPackageInfo } from '#utils/api/package'
 import { offsetRangeToRange } from '#utils/ast'
 import { formatUpgradeVersion, isSupportedProtocol } from '#utils/version'
-import { getResolvedDependencyByOffset } from '#utils/workspace-context'
+import { getResolvedDependencyByOffset } from '#utils/workspace'
 import { CompletionItem, CompletionItemKind } from 'vscode'
 
 export class VersionCompletionItemProvider implements CompletionItemProvider {

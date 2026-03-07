@@ -3,9 +3,9 @@ import { join } from 'node:path'
 import { createTextDocument } from 'jest-mock-vscode'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Uri, workspace } from 'vscode'
-import { getPackageContext, getResolvedDependencies, getResolvedDependencyByOffset, getWorkspaceContext, invalidateWorkspaceContext } from '../../src/utils/workspace-context'
+import { getPackageContext, getResolvedDependencies, getResolvedDependencyByOffset, getWorkspaceContext, invalidateWorkspaceContext } from '../../src/utils/workspace'
 
-const FIXTURES_ROOT = join(process.cwd(), 'tests/fixtures/workspace-context')
+const FIXTURES_ROOT = join(process.cwd(), 'tests/fixtures/workspace')
 const FIXTURE_NAMES = [
   'pnpm-workspace',
   'package-manager-npm',
