@@ -1,46 +1,26 @@
 import type { DependencyProtocol, ResolvedDependencyInfo } from '#types/context'
-import { isJsrNpmPackage, jsrNpmToJsrName } from '#utils/package'
-
-export interface WorkspacePackageReference {
-  name?: string
-  version?: string
-}
+import { isJsrNpmPackage, jsrNpmToJsrName, parsePackageId } from '#utils/package'
 
 export type CatalogsEntry = Record<string, Record<string, string>>
 
-interface Resolution extends Pick<ResolvedDependencyInfo, 'resolvedName' | 'resolvedSpec'> {
+interface FinalResolution extends Pick<ResolvedDependencyInfo, 'resolvedName' | 'resolvedSpec'> {
   resolvedProtocol: DependencyProtocol
 }
 
-interface DependencySpecResolution extends Resolution, Pick<ResolvedDependencyInfo, 'protocol' | 'categoryName'> {
+interface DependencySpecResolution extends FinalResolution, Pick<ResolvedDependencyInfo, 'protocol' | 'categoryName'> {
 }
 
-const DEFAULT_CATEGORY_NAME = 'default'
+const DEFAULT_CATALOG_NAME = 'default'
 const GIT_PATTERN = /^(?:git\+|git:\/\/|github:|gitlab:|bitbucket:|ssh:\/\/git@)/i
 const HTTP_PATTERN = /^https?:/i
 
-export function normalizeCategoryName(name: string | undefined): string {
-  return name?.trim() || DEFAULT_CATEGORY_NAME
+export function normalizeCatalogName(name: string): string {
+  return name.trim() || DEFAULT_CATALOG_NAME
 }
 
-function splitAliasSpec(value: string): { name: string, spec: string } | undefined {
-  const separatorIndex = value.lastIndexOf('@')
-  if (separatorIndex <= 0)
-    return
-
-  return {
-    name: value.slice(0, separatorIndex),
-    spec: value.slice(separatorIndex + 1),
-  }
-}
-
-function isWorkspacePathReference(spec: string): boolean {
-  return spec.startsWith('.') || spec.startsWith('/')
-}
-
-function resolveNpmSpec(rawName: string, spec: string): Pick<DependencySpecResolution, 'resolvedName' | 'resolvedSpec' | 'resolvedProtocol'> {
-  const alias = splitAliasSpec(spec)
-  if (!alias) {
+function resolveNpmSpec(rawName: string, spec: string): FinalResolution {
+  const alias = parsePackageId(spec)
+  if (!alias.version) {
     return {
       resolvedName: rawName,
       resolvedSpec: spec,
@@ -51,23 +31,23 @@ function resolveNpmSpec(rawName: string, spec: string): Pick<DependencySpecResol
   if (isJsrNpmPackage(alias.name)) {
     return {
       resolvedName: jsrNpmToJsrName(alias.name),
-      resolvedSpec: alias.spec,
+      resolvedSpec: alias.version,
       resolvedProtocol: 'jsr',
     }
   }
 
   return {
     resolvedName: alias.name,
-    resolvedSpec: alias.spec,
+    resolvedSpec: alias.version,
     resolvedProtocol: 'npm',
   }
 }
 
-function resolveEffectiveSpec(rawName: string, rawSpec: string, catalogs?: CatalogsEntry, seenCatalogs = new Set<string>()): Resolution {
+function resolveEffectiveSpec(rawName: string, rawSpec: string, catalogs?: CatalogsEntry, seenCatalogs = new Set<string>()): FinalResolution {
   const spec = rawSpec.trim()
 
   if (spec.startsWith('catalog:')) {
-    const categoryName = normalizeCategoryName(spec.slice('catalog:'.length))
+    const categoryName = normalizeCatalogName(spec.slice('catalog:'.length))
     const categoryKey = `${categoryName}:${rawName}`
     if (seenCatalogs.has(categoryKey)) {
       return {
@@ -92,13 +72,9 @@ function resolveEffectiveSpec(rawName: string, rawSpec: string, catalogs?: Catal
   }
 
   if (spec.startsWith('workspace:')) {
-    const trimmed = spec.trim()
-    const alias = !isWorkspacePathReference(trimmed) ? splitAliasSpec(trimmed) : undefined
-    const targetName = alias?.name || rawName
-
     return {
-      resolvedName: targetName,
-      resolvedSpec: alias?.spec ?? trimmed,
+      resolvedName: rawName,
+      resolvedSpec: spec,
       resolvedProtocol: 'npm',
     }
   }
@@ -114,7 +90,7 @@ function resolveEffectiveSpec(rawName: string, rawSpec: string, catalogs?: Catal
   if (spec.startsWith('file:')) {
     return {
       resolvedName: rawName,
-      resolvedSpec: rawSpec,
+      resolvedSpec: spec,
       resolvedProtocol: 'file',
     }
   }
@@ -122,7 +98,7 @@ function resolveEffectiveSpec(rawName: string, rawSpec: string, catalogs?: Catal
   if (GIT_PATTERN.test(spec)) {
     return {
       resolvedName: rawName,
-      resolvedSpec: rawSpec,
+      resolvedSpec: spec,
       resolvedProtocol: 'git',
     }
   }
@@ -130,7 +106,7 @@ function resolveEffectiveSpec(rawName: string, rawSpec: string, catalogs?: Catal
   if (HTTP_PATTERN.test(spec)) {
     return {
       resolvedName: rawName,
-      resolvedSpec: rawSpec,
+      resolvedSpec: spec,
       resolvedProtocol: 'http',
     }
   }
@@ -152,7 +128,7 @@ export function resolveDependencySpec(rawName: string, rawSpec: string, catalogs
   if (spec.startsWith('catalog:')) {
     return {
       protocol: 'catalog',
-      categoryName: normalizeCategoryName(spec.slice('catalog:'.length)),
+      categoryName: normalizeCatalogName(spec.slice('catalog:'.length)),
       ...effective,
     }
   }
