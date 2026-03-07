@@ -1,4 +1,4 @@
-import type { DependencyProtocol } from '#types/context'
+import type { DependencyProtocol, ResolvedDependencyInfo } from '#types/context'
 import { isJsrNpmPackage, jsrNpmToJsrName } from '#utils/package'
 
 export interface WorkspacePackageReference {
@@ -6,18 +6,13 @@ export interface WorkspacePackageReference {
   version?: string
 }
 
-export interface ResolveDependencySpecOptions {
-  catalogs?: Record<string, Record<string, string>>
-  resolveWorkspacePackage?: (name: string) => WorkspacePackageReference | undefined
-  resolveWorkspacePackageByPath?: (path: string) => WorkspacePackageReference | undefined
+export type CatalogsEntry = Record<string, Record<string, string>>
+
+interface Resolution extends Pick<ResolvedDependencyInfo, 'resolvedName' | 'resolvedSpec'> {
+  resolvedProtocol: DependencyProtocol
 }
 
-export interface DependencySpecResolution {
-  protocol: DependencyProtocol | null
-  categoryName?: string
-  resolvedName: string
-  resolvedSpec: string
-  finalProtocol: DependencyProtocol | null
+interface DependencySpecResolution extends Resolution, Pick<ResolvedDependencyInfo, 'protocol' | 'categoryName'> {
 }
 
 const DEFAULT_CATEGORY_NAME = 'default'
@@ -43,22 +38,13 @@ function isWorkspacePathReference(spec: string): boolean {
   return spec.startsWith('.') || spec.startsWith('/')
 }
 
-function transformWorkspaceSpec(spec: string, version: string): string {
-  if (spec === '' || spec === '*' || isWorkspacePathReference(spec))
-    return version
-  if (spec === '^' || spec === '~')
-    return `${spec}${version}`
-
-  return spec
-}
-
-function resolveNpmSpec(rawName: string, spec: string) {
+function resolveNpmSpec(rawName: string, spec: string): Pick<DependencySpecResolution, 'resolvedName' | 'resolvedSpec' | 'resolvedProtocol'> {
   const alias = splitAliasSpec(spec)
   if (!alias) {
     return {
       resolvedName: rawName,
       resolvedSpec: spec,
-      finalProtocol: 'npm' as const,
+      resolvedProtocol: 'npm',
     }
   }
 
@@ -66,41 +52,18 @@ function resolveNpmSpec(rawName: string, spec: string) {
     return {
       resolvedName: jsrNpmToJsrName(alias.name),
       resolvedSpec: alias.spec,
-      finalProtocol: 'jsr' as const,
+      resolvedProtocol: 'jsr',
     }
   }
 
   return {
     resolvedName: alias.name,
     resolvedSpec: alias.spec,
-    finalProtocol: 'npm' as const,
+    resolvedProtocol: 'npm',
   }
 }
 
-function resolveWorkspaceSpec(rawName: string, spec: string, options: ResolveDependencySpecOptions) {
-  const trimmed = spec.trim()
-  const alias = !isWorkspacePathReference(trimmed) ? splitAliasSpec(trimmed) : undefined
-  const targetName = alias?.name || rawName
-  const packageRef = isWorkspacePathReference(trimmed)
-    ? options.resolveWorkspacePackageByPath?.(trimmed)
-    : options.resolveWorkspacePackage?.(targetName)
-
-  if (!packageRef?.version) {
-    return {
-      resolvedName: packageRef?.name || targetName,
-      resolvedSpec: trimmed,
-      finalProtocol: 'workspace' as const,
-    }
-  }
-
-  return {
-    resolvedName: packageRef.name || targetName,
-    resolvedSpec: transformWorkspaceSpec(alias?.spec ?? trimmed, packageRef.version),
-    finalProtocol: 'npm' as const,
-  }
-}
-
-function resolveEffectiveSpec(rawName: string, rawSpec: string, options: ResolveDependencySpecOptions, seenCatalogs = new Set<string>()) {
+function resolveEffectiveSpec(rawName: string, rawSpec: string, catalogs?: CatalogsEntry, seenCatalogs = new Set<string>()): Resolution {
   const spec = rawSpec.trim()
 
   if (spec.startsWith('catalog:')) {
@@ -110,32 +73,41 @@ function resolveEffectiveSpec(rawName: string, rawSpec: string, options: Resolve
       return {
         resolvedName: rawName,
         resolvedSpec: spec,
-        finalProtocol: 'catalog' as const,
+        resolvedProtocol: 'catalog',
       }
     }
 
-    const catalogSpec = options.catalogs?.[categoryName]?.[rawName]
+    const catalogSpec = catalogs?.[categoryName]?.[rawName]
     if (!catalogSpec) {
       return {
         resolvedName: rawName,
         resolvedSpec: spec,
-        finalProtocol: 'catalog' as const,
+        resolvedProtocol: 'catalog',
       }
     }
 
     const nextSeenCatalogs = new Set(seenCatalogs)
     nextSeenCatalogs.add(categoryKey)
-    return resolveEffectiveSpec(rawName, catalogSpec, options, nextSeenCatalogs)
+    return resolveEffectiveSpec(rawName, catalogSpec, catalogs, nextSeenCatalogs)
   }
 
-  if (spec.startsWith('workspace:'))
-    return resolveWorkspaceSpec(rawName, spec.slice('workspace:'.length), options)
+  if (spec.startsWith('workspace:')) {
+    const trimmed = spec.trim()
+    const alias = !isWorkspacePathReference(trimmed) ? splitAliasSpec(trimmed) : undefined
+    const targetName = alias?.name || rawName
+
+    return {
+      resolvedName: targetName,
+      resolvedSpec: alias?.spec ?? trimmed,
+      resolvedProtocol: 'npm',
+    }
+  }
 
   if (spec.startsWith('jsr:')) {
     return {
       resolvedName: rawName,
       resolvedSpec: spec.slice('jsr:'.length),
-      finalProtocol: 'jsr' as const,
+      resolvedProtocol: 'jsr',
     }
   }
 
@@ -143,7 +115,7 @@ function resolveEffectiveSpec(rawName: string, rawSpec: string, options: Resolve
     return {
       resolvedName: rawName,
       resolvedSpec: rawSpec,
-      finalProtocol: null,
+      resolvedProtocol: 'file',
     }
   }
 
@@ -151,7 +123,7 @@ function resolveEffectiveSpec(rawName: string, rawSpec: string, options: Resolve
     return {
       resolvedName: rawName,
       resolvedSpec: rawSpec,
-      finalProtocol: null,
+      resolvedProtocol: 'git',
     }
   }
 
@@ -159,7 +131,7 @@ function resolveEffectiveSpec(rawName: string, rawSpec: string, options: Resolve
     return {
       resolvedName: rawName,
       resolvedSpec: rawSpec,
-      finalProtocol: null,
+      resolvedProtocol: 'http',
     }
   }
 
@@ -169,13 +141,13 @@ function resolveEffectiveSpec(rawName: string, rawSpec: string, options: Resolve
   return {
     resolvedName: rawName,
     resolvedSpec: spec,
-    finalProtocol: 'npm' as const,
+    resolvedProtocol: 'npm',
   }
 }
 
-export function resolveDependencySpec(rawName: string, rawSpec: string, options: ResolveDependencySpecOptions = {}): DependencySpecResolution {
+export function resolveDependencySpec(rawName: string, rawSpec: string, catalogs: CatalogsEntry = {}): DependencySpecResolution {
   const spec = rawSpec.trim()
-  const effective = resolveEffectiveSpec(rawName, rawSpec, options)
+  const effective = resolveEffectiveSpec(rawName, rawSpec, catalogs)
 
   if (spec.startsWith('catalog:')) {
     return {
@@ -201,34 +173,34 @@ export function resolveDependencySpec(rawName: string, rawSpec: string, options:
 
   if (spec.startsWith('file:')) {
     return {
-      protocol: null,
+      protocol: 'file',
       ...effective,
     }
   }
 
   if (GIT_PATTERN.test(spec)) {
     return {
-      protocol: null,
+      protocol: 'git',
       ...effective,
     }
   }
 
   if (HTTP_PATTERN.test(spec)) {
     return {
-      protocol: null,
+      protocol: 'http',
       ...effective,
     }
   }
 
   if (spec.startsWith('npm:')) {
     return {
-      protocol: effective.finalProtocol === 'jsr' ? 'jsr' : 'npm',
+      protocol: effective.resolvedProtocol === 'jsr' ? 'jsr' : 'npm',
       ...effective,
     }
   }
 
   return {
-    protocol: 'npm',
+    protocol: null,
     ...effective,
   }
 }

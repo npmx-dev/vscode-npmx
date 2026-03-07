@@ -7,7 +7,7 @@ import { isSupportedDependencyDocument, packageManifestExtractorEntry, workspace
 import { logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
 import { isOffsetInRange } from '#utils/ast'
-import { resolveDependencySpec } from '#utils/dependency-spec'
+import { resolveDependencySpec } from '#utils/dependency'
 import { readExtractorRoot } from '#utils/document'
 import { memoize } from '#utils/memoize'
 import { resolveExactVersion } from '#utils/package'
@@ -60,9 +60,7 @@ function createResolvedDependencyInfo(
   dependency: DependencyInfo,
   workspaceContext: WorkspaceContext,
 ): ResolvedDependencyInfo {
-  const resolution = resolveDependencySpec(dependency.rawName, dependency.rawSpec, {
-    catalogs: workspaceContext.catalogs,
-  })
+  const resolution = resolveDependencySpec(dependency.rawName, dependency.rawSpec, workspaceContext.catalogs)
 
   let packageInfoPromise: Promise<PackageInfo | null> | undefined
   let resolvedVersionPromise: Promise<string | null> | undefined
@@ -75,7 +73,7 @@ function createResolvedDependencyInfo(
     resolvedSpec: resolution.resolvedSpec,
     packageInfo: () => {
       if (!packageInfoPromise) {
-        packageInfoPromise = resolution.finalProtocol === 'npm'
+        packageInfoPromise = resolution.resolvedProtocol === 'npm'
           ? getPackageInfo(resolution.resolvedName).then((pkg) => pkg ?? null)
           : Promise.resolve(null)
       }
@@ -85,7 +83,7 @@ function createResolvedDependencyInfo(
     resolvedVersion: () => {
       if (!resolvedVersionPromise) {
         resolvedVersionPromise = (async () => {
-          if (resolution.finalProtocol !== 'npm')
+          if (resolution.resolvedProtocol !== 'npm')
             return null
 
           const pkg = await getPackageInfo(resolution.resolvedName)

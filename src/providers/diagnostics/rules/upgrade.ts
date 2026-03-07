@@ -21,8 +21,8 @@ function createUpgradeDiagnostic(range: OffsetRange, name: string, targetVersion
   }
 }
 
-export const checkUpgrade: DiagnosticRule = ({ dep, name, pkg, parsed, exactVersion }) => {
-  if (!parsed || !exactVersion)
+export const checkUpgrade: DiagnosticRule = ({ dep, name, pkg, exactVersion }) => {
+  if (!exactVersion)
     return
 
   if (Object.hasOwn(pkg.distTags, dep.rawSpec))
@@ -30,7 +30,7 @@ export const checkUpgrade: DiagnosticRule = ({ dep, name, pkg, parsed, exactVers
 
   const { latest } = pkg.distTags
   if (gt(latest, exactVersion)) {
-    const targetVersion = formatUpgradeVersion(parsed, latest)
+    const targetVersion = formatUpgradeVersion(dep, latest)
     if (checkIgnored({ ignoreList: config.ignore.upgrade, name, version: targetVersion }))
       return
     return createUpgradeDiagnostic(dep.specRange, name, targetVersion)
@@ -47,7 +47,7 @@ export const checkUpgrade: DiagnosticRule = ({ dep, name, pkg, parsed, exactVers
       continue
     if (lte(tagVersion, exactVersion))
       continue
-    const targetVersion = formatUpgradeVersion(parsed, tagVersion)
+    const targetVersion = formatUpgradeVersion(dep, tagVersion)
     if (checkIgnored({ ignoreList: config.ignore.upgrade, name, version: targetVersion }))
       continue
 

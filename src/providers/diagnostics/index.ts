@@ -1,7 +1,6 @@
 import type { ResolvedDependencyInfo } from '#types/context'
 import type { OffsetRange } from '#types/range'
 import type { PackageInfo } from '#utils/api/package'
-import type { ParsedVersion } from '#utils/version'
 import type { Engines } from 'fast-npm-meta'
 import type { Awaitable } from 'reactive-vscode'
 import type { Diagnostic, TextDocument, Uri } from 'vscode'
@@ -9,8 +8,8 @@ import { extractorEntries, isSupportedDependencyDocument } from '#extractors'
 import { config, logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
 import { offsetRangeToRange } from '#utils/ast'
-import { resolveExactVersion, resolvePackageName } from '#utils/package'
-import { isSupportedProtocol, parseVersion } from '#utils/version'
+import { resolveExactVersion } from '#utils/package'
+import { isSupportedProtocol } from '#utils/version'
 import { getPackageContext, getResolvedDependencies } from '#utils/workspace-context'
 import { debounce } from 'perfect-debounce'
 import { computed, useActiveTextEditor, useDisposable, useDocumentText, useFileSystemWatcher, watch } from 'reactive-vscode'
@@ -23,13 +22,12 @@ import { checkReplacement } from './rules/replacement'
 import { checkUpgrade } from './rules/upgrade'
 import { checkVulnerability } from './rules/vulnerability'
 
-type DiagnosticDependency = Pick<ResolvedDependencyInfo, 'nameRange' | 'rawName' | 'rawSpec' | 'specRange'>
+type DiagnosticDependency = Pick<ResolvedDependencyInfo, 'nameRange' | 'rawName' | 'rawSpec' | 'specRange' | 'protocol' | 'resolvedName' | 'resolvedSpec'>
 
 export interface DiagnosticContext {
   dep: DiagnosticDependency
   name: string
   pkg: PackageInfo
-  parsed: ParsedVersion | null
   exactVersion: string | null
   engines: Engines | undefined
 }
@@ -114,21 +112,18 @@ export function useDiagnostics() {
 
     const collect = async (dep: ResolvedDependencyInfo) => {
       try {
-        const parsed = parseVersion(dep.rawSpec)
-        const name = resolvePackageName(dep.rawName, parsed)
-        if (!name)
-          return
+        const name = dep.resolvedName
 
         const pkg = await getPackageInfo(name)
         if (!pkg || isStale(document, targetVersion))
           return
 
-        const exactVersion = parsed && isSupportedProtocol(parsed.protocol)
-          ? resolveExactVersion(pkg, parsed.version)
+        const exactVersion = isSupportedProtocol(dep.protocol)
+          ? resolveExactVersion(pkg, dep.resolvedSpec)
           : null
 
         for (const rule of rules) {
-          runRule(rule, { dep, name, pkg, parsed, exactVersion, engines })
+          runRule(rule, { dep, name, pkg, exactVersion, engines })
         }
       } catch (err) {
         logger.warn(`[diagnostics] fail to check ${dep.rawName}: ${err}`)

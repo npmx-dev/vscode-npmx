@@ -2,11 +2,11 @@ import type { DiagnosticRule } from '..'
 import { npmxPackageUrl } from '#utils/links'
 import { DiagnosticSeverity, Uri } from 'vscode'
 
-export const checkDistTag: DiagnosticRule = ({ dep, name, pkg, parsed, exactVersion }) => {
-  if (!parsed || !exactVersion)
+export const checkDistTag: DiagnosticRule = ({ dep, name, pkg, exactVersion }) => {
+  if (!exactVersion)
     return
 
-  const tag = parsed.version
+  const tag = dep.resolvedSpec
   if (!Object.hasOwn(pkg.distTags, tag))
     return
 

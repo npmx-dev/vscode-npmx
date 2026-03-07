@@ -5,8 +5,8 @@ import { npmxPackageUrl } from '#utils/links'
 import { formatPackageId } from '#utils/package'
 import { DiagnosticSeverity, DiagnosticTag, Uri } from 'vscode'
 
-export const checkDeprecation: DiagnosticRule = ({ dep, name, pkg, parsed, exactVersion }) => {
-  if (!parsed || !exactVersion)
+export const checkDeprecation: DiagnosticRule = ({ dep, name, pkg, exactVersion }) => {
+  if (!exactVersion)
     return
 
   const versionInfo = pkg.versionsMeta[exactVersion]
@@ -23,7 +23,7 @@ export const checkDeprecation: DiagnosticRule = ({ dep, name, pkg, parsed, exact
     severity: DiagnosticSeverity.Error,
     code: {
       value: 'deprecation',
-      target: Uri.parse(npmxPackageUrl(name, parsed.version)),
+      target: Uri.parse(npmxPackageUrl(name, dep.resolvedSpec)),
     },
     tags: [DiagnosticTag.Deprecated],
   }

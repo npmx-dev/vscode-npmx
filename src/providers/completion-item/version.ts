@@ -3,8 +3,7 @@ import { PRERELEASE_PATTERN } from '#constants'
 import { config } from '#state'
 import { getPackageInfo } from '#utils/api/package'
 import { offsetRangeToRange } from '#utils/ast'
-import { resolvePackageName } from '#utils/package'
-import { formatUpgradeVersion, isSupportedProtocol, parseVersion } from '#utils/version'
+import { formatUpgradeVersion, isSupportedProtocol } from '#utils/version'
 import { getResolvedDependencyByOffset } from '#utils/workspace-context'
 import { CompletionItem, CompletionItemKind } from 'vscode'
 
@@ -15,21 +14,10 @@ export class VersionCompletionItemProvider implements CompletionItemProvider {
     if (!info)
       return
 
-    const {
-      specRange,
-      rawName,
-      rawSpec,
-    } = info
-
-    const parsed = parseVersion(rawSpec)
-    if (!parsed || !isSupportedProtocol(parsed.protocol))
+    if (!isSupportedProtocol(info.protocol))
       return
 
-    const packageName = resolvePackageName(rawName, parsed)
-    if (!packageName)
-      return
-
-    const pkg = await getPackageInfo(packageName)
+    const pkg = await getPackageInfo(info.resolvedName)
     if (!pkg)
       return
 
@@ -47,10 +35,10 @@ export class VersionCompletionItemProvider implements CompletionItemProvider {
       if (config.completion.version === 'provenance-only' && !meta.provenance)
         continue
 
-      const text = formatUpgradeVersion(parsed, version)
+      const text = formatUpgradeVersion(info, version)
       const item = new CompletionItem(text, CompletionItemKind.Value)
 
-      item.range = offsetRangeToRange(document, specRange)
+      item.range = offsetRangeToRange(document, info.specRange)
       item.insertText = text
 
       const tag = pkg.versionToTag.get(version)

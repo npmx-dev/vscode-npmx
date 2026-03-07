@@ -1,5 +1,4 @@
 import type { PackageInfo } from './api/package'
-import type { ParsedVersion } from './version'
 import Range from 'semver/classes/range'
 import gt from 'semver/functions/gt'
 import lte from 'semver/functions/lte'
@@ -14,10 +13,6 @@ export function encodePackageName(name: string): string {
     return `@${encodeURIComponent(name.slice(1))}`
   }
   return encodeURIComponent(name)
-}
-
-export function resolvePackageName(depName: string, parsed: ParsedVersion | null): string {
-  return parsed?.aliasName ?? depName
 }
 
 const JSR_NPM_SCOPE = '@jsr/'

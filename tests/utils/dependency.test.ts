@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { resolveDependencySpec } from '../../src/utils/dependency-spec'
+import { resolveDependencySpec } from '../../src/utils/dependency'
 
 describe('resolveDependencySpec', () => {
   it('resolves plain npm specs as npm protocol', () => {
@@ -34,30 +34,10 @@ describe('resolveDependencySpec', () => {
     })
   })
 
-  it('resolves workspace specs with local versions', () => {
-    expect(resolveDependencySpec('pkg-a', 'workspace:*', {
-      resolveWorkspacePackage: () => ({ name: 'pkg-a', version: '1.2.3' }),
-    })).toMatchObject({
-      protocol: 'workspace',
-      resolvedName: 'pkg-a',
-      resolvedSpec: '1.2.3',
-    })
-
-    expect(resolveDependencySpec('pkg-a', 'workspace:^', {
-      resolveWorkspacePackage: () => ({ name: 'pkg-a', version: '1.2.3' }),
-    })).toMatchObject({
-      protocol: 'workspace',
-      resolvedName: 'pkg-a',
-      resolvedSpec: '^1.2.3',
-    })
-  })
-
   it('resolves default and named catalogs', () => {
     expect(resolveDependencySpec('lodash', 'catalog:', {
-      catalogs: {
-        default: {
-          lodash: '^4.17.21',
-        },
+      default: {
+        lodash: '^4.17.21',
       },
     })).toMatchObject({
       protocol: 'catalog',
@@ -67,10 +47,8 @@ describe('resolveDependencySpec', () => {
     })
 
     expect(resolveDependencySpec('vite', 'catalog:dev', {
-      catalogs: {
-        dev: {
-          vite: 'npm:vite@latest',
-        },
+      dev: {
+        vite: 'npm:vite@latest',
       },
     })).toMatchObject({
       protocol: 'catalog',

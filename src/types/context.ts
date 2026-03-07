@@ -9,6 +9,10 @@ export type DependencyProtocol
     | 'jsr'
     | 'workspace'
     | 'catalog'
+    | 'git'
+    | 'file'
+    | 'http'
+    | null
 
 export interface WorkspaceContext {
   packageManager: PackageManager
@@ -23,7 +27,7 @@ export interface PackageContext {
 }
 
 export interface ResolvedDependencyInfo extends DependencyInfo {
-  protocol: DependencyProtocol | null
+  protocol: DependencyProtocol
   resolvedName: string
   resolvedSpec: string
   packageInfo: () => Promise<PackageInfo | null>
