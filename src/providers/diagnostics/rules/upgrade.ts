@@ -21,19 +21,20 @@ function createUpgradeDiagnostic(range: OffsetRange, name: string, targetVersion
   }
 }
 
-export const checkUpgrade: DiagnosticRule = ({ dep, name, pkg, exactVersion }) => {
+export const checkUpgrade: DiagnosticRule = ({ dep, pkg, exactVersion }) => {
   if (!exactVersion)
     return
 
   if (Object.hasOwn(pkg.distTags, dep.rawSpec))
     return
 
+  const { resolvedName } = dep
   const { latest } = pkg.distTags
   if (gt(latest, exactVersion)) {
     const targetVersion = formatUpgradeVersion(dep, latest)
-    if (checkIgnored({ ignoreList: config.ignore.upgrade, name, version: targetVersion }))
+    if (checkIgnored({ ignoreList: config.ignore.upgrade, name: resolvedName, version: targetVersion }))
       return
-    return createUpgradeDiagnostic(dep.specRange, name, targetVersion)
+    return createUpgradeDiagnostic(dep.specRange, resolvedName, targetVersion)
   }
 
   const currentPreId = prerelease(exactVersion)?.[0]
@@ -48,9 +49,9 @@ export const checkUpgrade: DiagnosticRule = ({ dep, name, pkg, exactVersion }) =
     if (lte(tagVersion, exactVersion))
       continue
     const targetVersion = formatUpgradeVersion(dep, tagVersion)
-    if (checkIgnored({ ignoreList: config.ignore.upgrade, name, version: targetVersion }))
+    if (checkIgnored({ ignoreList: config.ignore.upgrade, name: resolvedName, version: targetVersion }))
       continue
 
-    return createUpgradeDiagnostic(dep.specRange, name, targetVersion)
+    return createUpgradeDiagnostic(dep.specRange, resolvedName, targetVersion)
   }
 }

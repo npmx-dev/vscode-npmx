@@ -138,9 +138,10 @@ describe('workspace context', () => {
           category: 'catalog',
           rawName: 'lodash',
           rawSpec: '^4.17.21',
-          protocol: 'npm',
+          protocol: null,
           resolvedName: 'lodash',
           resolvedSpec: '^4.17.21',
+          resolvedProtocol: 'npm',
         }),
         expect.objectContaining({
           category: 'catalogs',

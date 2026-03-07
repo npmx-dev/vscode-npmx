@@ -18,8 +18,11 @@ interface CreateContextOptions {
 
 export function createContext(options: CreateContextOptions): DiagnosticContext {
   const { name, version, distTags = {}, versionsMeta = {}, engines } = options
-  const { protocol, resolvedName, resolvedSpec } = resolveDependencySpec(name, version)
+  const { protocol, resolvedName, resolvedSpec, resolvedProtocol } = resolveDependencySpec(name, version)
+  const pkg = { distTags, versionsMeta, versionToTag: new Map() } as PackageInfo
+
   const dep: DiagnosticContext['dep'] = {
+    category: 'dependencies',
     rawName: name,
     rawSpec: version,
     nameRange: [0, name.length],
@@ -27,10 +30,12 @@ export function createContext(options: CreateContextOptions): DiagnosticContext 
     protocol,
     resolvedName,
     resolvedSpec,
+    resolvedProtocol,
+    resolvedVersion: async () => '',
+    packageInfo: async () => (pkg),
   }
-  const pkg = { distTags, versionsMeta, versionToTag: new Map() } as PackageInfo
-  const exactVersion = isSupportedProtocol(protocol)
+  const exactVersion = isSupportedProtocol(resolvedProtocol)
     ? resolveExactVersion(pkg, resolvedSpec)
     : null
-  return { dep, name: resolvedName, pkg, exactVersion, engines }
+  return { dep, pkg, exactVersion, engines }
 }

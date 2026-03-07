@@ -1,12 +1,10 @@
 import type { ResolvedDependencyInfo } from '#types/context'
 import type { OffsetRange } from '#types/range'
-import type { PackageInfo } from '#utils/api/package'
 import type { Engines } from 'fast-npm-meta'
 import type { Awaitable } from 'reactive-vscode'
 import type { Diagnostic, TextDocument, Uri } from 'vscode'
 import { extractorEntries, isSupportedDependencyDocument } from '#extractors'
 import { config, logger } from '#state'
-import { getPackageInfo } from '#utils/api/package'
 import { offsetRangeToRange } from '#utils/ast'
 import { resolveExactVersion } from '#utils/package'
 import { isSupportedProtocol } from '#utils/version'
@@ -22,12 +20,9 @@ import { checkReplacement } from './rules/replacement'
 import { checkUpgrade } from './rules/upgrade'
 import { checkVulnerability } from './rules/vulnerability'
 
-type DiagnosticDependency = Pick<ResolvedDependencyInfo, 'nameRange' | 'rawName' | 'rawSpec' | 'specRange' | 'protocol' | 'resolvedName' | 'resolvedSpec'>
-
 export interface DiagnosticContext {
-  dep: DiagnosticDependency
-  name: string
-  pkg: PackageInfo
+  dep: ResolvedDependencyInfo
+  pkg: NonNullable<Awaited<ReturnType<ResolvedDependencyInfo['packageInfo']>>>
   exactVersion: string | null
   engines: Engines | undefined
 }
@@ -112,9 +107,7 @@ export function useDiagnostics() {
 
     const collect = async (dep: ResolvedDependencyInfo) => {
       try {
-        const name = dep.resolvedName
-
-        const pkg = await getPackageInfo(name)
+        const pkg = await dep.packageInfo()
         if (!pkg || isStale(document, targetVersion))
           return
 
@@ -123,7 +116,7 @@ export function useDiagnostics() {
           : null
 
         for (const rule of rules) {
-          runRule(rule, { dep, name, pkg, exactVersion, engines })
+          runRule(rule, { dep, pkg, exactVersion, engines })
         }
       } catch (err) {
         logger.warn(`[diagnostics] fail to check ${dep.rawName}: ${err}`)

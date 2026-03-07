@@ -1,10 +1,9 @@
-import type { DependencyProtocol, ResolvedDependencyInfo } from '#types/context'
+import type { ResolvedDependencyInfo } from '#types/context'
 import { isJsrNpmPackage, jsrNpmToJsrName, parsePackageId } from '#utils/package'
 
 export type CatalogsInfo = Record<string, Record<string, string>>
 
-interface FinalResolution extends Pick<ResolvedDependencyInfo, 'resolvedName' | 'resolvedSpec'> {
-  resolvedProtocol: DependencyProtocol
+interface FinalResolution extends Pick<ResolvedDependencyInfo, 'resolvedName' | 'resolvedSpec' | 'resolvedProtocol'> {
 }
 
 interface DependencySpecResolution extends FinalResolution, Pick<ResolvedDependencyInfo, 'protocol' | 'categoryName'> {
@@ -43,21 +42,13 @@ function resolveNpmSpec(rawName: string, spec: string): FinalResolution {
   }
 }
 
-function resolveEffectiveSpec(rawName: string, rawSpec: string, catalogs?: CatalogsInfo, seenCatalogs = new Set<string>()): FinalResolution {
+function resolveEffectiveSpec(rawName: string, rawSpec: string, catalogs?: CatalogsInfo): FinalResolution {
   const spec = rawSpec.trim()
 
   if (spec.startsWith('catalog:')) {
     const categoryName = normalizeCatalogName(spec.slice('catalog:'.length))
-    const categoryKey = `${categoryName}:${rawName}`
-    if (seenCatalogs.has(categoryKey)) {
-      return {
-        resolvedName: rawName,
-        resolvedSpec: spec,
-        resolvedProtocol: 'catalog',
-      }
-    }
-
     const catalogSpec = catalogs?.[categoryName]?.[rawName]
+
     if (!catalogSpec) {
       return {
         resolvedName: rawName,
@@ -66,16 +57,14 @@ function resolveEffectiveSpec(rawName: string, rawSpec: string, catalogs?: Catal
       }
     }
 
-    const nextSeenCatalogs = new Set(seenCatalogs)
-    nextSeenCatalogs.add(categoryKey)
-    return resolveEffectiveSpec(rawName, catalogSpec, catalogs, nextSeenCatalogs)
+    return resolveEffectiveSpec(rawName, catalogSpec, catalogs)
   }
 
   if (spec.startsWith('workspace:')) {
     return {
       resolvedName: rawName,
-      resolvedSpec: spec,
-      resolvedProtocol: 'npm',
+      resolvedSpec: spec.slice('workspace:'.length),
+      resolvedProtocol: 'workspace',
     }
   }
 

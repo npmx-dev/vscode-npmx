@@ -29,6 +29,7 @@ export interface ResolvedDependencyInfo extends DependencyInfo {
   protocol: DependencyProtocol
   resolvedName: string
   resolvedSpec: string
+  resolvedProtocol: DependencyProtocol
   packageInfo: () => Promise<PackageInfo | null>
   resolvedVersion: () => Promise<string | null>
 }

@@ -13,7 +13,7 @@ export class NpmxDocumentLinkProvider implements DocumentLinkProvider {
     const links: DocumentLink[] = []
     const dependencies = await getResolvedDependencies(document.uri)
     const linkMode = config.packageLinks
-    const supportedDeps = dependencies.filter(dep => isSupportedProtocol(dep.protocol))
+    const supportedDeps = dependencies.filter((dep) => isSupportedProtocol(dep.protocol))
 
     for (const dep of supportedDeps) {
       const { resolvedName, resolvedSpec, nameRange } = dep

@@ -4,7 +4,8 @@ import { resolveDependencySpec } from '../../src/utils/dependency'
 describe('resolveDependencySpec', () => {
   it('resolves plain npm specs as npm protocol', () => {
     expect(resolveDependencySpec('vite', '^6.0.0')).toMatchObject({
-      protocol: 'npm',
+      protocol: null,
+      resolvedProtocol: 'npm',
       resolvedName: 'vite',
       resolvedSpec: '^6.0.0',
     })
@@ -60,19 +61,19 @@ describe('resolveDependencySpec', () => {
 
   it('preserves unsupported file, git and http specs', () => {
     expect(resolveDependencySpec('pkg-a', 'file:../pkg-a')).toMatchObject({
-      protocol: null,
+      protocol: 'file',
       resolvedName: 'pkg-a',
       resolvedSpec: 'file:../pkg-a',
     })
 
     expect(resolveDependencySpec('pkg-a', 'git+https://github.com/user/repo.git')).toMatchObject({
-      protocol: null,
+      protocol: 'git',
       resolvedName: 'pkg-a',
       resolvedSpec: 'git+https://github.com/user/repo.git',
     })
 
     expect(resolveDependencySpec('pkg-a', 'https://example.com/pkg.tgz')).toMatchObject({
-      protocol: null,
+      protocol: 'http',
       resolvedName: 'pkg-a',
       resolvedSpec: 'https://example.com/pkg.tgz',
     })

@@ -43,10 +43,8 @@ function createResolvedDependencyInfo(
 
   return {
     ...dependency,
-    protocol: resolution.protocol,
+    ...resolution,
     categoryName: dependency.categoryName ?? resolution.categoryName,
-    resolvedName: resolution.resolvedName,
-    resolvedSpec: resolution.resolvedSpec,
     packageInfo: () => {
       if (!packageInfoPromise) {
         packageInfoPromise = resolution.resolvedProtocol === 'npm'

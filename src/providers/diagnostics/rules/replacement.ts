@@ -41,19 +41,19 @@ function getReplacementInfo(replacement: ModuleReplacement) {
   }
 }
 
-export const checkReplacement: DiagnosticRule = async ({ dep, name }) => {
-  if (checkIgnored({ ignoreList: config.ignore.replacement, name }))
+export const checkReplacement: DiagnosticRule = async ({ dep: { nameRange, resolvedName } }) => {
+  if (checkIgnored({ ignoreList: config.ignore.replacement, name: resolvedName }))
     return
 
-  const replacement = await getReplacement(name)
+  const replacement = await getReplacement(resolvedName)
   if (!replacement)
     return
 
   const { message, link } = getReplacementInfo(replacement)
 
   return {
-    range: dep.nameRange,
-    message: `"${name}" ${message}`,
+    range: nameRange,
+    message: `"${resolvedName}" ${message}`,
     severity: DiagnosticSeverity.Warning,
     code: link ? { value: 'replacement', target: Uri.parse(link) } : 'replacement',
   }

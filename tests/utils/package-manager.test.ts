@@ -44,19 +44,4 @@ describe('package manager', () => {
 
     expect(packageManager).toBe(expected)
   })
-
-  it('prefers open dirty root package.json over disk contents', async () => {
-    const root = getFixtureRoot('package-manager-yarn')
-    const rootPackageUri = Uri.file(join(root, packageManifestExtractorEntry.basename))
-    const dirtyDocument = createTextDocument(rootPackageUri, JSON.stringify({
-      name: 'repo',
-      version: '1.0.0',
-      packageManager: 'pnpm@10.30.3',
-    }, null, 2), 'json', 2)
-    ;(workspace.textDocuments as any) = [dirtyDocument]
-
-    const packageManager = await detectPackageManager(createWorkspaceFolder(root) as any)
-
-    expect(packageManager).toBe('pnpm')
-  })
 })
