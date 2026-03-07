@@ -80,21 +80,21 @@ describe('resolveDependencySpec', () => {
     })
   })
 
-  it('preserves unsupported file, git and http protocols', () => {
+  it('preserves unsupported file, git and http specs', () => {
     expect(resolveDependencySpec('pkg-a', 'file:../pkg-a')).toMatchObject({
-      protocol: 'file',
+      protocol: null,
       resolvedName: 'pkg-a',
       resolvedSpec: 'file:../pkg-a',
     })
 
     expect(resolveDependencySpec('pkg-a', 'git+https://github.com/user/repo.git')).toMatchObject({
-      protocol: 'git',
+      protocol: null,
       resolvedName: 'pkg-a',
       resolvedSpec: 'git+https://github.com/user/repo.git',
     })
 
     expect(resolveDependencySpec('pkg-a', 'https://example.com/pkg.tgz')).toMatchObject({
-      protocol: 'http',
+      protocol: null,
       resolvedName: 'pkg-a',
       resolvedSpec: 'https://example.com/pkg.tgz',
     })

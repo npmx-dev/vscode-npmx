@@ -1,18 +1,9 @@
 import type { PackageManager } from '#types/context'
-import type { Extractor } from '#types/extractor'
-import type { TextDocument, WorkspaceFolder } from 'vscode'
+import type { WorkspaceFolder } from 'vscode'
 import { getWorkspaceCatalogExtractorEntry, packageManifestExtractorEntry, workspaceCatalogExtractorEntries } from '#extractors'
+import { readExtractorRoot } from '#utils/document'
 import { Uri } from 'vscode'
-
-type DocumentTextReader = (uri: Uri, openDocuments: Map<string, TextDocument>) => Promise<string | undefined>
-
-interface ExtractorRootReader {
-  <T>(
-    uri: Uri,
-    extractor: Extractor<T>,
-    openDocuments: Map<string, TextDocument>,
-  ): Promise<T | undefined>
-}
+import { accessOk } from 'vscode-find-up'
 
 function normalizeDeclaredPackageManager(value: string | undefined): PackageManager | undefined {
   const packageManagerName = value?.split('@')[0]
@@ -20,23 +11,21 @@ function normalizeDeclaredPackageManager(value: string | undefined): PackageMana
     return packageManagerName
 }
 
-export async function detectPackageManager(
-  folder: WorkspaceFolder,
-  openDocuments: Map<string, TextDocument>,
-  readDocumentText: DocumentTextReader,
-  readExtractorRoot: ExtractorRootReader,
-): Promise<PackageManager> {
+export async function detectPackageManager(folder: WorkspaceFolder): Promise<PackageManager> {
   const rootPackageUri = Uri.joinPath(folder.uri, packageManifestExtractorEntry.basename)
-  const rootPackage = await readExtractorRoot(rootPackageUri, packageManifestExtractorEntry.extractor, openDocuments)
-  if (rootPackage) {
-    const declaredPackageManager = packageManifestExtractorEntry.extractor.getPackageManifestInfo(rootPackage).packageManager
-    const packageManager = normalizeDeclaredPackageManager(declaredPackageManager)
-    if (packageManager)
-      return packageManager
+
+  if (await accessOk(rootPackageUri)) {
+    const rootPackage = await readExtractorRoot(rootPackageUri, packageManifestExtractorEntry.extractor)
+    if (rootPackage) {
+      const declaredPackageManager = packageManifestExtractorEntry.extractor.getPackageManifestInfo(rootPackage).packageManager
+      const packageManager = normalizeDeclaredPackageManager(declaredPackageManager)
+      if (packageManager)
+        return packageManager
+    }
   }
 
   for (const entry of workspaceCatalogExtractorEntries) {
-    if (await readDocumentText(Uri.joinPath(folder.uri, entry.basename), openDocuments))
+    if (await accessOk(Uri.joinPath(folder.uri, entry.basename)))
       return entry.packageManager
   }
 
@@ -46,8 +35,6 @@ export async function detectPackageManager(
 export async function readWorkspaceCatalogs(
   folder: WorkspaceFolder,
   packageManager: PackageManager,
-  openDocuments: Map<string, TextDocument>,
-  readExtractorRoot: ExtractorRootReader,
 ) {
   if (packageManager === 'npm')
     return
@@ -56,7 +43,7 @@ export async function readWorkspaceCatalogs(
   if (!entry)
     return
 
-  const root = await readExtractorRoot(Uri.joinPath(folder.uri, entry.basename), entry.extractor, openDocuments)
+  const root = await readExtractorRoot(Uri.joinPath(folder.uri, entry.basename), entry.extractor)
   if (!root)
     return
 

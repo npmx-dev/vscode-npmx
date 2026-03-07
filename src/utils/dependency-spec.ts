@@ -13,11 +13,11 @@ export interface ResolveDependencySpecOptions {
 }
 
 export interface DependencySpecResolution {
-  protocol: DependencyProtocol
+  protocol: DependencyProtocol | null
   categoryName?: string
   resolvedName: string
   resolvedSpec: string
-  finalProtocol: DependencyProtocol
+  finalProtocol: DependencyProtocol | null
 }
 
 const DEFAULT_CATEGORY_NAME = 'default'
@@ -143,7 +143,7 @@ function resolveEffectiveSpec(rawName: string, rawSpec: string, options: Resolve
     return {
       resolvedName: rawName,
       resolvedSpec: rawSpec,
-      finalProtocol: 'file' as const,
+      finalProtocol: null,
     }
   }
 
@@ -151,7 +151,7 @@ function resolveEffectiveSpec(rawName: string, rawSpec: string, options: Resolve
     return {
       resolvedName: rawName,
       resolvedSpec: rawSpec,
-      finalProtocol: 'git' as const,
+      finalProtocol: null,
     }
   }
 
@@ -159,7 +159,7 @@ function resolveEffectiveSpec(rawName: string, rawSpec: string, options: Resolve
     return {
       resolvedName: rawName,
       resolvedSpec: rawSpec,
-      finalProtocol: 'http' as const,
+      finalProtocol: null,
     }
   }
 
@@ -201,21 +201,21 @@ export function resolveDependencySpec(rawName: string, rawSpec: string, options:
 
   if (spec.startsWith('file:')) {
     return {
-      protocol: 'file',
+      protocol: null,
       ...effective,
     }
   }
 
   if (GIT_PATTERN.test(spec)) {
     return {
-      protocol: 'git',
+      protocol: null,
       ...effective,
     }
   }
 
   if (HTTP_PATTERN.test(spec)) {
     return {
-      protocol: 'http',
+      protocol: null,
       ...effective,
     }
   }

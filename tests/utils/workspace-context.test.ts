@@ -68,7 +68,7 @@ describe('workspace context', () => {
     resetWorkspaceState()
   })
 
-  it('builds package contexts for the whole workspace and resolves catalogs/workspace deps', async () => {
+  it('builds package contexts on demand and resolves catalogs without scanning the workspace', async () => {
     const root = getFixtureRoot('pnpm-workspace')
     setWorkspaceRoot(root)
     await setFixturePackageFiles(root)
@@ -83,9 +83,7 @@ describe('workspace context', () => {
         vite: 'npm:vite@latest',
       },
     })
-    expect(workspaceContext?.packages.size).toBe(3)
-
-    const appContext = workspaceContext?.packages.get(join(root, 'packages/app/package.json'))
+    const appContext = await getPackageContext(Uri.file(join(root, 'packages/app/package.json')))
     expect(appContext).toBeDefined()
 
     const dependencies = [...appContext!.dependencies.values()]
@@ -107,7 +105,7 @@ describe('workspace context', () => {
           rawName: 'pkg-core',
           protocol: 'workspace',
           resolvedName: 'pkg-core',
-          resolvedSpec: '2.3.4',
+          resolvedSpec: '*',
         }),
         expect.objectContaining({
           rawName: 'my-nuxt',
@@ -186,8 +184,7 @@ describe('workspace context', () => {
     ;(dirtyDocument as any)._isDirty = true
     ;(workspace.textDocuments as any) = [dirtyDocument]
 
-    const workspaceContext = await getWorkspaceContext(appPackageJsonUri)
-    const appContext = workspaceContext?.packages.get(join(root, 'packages/app/package.json'))
+    const appContext = await getPackageContext(appPackageJsonUri)
     expect([...appContext!.dependencies.values()]).toEqual([
       expect.objectContaining({
         rawName: 'vite',
@@ -197,35 +194,14 @@ describe('workspace context', () => {
     ])
   })
 
-  it('deduplicates in-flight builds and rebuilds after invalidation', async () => {
+  it('does not scan workspace packages during initialization', async () => {
     const root = getFixtureRoot('minimal')
     setWorkspaceRoot(root)
 
-    let resolveFindFiles: ((value: Uri[]) => void) | undefined
-    const pendingFindFiles = new Promise<Uri[]>((resolve) => {
-      resolveFindFiles = resolve
-    })
-    vi.mocked(workspace.findFiles).mockImplementation(() => pendingFindFiles)
-
     const target = Uri.file(join(root, 'package.json'))
-    const first = getWorkspaceContext(target)
-    const second = getWorkspaceContext(target)
+    await getWorkspaceContext(target)
 
-    await vi.waitFor(() => {
-      expect(workspace.findFiles).toHaveBeenCalledTimes(1)
-    })
-
-    resolveFindFiles?.([target])
-
-    const [firstContext, secondContext] = await Promise.all([first, second])
-    expect(firstContext).toBe(secondContext)
-
-    invalidateWorkspaceContext(root)
-    vi.mocked(workspace.findFiles).mockResolvedValue([target])
-
-    const thirdContext = await getWorkspaceContext(target)
-    expect(workspace.findFiles).toHaveBeenCalledTimes(2)
-    expect(thirdContext).toBeDefined()
+    expect(workspace.findFiles).not.toHaveBeenCalled()
   })
 
   it('finds resolved dependencies by offset across supported documents', async () => {
@@ -244,7 +220,7 @@ describe('workspace context', () => {
       rawName: 'pkg-core',
       protocol: 'workspace',
       resolvedName: 'pkg-core',
-      resolvedSpec: '2.3.4',
+      resolvedSpec: '*',
     })
 
     const workspaceYamlPath = join(root, 'pnpm-workspace.yaml')

@@ -1,9 +1,7 @@
-import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createTextDocument } from 'jest-mock-vscode'
-import { normalize } from 'pathe'
-import { describe, expect, it } from 'vitest'
-import { Uri } from 'vscode'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { Uri, workspace } from 'vscode'
 import { packageManifestExtractorEntry } from '../../src/extractors'
 import { detectPackageManager, readWorkspaceCatalogs } from '../../src/utils/package-manager'
 
@@ -21,29 +19,20 @@ function createWorkspaceFolder(root: string) {
   }
 }
 
-async function readDocumentText(uri: Uri, openDocuments: Map<string, ReturnType<typeof createTextDocument>>): Promise<string | undefined> {
-  const openDocument = openDocuments.get(normalize(uri.path))
-  if (openDocument)
-    return openDocument.getText()
-
-  try {
-    return await readFile(uri.fsPath, 'utf8')
-  } catch {}
-}
-
-async function readExtractorRoot<T>(
-  uri: Uri,
-  extractor: { parse: (text: string) => T | null | undefined },
-  openDocuments: Map<string, ReturnType<typeof createTextDocument>>,
-): Promise<T | undefined> {
-  const text = await readDocumentText(uri, openDocuments)
-  if (!text)
-    return
-
-  return extractor.parse(text) ?? undefined
+function resetWorkspaceState() {
+  ;(workspace.textDocuments as any) = []
+  ;(workspace as any).setWorkspaceFolders([])
 }
 
 describe('package manager', () => {
+  beforeEach(() => {
+    resetWorkspaceState()
+  })
+
+  afterEach(() => {
+    resetWorkspaceState()
+  })
+
   it.each([
     ['prefers packageManager in root package.json over workspace files', 'package-manager-npm', 'npm'],
     ['falls back to pnpm workspace file', 'package-manager-pnpm', 'pnpm'],
@@ -51,13 +40,7 @@ describe('package manager', () => {
   ] as const)('%s', async (_, fixtureName, expected) => {
     const root = getFixtureRoot(fixtureName)
     const folder = createWorkspaceFolder(root)
-
-    const packageManager = await detectPackageManager(
-      folder as any,
-      new Map(),
-      readDocumentText,
-      readExtractorRoot,
-    )
+    const packageManager = await detectPackageManager(folder as any)
 
     expect(packageManager).toBe(expected)
   })
@@ -70,13 +53,9 @@ describe('package manager', () => {
       version: '1.0.0',
       packageManager: 'pnpm@10.30.3',
     }, null, 2), 'json', 2)
+    ;(workspace.textDocuments as any) = [dirtyDocument]
 
-    const packageManager = await detectPackageManager(
-      createWorkspaceFolder(root) as any,
-      new Map([[normalize(rootPackageUri.path), dirtyDocument]]),
-      readDocumentText,
-      readExtractorRoot,
-    )
+    const packageManager = await detectPackageManager(createWorkspaceFolder(root) as any)
 
     expect(packageManager).toBe('pnpm')
   })
@@ -86,8 +65,6 @@ describe('package manager', () => {
     const catalogs = await readWorkspaceCatalogs(
       createWorkspaceFolder(root) as any,
       'pnpm',
-      new Map(),
-      readExtractorRoot,
     )
 
     expect(catalogs).toEqual({
@@ -105,8 +82,6 @@ describe('package manager', () => {
     const catalogs = await readWorkspaceCatalogs(
       createWorkspaceFolder(root) as any,
       'npm',
-      new Map(),
-      readExtractorRoot,
     )
 
     expect(catalogs).toBeUndefined()
