@@ -2,10 +2,13 @@
   "engines": {
     "node": ">16"
   },
+  "peerDependencies": {
+    "eslint": "^8 || ^9 || ^10"
+  },
   "dependencies": {
     "@deno/doc": "jsr:^0.189.1",
     "@prismicio/client": "~7.21.0-canary.147e3f2",
-    "nuxt": "npm:4.3.0"
+    "nuxt": "npm:nuxt@4.3.0"
   },
   "devDependencies": {
     "ofetch": "^2.0.0-alpha.1",

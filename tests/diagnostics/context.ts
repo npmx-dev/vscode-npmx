@@ -2,7 +2,7 @@ import type { DependencyInfo } from '#types/extractor'
 import type { PackageInfo } from '#utils/api/package'
 import type { Engines } from 'fast-npm-meta'
 import type { DiagnosticContext } from '../../src/providers/diagnostics'
-import { resolveExactVersion } from '#utils/package'
+import { resolveExactVersion, resolvePackageName } from '#utils/package'
 import { isSupportedProtocol, parseVersion } from '#utils/version'
 
 interface CreateContextOptions {
@@ -24,5 +24,5 @@ export function createContext(options: CreateContextOptions): DiagnosticContext 
   const exactVersion = parsed && isSupportedProtocol(parsed.protocol)
     ? resolveExactVersion(pkg, parsed.version)
     : null
-  return { dep, pkg, parsed, exactVersion, engines }
+  return { dep, name: resolvePackageName(name, parsed), pkg, parsed, exactVersion, engines }
 }

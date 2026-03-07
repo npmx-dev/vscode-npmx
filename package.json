@@ -120,6 +120,42 @@
           ],
           "default": "declared",
           "description": "Enable clickable links for package names"
+        },
+        "npmx.ignore.upgrade": {
+          "scope": "resource",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "markdownDescription": "Ignore list for upgrade diagnostics (\"name\" or \"name@version\"). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics)"
+        },
+        "npmx.ignore.deprecation": {
+          "scope": "resource",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "markdownDescription": "Ignore list for deprecation diagnostics (\"name\" or \"name@version\"). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics)"
+        },
+        "npmx.ignore.replacement": {
+          "scope": "resource",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "markdownDescription": "Ignore list for replacement diagnostics (\"name\" only). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics)"
+        },
+        "npmx.ignore.vulnerability": {
+          "scope": "resource",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "markdownDescription": "Ignore list for vulnerability diagnostics (\"name\" or \"name@version\"). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics)"
         }
       }
     },

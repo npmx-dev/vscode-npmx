@@ -46,7 +46,7 @@ function resolveEngineMismatches(
   return mismatches
 }
 
-export const checkEngineMismatch: DiagnosticRule = ({ dep, pkg, parsed, exactVersion, engines }) => {
+export const checkEngineMismatch: DiagnosticRule = ({ dep, name, pkg, parsed, exactVersion, engines }) => {
   if (!parsed || !exactVersion || !engines)
     return
 
@@ -64,11 +64,11 @@ export const checkEngineMismatch: DiagnosticRule = ({ dep, pkg, parsed, exactVer
 
   return {
     node: dep.versionNode,
-    message: `Engines mismatch for "${formatPackageId(dep.name, exactVersion)}": ${mismatchDetails}.`,
+    message: `Engines mismatch for "${formatPackageId(name, exactVersion)}": ${mismatchDetails}.`,
     severity: DiagnosticSeverity.Warning,
     code: {
       value: 'engine-mismatch',
-      target: Uri.parse(npmxPackageUrl(dep.name, parsed.version)),
+      target: Uri.parse(npmxPackageUrl(name, parsed.version)),
     },
   }
 }

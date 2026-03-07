@@ -1,6 +1,7 @@
-import type { DependencyInfo } from '#types/extractor'
-import type { ParsedVersion } from '#utils/version'
+import type { ValidNode } from '#types/extractor'
 import type { DiagnosticRule, NodeDiagnosticInfo } from '..'
+import { config } from '#state'
+import { checkIgnored } from '#utils/ignore'
 import { npmxPackageUrl } from '#utils/links'
 import { formatUpgradeVersion } from '#utils/version'
 import gt from 'semver/functions/gt'
@@ -8,28 +9,32 @@ import lte from 'semver/functions/lte'
 import prerelease from 'semver/functions/prerelease'
 import { DiagnosticSeverity, Uri } from 'vscode'
 
-function createUpgradeDiagnostic(dep: DependencyInfo, parsed: ParsedVersion, target: string): NodeDiagnosticInfo {
+function createUpgradeDiagnostic(node: ValidNode, name: string, targetVersion: string): NodeDiagnosticInfo {
   return {
-    node: dep.versionNode,
+    node,
     severity: DiagnosticSeverity.Hint,
-    message: `New version available: ${formatUpgradeVersion(parsed, target)}`,
+    message: `"${name}" can be upgraded to ${targetVersion}.`,
     code: {
       value: 'upgrade',
-      target: Uri.parse(npmxPackageUrl(dep.name, target)),
+      target: Uri.parse(npmxPackageUrl(name, targetVersion)),
     },
   }
 }
 
-export const checkUpgrade: DiagnosticRule = ({ dep, pkg, parsed, exactVersion }) => {
+export const checkUpgrade: DiagnosticRule = ({ dep, name, pkg, parsed, exactVersion }) => {
   if (!parsed || !exactVersion)
     return
 
-  if (Object.hasOwn(pkg.distTags, exactVersion))
+  if (Object.hasOwn(pkg.distTags, dep.version))
     return
 
   const { latest } = pkg.distTags
-  if (gt(latest, exactVersion))
-    return createUpgradeDiagnostic(dep, parsed, latest)
+  if (gt(latest, exactVersion)) {
+    const targetVersion = formatUpgradeVersion(parsed, latest)
+    if (checkIgnored({ ignoreList: config.ignore.upgrade, name, version: targetVersion }))
+      return
+    return createUpgradeDiagnostic(dep.versionNode, name, targetVersion)
+  }
 
   const currentPreId = prerelease(exactVersion)?.[0]
   if (currentPreId == null)
@@ -42,7 +47,10 @@ export const checkUpgrade: DiagnosticRule = ({ dep, pkg, parsed, exactVersion })
       continue
     if (lte(tagVersion, exactVersion))
       continue
+    const targetVersion = formatUpgradeVersion(parsed, tagVersion)
+    if (checkIgnored({ ignoreList: config.ignore.upgrade, name, version: targetVersion }))
+      continue
 
-    return createUpgradeDiagnostic(dep, parsed, tagVersion)
+    return createUpgradeDiagnostic(dep.versionNode, name, targetVersion)
   }
 }

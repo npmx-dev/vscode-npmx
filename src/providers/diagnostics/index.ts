@@ -7,7 +7,7 @@ import type { Diagnostic, TextDocument, Uri } from 'vscode'
 import { extractorEntries } from '#extractors'
 import { config, logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
-import { resolveExactVersion } from '#utils/package'
+import { resolveExactVersion, resolvePackageName } from '#utils/package'
 import { isSupportedProtocol, parseVersion } from '#utils/version'
 import { debounce } from 'perfect-debounce'
 import { computed, useActiveTextEditor, useDisposable, useDocumentText, useFileSystemWatcher, watch } from 'reactive-vscode'
@@ -22,6 +22,7 @@ import { checkVulnerability } from './rules/vulnerability'
 
 export interface DiagnosticContext {
   dep: DependencyInfo
+  name: string
   pkg: PackageInfo
   parsed: ParsedVersion | null
   exactVersion: string | null
@@ -108,17 +109,21 @@ export function useDiagnostics() {
 
     const collect = async (dep: DependencyInfo) => {
       try {
-        const pkg = await getPackageInfo(dep.name)
+        const parsed = parseVersion(dep.version)
+        const name = resolvePackageName(dep.name, parsed)
+        if (!name)
+          return
+
+        const pkg = await getPackageInfo(name)
         if (!pkg || isStale(document, targetVersion))
           return
 
-        const parsed = parseVersion(dep.version)
         const exactVersion = parsed && isSupportedProtocol(parsed.protocol)
           ? resolveExactVersion(pkg, parsed.version)
           : null
 
         for (const rule of rules) {
-          runRule(rule, { dep, pkg, parsed, exactVersion, engines })
+          runRule(rule, { dep, name, pkg, parsed, exactVersion, engines })
         }
       } catch (err) {
         logger.warn(`[diagnostics] fail to check ${dep.name}: ${err}`)

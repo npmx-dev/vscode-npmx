@@ -1,11 +1,14 @@
 import { extractorEntries } from '#extractors'
-import { config } from '#state'
-import { computed, watch } from 'reactive-vscode'
+import { config, internalCommands } from '#state'
+import { computed, useCommand, watch } from 'reactive-vscode'
 import { CodeActionKind, Disposable, languages } from 'vscode'
+import { addToIgnore } from '../../commands/add-to-ignore'
 import { QuickFixProvider } from './quick-fix'
 
 export function useCodeActions() {
-  const hasQuickFix = computed(() => config.diagnostics.upgrade || config.diagnostics.vulnerability)
+  useCommand(internalCommands.addToIgnore, addToIgnore)
+
+  const hasQuickFix = computed(() => config.diagnostics.upgrade || config.diagnostics.deprecation || config.diagnostics.replacement || config.diagnostics.vulnerability)
 
   watch(hasQuickFix, (enabled, _, onCleanup) => {
     if (!enabled)

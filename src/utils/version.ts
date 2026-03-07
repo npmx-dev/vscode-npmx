@@ -1,4 +1,6 @@
-type VersionProtocol = 'workspace' | 'catalog' | 'npm' | 'jsr' | null
+import { formatPackageId, isJsrNpmPackage, jsrNpmToJsrName } from './package'
+
+type VersionProtocol = 'workspace' | 'catalog' | 'npm' | 'jsr'
 
 const URL_PACKAGE_PATTERN = /^(?:https?:|git\+|github:)/
 function isUrlPackage(currentVersion: string) {
@@ -9,15 +11,16 @@ const UNSUPPORTED_PROTOCOLS = new Set(['workspace', 'catalog', 'jsr'])
 const KNOWN_PROTOCOLS = new Set([...UNSUPPORTED_PROTOCOLS, 'npm'])
 
 export interface ParsedVersion {
-  protocol: VersionProtocol
+  protocol: VersionProtocol | null
+  aliasName: string | null
   version: string
 }
 
-export function isSupportedProtocol(protocol: VersionProtocol): boolean {
+export function isSupportedProtocol(protocol: VersionProtocol | null): boolean {
   return !protocol || !UNSUPPORTED_PROTOCOLS.has(protocol)
 }
 
-function isKnownProtocol(protocol: string): protocol is NonNullable<VersionProtocol> {
+function isKnownProtocol(protocol: string): protocol is VersionProtocol {
   return KNOWN_PROTOCOLS.has(protocol)
 }
 
@@ -27,6 +30,7 @@ export function parseVersion(rawVersion: string): ParsedVersion | null {
     return null
 
   let protocol: string | null = null
+  let aliasName: string | null = null
   let version = rawVersion
 
   const colonIndex = rawVersion.indexOf(':')
@@ -36,10 +40,23 @@ export function parseVersion(rawVersion: string): ParsedVersion | null {
     if (!isKnownProtocol(protocol))
       return null
 
-    version = rawVersion.slice(colonIndex + 1)
+    version = rawVersion.substring(colonIndex + 1)
+
+    if (protocol === 'npm') {
+      const lastAtIndex = version.lastIndexOf('@')
+      if (lastAtIndex > 0) {
+        aliasName = version.substring(0, lastAtIndex)
+        version = version.substring(lastAtIndex + 1)
+
+        if (isJsrNpmPackage(aliasName)) {
+          aliasName = jsrNpmToJsrName(aliasName)
+          protocol = 'jsr'
+        }
+      }
+    }
   }
 
-  return { protocol, version }
+  return { protocol, aliasName, version } as ParsedVersion
 }
 
 const RANGE_PREFIXES = ['>=', '<=', '=', '>', '<']
@@ -75,5 +92,6 @@ export function formatUpgradeVersion(current: ParsedVersion, target: string): st
   if (!current.protocol)
     return result
 
-  return `${current.protocol}:${result}`
+  const versionPart = current.aliasName ? formatPackageId(current.aliasName, result) : result
+  return `${current.protocol}:${versionPart}`
 }
