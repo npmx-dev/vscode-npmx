@@ -7,6 +7,7 @@ import { logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
 import { isOffsetInRange } from '#utils/ast'
 import { resolveDependencySpec } from '#utils/dependency-spec'
+import { memoize } from '#utils/memoize'
 import { resolveExactVersion } from '#utils/package'
 import { detectPackageManager, readWorkspaceCatalogs } from '#utils/package-manager'
 import { dirname, join, normalize, resolve } from 'pathe'
@@ -32,8 +33,6 @@ interface DependencyResolutionContext {
 }
 
 const decoder = new TextDecoder()
-const workspaceContextCache = new Map<string, WorkspaceContextState>()
-const pendingWorkspaceContext = new Map<string, Promise<WorkspaceContextState | undefined>>()
 
 function getDependencyKey(dep: Pick<ResolvedDependencyInfo, 'category' | 'rawName'>): string {
   return `${dep.category}:${dep.rawName}`
@@ -317,6 +316,19 @@ async function buildWorkspaceContext(folder: WorkspaceFolder): Promise<Workspace
   }
 }
 
+const getWorkspaceContextState = memoize<Uri, Promise<WorkspaceContextState | undefined>>(async (uri) => {
+  const folder = workspace.getWorkspaceFolder(uri)
+  if (!folder)
+    return
+
+  return buildWorkspaceContext(folder)
+}, {
+  getKey: (uri: Uri) => normalize(workspace.getWorkspaceFolder(uri)?.uri.path ?? uri.path),
+  ttl: 0,
+  maxSize: Number.POSITIVE_INFINITY,
+  fallbackToCachedOnError: false,
+})
+
 async function findNearestPackageContext(
   workspaceContext: WorkspaceContext,
   uri: Uri,
@@ -337,36 +349,13 @@ async function findNearestPackageContext(
 
 export function invalidateWorkspaceContext(workspacePath: string) {
   const key = normalize(workspacePath)
-  workspaceContextCache.delete(key)
-  pendingWorkspaceContext.delete(key)
+  getWorkspaceContextState.deleteByKey(key)
   logger.info(`[workspace-context] invalidated ${key}`)
 }
 
 export async function getWorkspaceContext(uri: Uri): Promise<WorkspaceContext | undefined> {
-  const folder = workspace.getWorkspaceFolder(uri)
-  if (!folder)
-    return
-
-  const workspacePath = normalize(folder.uri.path)
-  const cacheHit = workspaceContextCache.get(workspacePath)
-  if (cacheHit)
-    return cacheHit.workspaceContext
-
-  const pending = pendingWorkspaceContext.get(workspacePath)
-  if (pending)
-    return pending.then((state) => state?.workspaceContext)
-
-  const promise = buildWorkspaceContext(folder)
-    .then((state) => {
-      workspaceContextCache.set(workspacePath, state)
-      return state
-    })
-    .finally(() => {
-      pendingWorkspaceContext.delete(workspacePath)
-    })
-
-  pendingWorkspaceContext.set(workspacePath, promise)
-  return promise.then((state) => state.workspaceContext)
+  const state = await getWorkspaceContextState(uri)
+  return state?.workspaceContext
 }
 
 export async function getPackageContext(uri: Uri): Promise<PackageContext | undefined> {
@@ -379,20 +368,6 @@ export async function getPackageContext(uri: Uri): Promise<PackageContext | unde
     return
 
   return await findNearestPackageContext(workspaceContext, uri)
-}
-
-async function getWorkspaceContextState(uri: Uri): Promise<WorkspaceContextState | undefined> {
-  const folder = workspace.getWorkspaceFolder(uri)
-  if (!folder)
-    return
-
-  const workspacePath = normalize(folder.uri.path)
-  const cacheHit = workspaceContextCache.get(workspacePath)
-  if (cacheHit)
-    return cacheHit
-
-  await getWorkspaceContext(uri)
-  return workspaceContextCache.get(workspacePath)
 }
 
 export async function getResolvedDependencies(uri: Uri): Promise<ResolvedDependencyInfo[]> {

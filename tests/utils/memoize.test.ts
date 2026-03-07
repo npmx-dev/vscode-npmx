@@ -106,4 +106,26 @@ describe('memoize', () => {
     expect(await memoized('nil')).toBe(null)
     expect(fn).toHaveBeenCalledTimes(4)
   })
+
+  it('should not restore an invalidated pending async result', async () => {
+    const resolvers: ((value: string) => void)[] = []
+    const fn = vi.fn(() => new Promise<string>((resolve) => {
+      resolvers.push(resolve)
+    }))
+    const memoized = memoize(fn, { ttl: 0 })
+
+    const stalePromise = memoized('key')
+    memoized.deleteByKey('key')
+    const freshPromise = memoized('key')
+
+    expect(fn).toHaveBeenCalledTimes(2)
+
+    resolvers[1]!('fresh')
+    await expect(freshPromise).resolves.toBe('fresh')
+
+    resolvers[0]!('stale')
+    await expect(stalePromise).resolves.toBe('stale')
+    expect(await memoized('key')).toBe('fresh')
+    expect(fn).toHaveBeenCalledTimes(2)
+  })
 })
