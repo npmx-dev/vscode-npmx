@@ -13,16 +13,12 @@ function createReplacementContext(name: string) {
 
 describe('checkReplacement', () => {
   it('should flag when replacement found', async () => {
-    const result = await checkReplacement(createReplacementContext('left-pad'))
-
-    expect(result).toBeDefined()
-    expect(result!.message).toBeDefined()
-    expect(result!.code).toMatchObject({ value: 'replacement' })
+    expect(await checkReplacement(createReplacementContext('left-pad'))).toMatchObject({
+      code: { value: 'replacement' },
+    })
   })
 
   it('should not flag when no replacement found', async () => {
-    const result = await checkReplacement(createReplacementContext('vitest'))
-
-    expect(result).toBeUndefined()
+    expect(await checkReplacement(createReplacementContext('vitest'))).toBeUndefined()
   })
 })

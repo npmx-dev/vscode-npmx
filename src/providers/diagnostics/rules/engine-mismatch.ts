@@ -7,14 +7,14 @@ import intersects from 'semver/ranges/intersects'
 import subset from 'semver/ranges/subset'
 import { DiagnosticSeverity, Uri } from 'vscode'
 
-interface EngineMismatch {
+export interface EngineMismatch {
   engine: string
   packageRange: string
   dependencyRange: string
   hasIntersection: boolean
 }
 
-function resolveEngineMismatches(
+export function resolveEngineMismatches(
   packageEngines: Engines,
   dependencyEngines: Engines,
 ) {
