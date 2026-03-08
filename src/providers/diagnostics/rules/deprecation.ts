@@ -15,18 +15,18 @@ export const checkDeprecation: DiagnosticRule = async ({ dep, pkg }) => {
   if (!versionInfo.deprecated)
     return
 
-  const { resolvedName } = dep
+  const { specRange, resolvedName, resolvedSpec } = dep
 
   if (checkIgnored({ ignoreList: config.ignore.deprecation, name: resolvedName, version: resolvedVersion }))
     return
 
   return {
-    range: dep.specRange,
+    range: specRange,
     message: `"${formatPackageId(resolvedName, resolvedVersion)}" has been deprecated: ${versionInfo.deprecated}`,
     severity: DiagnosticSeverity.Error,
     code: {
       value: 'deprecation',
-      target: Uri.parse(npmxPackageUrl(resolvedName, dep.resolvedSpec)),
+      target: Uri.parse(npmxPackageUrl(resolvedName, resolvedSpec)),
     },
     tags: [DiagnosticTag.Deprecated],
   }

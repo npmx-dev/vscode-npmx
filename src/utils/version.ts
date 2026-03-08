@@ -29,16 +29,17 @@ function getVersionRangePrefix(v: string): string {
 
 const PROTOCOL_PATTERN = /^[a-z]+:/
 
-export function formatUpgradeVersion(dep: Pick<ResolvedDependencyInfo, 'protocol' | 'resolvedName' | 'resolvedSpec' | 'rawName' | 'rawSpec'>, target: string): string {
-  const prefix = getVersionRangePrefix(dep.resolvedSpec)
+export function formatUpgradeVersion(dep: ResolvedDependencyInfo, target: string): string {
+  const { rawName, rawSpec, resolvedName, resolvedSpec, protocol } = dep
+  const prefix = getVersionRangePrefix(resolvedSpec)
 
   const result = prefix === '*' ? '*' : `${prefix}${target}`
 
-  const declaredProtocol = PROTOCOL_PATTERN.test(dep.rawSpec) ? dep.protocol : null
+  const declaredProtocol = PROTOCOL_PATTERN.test(rawSpec) ? protocol : null
   if (!declaredProtocol)
     return result
 
-  const isAlias = dep.resolvedName !== dep.rawName
-  const versionPart = isAlias ? formatPackageId(dep.resolvedName, result) : result
+  const isAlias = resolvedName !== rawName
+  const versionPart = isAlias ? formatPackageId(resolvedName, result) : result
   return `${declaredProtocol}:${versionPart}`
 }
