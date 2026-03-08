@@ -1,11 +1,5 @@
-import type { DependencyProtocol, ResolvedDependencyInfo } from '#types/context'
+import type { ResolvedDependencyInfo } from '#types/context'
 import { formatPackageId } from './package'
-
-const UNSUPPORTED_PROTOCOLS = new Set<DependencyProtocol>(['workspace', 'catalog', 'jsr'])
-
-export function isSupportedProtocol(protocol: DependencyProtocol | null): boolean {
-  return !protocol || !UNSUPPORTED_PROTOCOLS.has(protocol)
-}
 
 const RANGE_PREFIXES = ['>=', '<=', '=', '>', '<']
 

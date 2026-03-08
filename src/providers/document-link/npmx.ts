@@ -2,7 +2,6 @@ import type { DocumentLink, DocumentLinkProvider, TextDocument } from 'vscode'
 import { config } from '#state'
 import { offsetRangeToRange } from '#utils/ast'
 import { npmxPackageUrl } from '#utils/links'
-import { isSupportedProtocol } from '#utils/version'
 import { getResolvedDependencies } from '#utils/workspace'
 import { Uri, DocumentLink as VscodeDocumentLink } from 'vscode'
 
@@ -14,9 +13,11 @@ export class NpmxDocumentLinkProvider implements DocumentLinkProvider {
 
     const links: DocumentLink[] = []
     const linkMode = config.packageLinks
-    const supportedDeps = dependencies.filter((dep) => isSupportedProtocol(dep.protocol))
 
-    for (const dep of supportedDeps) {
+    for (const dep of dependencies) {
+      if (dep.resolvedProtocol !== 'npm')
+        continue
+
       const { resolvedName, resolvedSpec, nameRange } = dep
 
       let targetVersion: string | undefined

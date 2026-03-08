@@ -3,7 +3,7 @@ import { PRERELEASE_PATTERN } from '#constants'
 import { config } from '#state'
 import { getPackageInfo } from '#utils/api/package'
 import { offsetRangeToRange } from '#utils/ast'
-import { formatUpgradeVersion, isSupportedProtocol } from '#utils/version'
+import { formatUpgradeVersion } from '#utils/version'
 import { getResolvedDependencyByOffset } from '#utils/workspace'
 import { CompletionItem, CompletionItemKind } from 'vscode'
 
@@ -14,7 +14,7 @@ export class VersionCompletionItemProvider implements CompletionItemProvider {
     if (!info)
       return
 
-    if (!isSupportedProtocol(info.protocol))
+    if (info.resolvedProtocol !== 'npm')
       return
 
     const pkg = await getPackageInfo(info.resolvedName)
