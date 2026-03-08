@@ -1,19 +1,10 @@
-import type { PackageManager } from '#types/context'
+import type { PackageManifestInfo } from '#types/extractor'
 import type { Uri } from 'vscode'
 import { workspace } from 'vscode'
 
 export async function getDocumentText(uri: Uri) {
   const document = await workspace.openTextDocument(uri)
   return document.getText()
-}
-
-/** A parsed `package.json` manifest file. */
-interface PackageManifest {
-  /** Package name. */
-  name: string
-  /** Package version specifier. */
-  version: string
-  packageManager?: PackageManager
 }
 
 /**
@@ -23,10 +14,10 @@ interface PackageManifest {
  * @returns A promise that resolves to the parsed manifest,
  *     or `undefined` if the file is invalid or missing required fields.
  */
-export async function resolvePackageJson(pkgJsonUri: Uri): Promise<PackageManifest | undefined> {
+export async function getPackageManifest(pkgJsonUri: Uri): Promise<PackageManifestInfo | undefined> {
   try {
     const content = await workspace.fs.readFile(pkgJsonUri)
-    const manifest = JSON.parse(new TextDecoder().decode(content)) as PackageManifest
+    const manifest = JSON.parse(new TextDecoder().decode(content)) as PackageManifestInfo
 
     if (!manifest || !manifest.name || !manifest.version)
       return

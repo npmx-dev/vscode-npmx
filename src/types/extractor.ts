@@ -28,8 +28,8 @@ export interface DependencyInfo {
 }
 
 export interface PackageManifestInfo {
-  name?: string
-  version?: string
+  name: string
+  version: string
   packageManager?: string
   engines?: Engines
   dependencies: DependencyInfo[]

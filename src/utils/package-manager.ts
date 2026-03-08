@@ -3,14 +3,14 @@ import type { WorkspaceFolder } from 'vscode'
 import { packageManifestExtractorEntry, workspaceCatalogExtractorEntries } from '#extractors'
 import { Uri } from 'vscode'
 import { accessOk } from 'vscode-find-up'
+import { getPackageManifest } from './document'
 import { parsePackageId } from './package'
-import { resolvePackageJson } from './resolve'
 
 export async function detectPackageManager(folder: WorkspaceFolder): Promise<PackageManager> {
   const rootPackageUri = Uri.joinPath(folder.uri, packageManifestExtractorEntry.basename)
 
   if (await accessOk(rootPackageUri)) {
-    const rootPackage = await resolvePackageJson(rootPackageUri)
+    const rootPackage = await getPackageManifest(rootPackageUri)
     if (rootPackage?.packageManager) {
       const { name: packageManager } = parsePackageId(rootPackage.packageManager)
       if (packageManager)

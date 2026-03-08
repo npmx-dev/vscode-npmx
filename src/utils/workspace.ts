@@ -13,16 +13,12 @@ import { resolveExactVersion } from '#utils/package'
 import { detectPackageManager } from '#utils/package-manager'
 import { Uri, workspace } from 'vscode'
 import { findUp } from 'vscode-find-up'
-import { getDocumentText } from './resolve'
-
-interface PackageRecord extends PackageManifestInfo {
-  packageJsonPath: string
-}
+import { getDocumentText } from './document'
 
 interface WorkspaceContextState {
   folder: WorkspaceFolder
   workspaceContext: WorkspaceContext
-  loadPackageRecord: MemoizedFunction<Uri, Promise<PackageRecord | undefined>>
+  loadPackageRecord: MemoizedFunction<Uri, Promise<PackageManifestInfo | undefined>>
   loadPackageContext: MemoizedFunction<Uri, Promise<PackageContext | undefined>>
   loadDocumentDependencies: MemoizedFunction<Uri, Promise<ResolvedDependencyInfo[] | undefined>>
 }
@@ -45,21 +41,22 @@ function createResolvedDependencyInfo(
   workspaceContext: WorkspaceContext,
 ): ResolvedDependencyInfo {
   const resolution = resolveDependencySpec(dependency.rawName, dependency.rawSpec, workspaceContext.catalogs)
+  const packageInfo = lazyInit(
+    () => resolution.resolvedProtocol === 'npm'
+      ? getPackageInfo(resolution.resolvedName).then((pkg) => pkg ?? null)
+      : Promise.resolve(null),
+  )
 
   return {
     ...dependency,
     ...resolution,
     categoryName: dependency.categoryName ?? resolution.categoryName,
-    packageInfo: lazyInit(
-      () => resolution.resolvedProtocol === 'npm'
-        ? getPackageInfo(resolution.resolvedName).then((pkg) => pkg ?? null)
-        : Promise.resolve(null),
-    ),
+    packageInfo,
     resolvedVersion: lazyInit(async () => {
       if (resolution.resolvedProtocol !== 'npm')
         return null
 
-      const pkg = await getPackageInfo(resolution.resolvedName)
+      const pkg = await packageInfo()
       if (!pkg)
         return null
 
@@ -76,13 +73,12 @@ export async function readWorkspaceCatalogs(folder: WorkspaceFolder, packageMana
   if (!entry)
     return
 
-  const uri = Uri.joinPath(folder.uri, entry.basename)
-  const text = await getDocumentText(uri)
+  const text = await getDocumentText(Uri.joinPath(folder.uri, entry.basename))
 
   return entry.extractor.getWorkspaceCatalogInfo(text)?.catalogs
 }
 
-const loadPackageRecord = memoize<Uri, Promise<PackageRecord | undefined>>(async (uri) => {
+const loadPackageRecord = memoize<Uri, Promise<PackageManifestInfo | undefined>>(async (uri) => {
   const text = await getDocumentText(uri)
 
   const manifestInfo = packageManifestExtractorEntry.extractor.getPackageManifestInfo(text)
@@ -90,7 +86,6 @@ const loadPackageRecord = memoize<Uri, Promise<PackageRecord | undefined>>(async
     return
 
   return {
-    packageJsonPath: uri.path,
     name: manifestInfo.name,
     version: manifestInfo.version,
     engines: manifestInfo.engines,

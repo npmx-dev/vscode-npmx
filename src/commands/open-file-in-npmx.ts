@@ -1,7 +1,7 @@
 import { PACKAGE_JSON_BASENAME } from '#constants'
 import { logger } from '#state'
+import { getPackageManifest } from '#utils/document'
 import { npmxFileUrl } from '#utils/links'
-import { resolvePackageJson } from '#utils/resolve'
 import { env, Uri, window } from 'vscode'
 import { findUp } from 'vscode-find-up'
 
@@ -27,7 +27,7 @@ export async function openFileInNpmx(fileUri?: Uri) {
   const pkgJsonUri = await findUp(PACKAGE_JSON_BASENAME, {
     cwd: uri,
   })
-  const manifest = pkgJsonUri ? await resolvePackageJson(pkgJsonUri) : undefined
+  const manifest = pkgJsonUri ? await getPackageManifest(pkgJsonUri) : undefined
   if (!pkgJsonUri || !manifest) {
     logger.warn(`Could not resolve npmx url: ${uri.toString()}`)
     window.showWarningMessage(`npmx: Could not find package.json for ${uri.toString()}`)
