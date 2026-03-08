@@ -1,7 +1,7 @@
-import { extractorEntries } from '#extractors'
+import { SUPPORTED_DOCUMENT_PATTERN } from '#constants'
 import { config, internalCommands } from '#state'
 import { computed, useCommand, watch } from 'reactive-vscode'
-import { CodeActionKind, Disposable, languages } from 'vscode'
+import { CodeActionKind, languages } from 'vscode'
 import { addToIgnore } from '../../commands/add-to-ignore'
 import { QuickFixProvider } from './quick-fix'
 
@@ -16,10 +16,8 @@ export function useCodeActions() {
 
     const provider = new QuickFixProvider()
     const options = { providedCodeActionKinds: [CodeActionKind.QuickFix] }
-    const disposables = extractorEntries.map(({ pattern }) =>
-      languages.registerCodeActionsProvider({ pattern }, provider, options),
-    )
+    const disposable = languages.registerCodeActionsProvider({ pattern: SUPPORTED_DOCUMENT_PATTERN }, provider, options)
 
-    onCleanup(() => Disposable.from(...disposables).dispose())
+    onCleanup(() => disposable.dispose())
   }, { immediate: true })
 }

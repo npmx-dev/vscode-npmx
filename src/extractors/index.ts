@@ -8,7 +8,6 @@ import { WorkspaceCatalogDocumentExtractor } from './workspace-catalog'
 
 interface BaseExtractorEntry<TExtractor extends Extractor = Extractor> {
   basename: string
-  pattern: string
   extractor: TExtractor
 }
 
@@ -18,35 +17,25 @@ interface WorkspaceCatalogExtractorEntry extends BaseExtractorEntry<WorkspaceCat
   packageManager: Exclude<PackageManager, 'npm'>
 }
 
-type DependencyExtractorEntry = PackageManifestExtractorEntry | WorkspaceCatalogExtractorEntry
-
 const packageJsonExtractor = new PackageJsonDocumentExtractor()
 const workspaceCatalogExtractor = new WorkspaceCatalogDocumentExtractor()
 
 export const packageManifestExtractorEntry: PackageManifestExtractorEntry = {
   basename: PACKAGE_JSON_BASENAME,
-  pattern: `**/${PACKAGE_JSON_BASENAME}`,
   extractor: packageJsonExtractor,
 }
 
 export const workspaceCatalogExtractorEntries: WorkspaceCatalogExtractorEntry[] = [
   {
     basename: PNPM_WORKSPACE_BASENAME,
-    pattern: `**/${PNPM_WORKSPACE_BASENAME}`,
     extractor: workspaceCatalogExtractor,
     packageManager: 'pnpm',
   },
   {
     basename: YARN_WORKSPACE_BASENAME,
-    pattern: `**/${YARN_WORKSPACE_BASENAME}`,
     extractor: workspaceCatalogExtractor,
     packageManager: 'yarn',
   },
-]
-
-export const extractorEntries: DependencyExtractorEntry[] = [
-  packageManifestExtractorEntry,
-  ...workspaceCatalogExtractorEntries,
 ]
 
 const SUPPORTED_BASENAMES = new Set([

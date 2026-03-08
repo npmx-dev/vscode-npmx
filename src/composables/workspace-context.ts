@@ -1,5 +1,6 @@
 import type { TextDocument, Uri } from 'vscode'
-import { extractorEntries, isSupportedDependencyDocument } from '#extractors'
+import { SUPPORTED_DOCUMENT_PATTERN } from '#constants'
+import { isSupportedDependencyDocument } from '#extractors'
 import { logger } from '#state'
 import { deleteWorkspaceContext, getWorkspaceContext } from '#utils/workspace'
 import { useActiveTextEditor, useDisposable, useFileSystemWatcher, watchEffect } from 'reactive-vscode'
@@ -23,7 +24,7 @@ function warmDocument(document: TextDocument | undefined) {
   })
 }
 
-export function useWorkspaceContextLifecycle() {
+export function useWorkspaceContext() {
   const activeEditor = useActiveTextEditor()
 
   watchEffect(() => {
@@ -48,11 +49,9 @@ export function useWorkspaceContextLifecycle() {
     invalidateByUri(document.uri)
   }))
 
-  extractorEntries.forEach(({ pattern }) => {
-    const { onDidCreate, onDidChange, onDidDelete } = useFileSystemWatcher(pattern)
+  const { onDidCreate, onDidChange, onDidDelete } = useFileSystemWatcher(SUPPORTED_DOCUMENT_PATTERN)
 
-    onDidCreate(invalidateByUri)
-    onDidChange(invalidateByUri)
-    onDidDelete(invalidateByUri)
-  })
+  onDidCreate(invalidateByUri)
+  onDidChange(invalidateByUri)
+  onDidDelete(invalidateByUri)
 }

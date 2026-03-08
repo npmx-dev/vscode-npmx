@@ -3,7 +3,8 @@ import type { OffsetRange } from '#types/extractor'
 import type { Engines } from 'fast-npm-meta'
 import type { Awaitable } from 'reactive-vscode'
 import type { Diagnostic, TextDocument, Uri } from 'vscode'
-import { extractorEntries, isSupportedDependencyDocument } from '#extractors'
+import { SUPPORTED_DOCUMENT_PATTERN } from '#constants'
+import { isSupportedDependencyDocument } from '#extractors'
 import { config, logger } from '#state'
 import { offsetRangeToRange } from '#utils/ast'
 import { resolveExactVersion } from '#utils/package'
@@ -149,13 +150,11 @@ export function useDiagnostics() {
     collectDiagnostics(doc)
   }
 
-  extractorEntries.forEach(({ pattern }) => {
-    const { onDidCreate, onDidChange, onDidDelete } = useFileSystemWatcher(pattern)
+  const { onDidCreate, onDidChange, onDidDelete } = useFileSystemWatcher(SUPPORTED_DOCUMENT_PATTERN)
 
-    onDidCreate(recollectByUri)
-    onDidChange(recollectByUri)
-    onDidDelete((uri) => diagnosticCollection.delete(uri))
-  })
+  onDidCreate(recollectByUri)
+  onDidChange(recollectByUri)
+  onDidDelete((uri) => diagnosticCollection.delete(uri))
 
   useDisposable(window.tabGroups.onDidChangeTabs(({ closed }) => {
     closed.forEach((tab) => {
