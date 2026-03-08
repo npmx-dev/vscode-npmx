@@ -1,4 +1,6 @@
+import type { ResolvedDependencyInfo } from '#types/context'
 import type { OffsetRange } from '#types/extractor'
+import type { PackageInfo } from '#utils/api/package'
 import type { DiagnosticRule, RangeDiagnosticInfo } from '..'
 import { config } from '#state'
 import { checkIgnored } from '#utils/ignore'
@@ -8,6 +10,42 @@ import gt from 'semver/functions/gt'
 import lte from 'semver/functions/lte'
 import prerelease from 'semver/functions/prerelease'
 import { DiagnosticSeverity, Uri } from 'vscode'
+
+export function resolveUpgrade(dep: ResolvedDependencyInfo, pkg: PackageInfo, exactVersion: string) {
+  const { distTags } = pkg
+  if (Object.hasOwn(distTags, dep.resolvedSpec))
+    return
+
+  const ignoreList = config.ignore.upgrade
+  const { latest } = distTags
+  const { resolvedName } = dep
+
+  if (gt(latest, exactVersion)) {
+    const targetVersion = formatUpgradeVersion(dep, latest)
+    if (checkIgnored({ ignoreList, name: resolvedName, version: targetVersion }))
+      return
+
+    return targetVersion
+  }
+
+  const currentPreId = prerelease(exactVersion)?.[0]
+  if (currentPreId == null)
+    return
+
+  for (const [tag, tagVersion] of Object.entries(distTags)) {
+    if (tag === 'latest')
+      continue
+    if (prerelease(tagVersion)?.[0] !== currentPreId)
+      continue
+    if (lte(tagVersion, exactVersion))
+      continue
+    const targetVersion = formatUpgradeVersion(dep, tagVersion)
+    if (checkIgnored({ ignoreList, name: resolvedName, version: targetVersion }))
+      continue
+
+    return targetVersion
+  }
+}
 
 function createUpgradeDiagnostic(range: OffsetRange, name: string, targetVersion: string): RangeDiagnosticInfo {
   return {
@@ -26,33 +64,9 @@ export const checkUpgrade: DiagnosticRule = async ({ dep, pkg }) => {
   if (!exactVersion)
     return
 
-  if (Object.hasOwn(pkg.distTags, dep.rawSpec))
+  const result = resolveUpgrade(dep, pkg, exactVersion)
+  if (!result)
     return
 
-  const { resolvedName } = dep
-  const { latest } = pkg.distTags
-  if (gt(latest, exactVersion)) {
-    const targetVersion = formatUpgradeVersion(dep, latest)
-    if (checkIgnored({ ignoreList: config.ignore.upgrade, name: resolvedName, version: targetVersion }))
-      return
-    return createUpgradeDiagnostic(dep.specRange, resolvedName, targetVersion)
-  }
-
-  const currentPreId = prerelease(exactVersion)?.[0]
-  if (currentPreId == null)
-    return
-
-  for (const [tag, tagVersion] of Object.entries(pkg.distTags)) {
-    if (tag === 'latest')
-      continue
-    if (prerelease(tagVersion)?.[0] !== currentPreId)
-      continue
-    if (lte(tagVersion, exactVersion))
-      continue
-    const targetVersion = formatUpgradeVersion(dep, tagVersion)
-    if (checkIgnored({ ignoreList: config.ignore.upgrade, name: resolvedName, version: targetVersion }))
-      continue
-
-    return createUpgradeDiagnostic(dep.specRange, resolvedName, targetVersion)
-  }
+  return createUpgradeDiagnostic(dep.specRange, dep.resolvedName, result)
 }
