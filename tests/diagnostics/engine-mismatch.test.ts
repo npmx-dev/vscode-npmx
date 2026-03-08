@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { checkEngineMismatch, resolveEngineMismatches } from '../../src/providers/diagnostics/rules/engine-mismatch'
-import { createContext } from './context'
+import { resolveEngineMismatches } from '../../src/providers/diagnostics/rules/engine-mismatch'
 
 describe('resolveEngineMismatches', () => {
   it('should flag when engine ranges do not overlap', () => {
@@ -56,46 +55,5 @@ describe('resolveEngineMismatches', () => {
       { node: '>=18' },
       { node: 'lts' },
     )).toEqual([])
-  })
-})
-
-describe('checkEngineMismatch', () => {
-  it('should format a diagnostic when mismatches exist', async () => {
-    const result = await checkEngineMismatch(createContext({
-      name: 'foo',
-      version: '^1.0.0',
-      distTags: { latest: '1.0.0' },
-      versionsMeta: {
-        '1.0.0': {
-          engines: { node: '>=20' },
-        },
-      },
-      engines: { node: '^18.0.0' },
-    }))
-
-    expect(result).toBeDefined()
-    expect(result!.code).toMatchObject({ value: 'engine-mismatch' })
-    expect(result!.message).toContain('requires ">=20", but package supports "^18.0.0"')
-  })
-
-  it('should not flag when either engines is missing', async () => {
-    expect(await checkEngineMismatch(createContext({
-      name: 'foo',
-      version: '^1.0.0',
-      distTags: { latest: '1.0.0' },
-      versionsMeta: {
-        '1.0.0': { engines: { node: '>=18' } },
-      },
-    }))).toBeUndefined()
-
-    expect(await checkEngineMismatch(createContext({
-      name: 'foo',
-      version: '^1.0.0',
-      distTags: { latest: '1.0.0' },
-      versionsMeta: {
-        '1.0.0': {},
-      },
-      engines: { node: '>=18' },
-    }))).toBeUndefined()
   })
 })

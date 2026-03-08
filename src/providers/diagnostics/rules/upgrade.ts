@@ -11,16 +11,15 @@ import lte from 'semver/functions/lte'
 import prerelease from 'semver/functions/prerelease'
 import { DiagnosticSeverity, Uri } from 'vscode'
 
-export function resolveUpgrade(dep: ResolvedDependencyInfo, pkg: PackageInfo, exactVersion: string) {
+export function resolveUpgrade(dep: ResolvedDependencyInfo, pkg: PackageInfo, resolvedVersion: string, ignoreList = config.ignore.upgrade) {
   const { distTags } = pkg
   if (Object.hasOwn(distTags, dep.resolvedSpec))
     return
 
-  const ignoreList = config.ignore.upgrade
   const { latest } = distTags
   const { resolvedName } = dep
 
-  if (gt(latest, exactVersion)) {
+  if (gt(latest, resolvedVersion)) {
     const targetVersion = formatUpgradeVersion(dep, latest)
     if (checkIgnored({ ignoreList, name: resolvedName, version: targetVersion }))
       return
@@ -28,7 +27,7 @@ export function resolveUpgrade(dep: ResolvedDependencyInfo, pkg: PackageInfo, ex
     return targetVersion
   }
 
-  const currentPreId = prerelease(exactVersion)?.[0]
+  const currentPreId = prerelease(resolvedVersion)?.[0]
   if (currentPreId == null)
     return
 
@@ -37,7 +36,7 @@ export function resolveUpgrade(dep: ResolvedDependencyInfo, pkg: PackageInfo, ex
       continue
     if (prerelease(tagVersion)?.[0] !== currentPreId)
       continue
-    if (lte(tagVersion, exactVersion))
+    if (lte(tagVersion, resolvedVersion))
       continue
     const targetVersion = formatUpgradeVersion(dep, tagVersion)
     if (checkIgnored({ ignoreList, name: resolvedName, version: targetVersion }))
@@ -60,11 +59,11 @@ function createUpgradeDiagnostic(range: OffsetRange, name: string, targetVersion
 }
 
 export const checkUpgrade: DiagnosticRule = async ({ dep, pkg }) => {
-  const exactVersion = await dep.resolvedVersion()
-  if (!exactVersion)
+  const resolvedVersion = await dep.resolvedVersion()
+  if (!resolvedVersion)
     return
 
-  const result = resolveUpgrade(dep, pkg, exactVersion)
+  const result = resolveUpgrade(dep, pkg, resolvedVersion)
   if (!result)
     return
 
