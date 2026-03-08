@@ -3,12 +3,7 @@ import { checkReplacement } from '../../src/providers/diagnostics/rules/replacem
 import { createContext } from './context'
 
 function createReplacementContext(name: string) {
-  return createContext({
-    name,
-    version: '^1.0.0',
-    distTags: { latest: '1.0.0' },
-    versionsMeta: { '1.0.0': {} },
-  })
+  return createContext({ name, version: '^1.0.0' })
 }
 
 describe('checkReplacement', () => {

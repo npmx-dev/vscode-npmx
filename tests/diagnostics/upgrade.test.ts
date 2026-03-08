@@ -1,5 +1,5 @@
-import type { ResolveUpgradeOptions } from '../../src/providers/diagnostics/rules/upgrade'
 import type { PackageInfo } from '#utils/api/package'
+import type { ResolveUpgradeOptions } from '../../src/providers/diagnostics/rules/upgrade'
 import { resolveExactVersion } from '#utils/package'
 import { isSupportedProtocol, parseVersion } from '#utils/version'
 import { describe, expect, it } from 'vitest'
