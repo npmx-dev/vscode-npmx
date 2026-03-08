@@ -1,55 +1,22 @@
-import { SUPPORTED_DOCUMENT_PATTERN, VERSION_TRIGGER_CHARACTERS } from '#constants'
-import { defineExtension, useCommands, watchEffect } from 'reactive-vscode'
-import { languages } from 'vscode'
+import { defineExtension, useCommands } from 'reactive-vscode'
 import { openFileInNpmx } from './commands/open-file-in-npmx'
 import { openInBrowser } from './commands/open-in-browser'
 import { commands, displayName, version } from './generated-meta'
 import { useCodeActions } from './providers/code-actions'
-import { VersionCompletionItemProvider } from './providers/completion-item/version'
+import { useCompletionItem } from './providers/completion-item'
 import { useDiagnostics } from './providers/diagnostics'
-import { NpmxDocumentLinkProvider } from './providers/document-link/npmx'
-import { NpmxHoverProvider } from './providers/hover/npmx'
-import { config, logger } from './state'
-
-const documentFilter = { pattern: SUPPORTED_DOCUMENT_PATTERN }
+import { useDocumentLink } from './providers/document-link'
+import { useHover } from './providers/hover'
+import { logger } from './state'
 
 export const { activate, deactivate } = defineExtension(() => {
   logger.info(`${displayName} Activated, v${version}`)
 
-  watchEffect((onCleanup) => {
-    if (!config.hover.enabled)
-      return
-
-    const disposable = languages.registerHoverProvider(documentFilter, new NpmxHoverProvider())
-
-    onCleanup(() => disposable.dispose())
-  })
-
-  watchEffect((onCleanup) => {
-    if (config.completion.version === 'off')
-      return
-
-    const disposable = languages.registerCompletionItemProvider(
-      documentFilter,
-      new VersionCompletionItemProvider(),
-      ...VERSION_TRIGGER_CHARACTERS,
-    )
-
-    onCleanup(() => disposable.dispose())
-  })
-
-  watchEffect((onCleanup) => {
-    if (config.packageLinks === 'off')
-      return
-
-    const disposable = languages.registerDocumentLinkProvider(documentFilter, new NpmxDocumentLinkProvider())
-
-    onCleanup(() => disposable.dispose())
-  })
-
   useDiagnostics()
-
   useCodeActions()
+  useHover()
+  useCompletionItem()
+  useDocumentLink()
 
   useCommands({
     [commands.openInBrowser]: openInBrowser,

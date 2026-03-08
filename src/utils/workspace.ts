@@ -66,11 +66,13 @@ function createResolvedDependencyInfo(
   }
 }
 
-async function createWorkspaceContext(folder: WorkspaceFolder): Promise<WorkspaceContextState> {
+export const getWorkspaceContextState = memoize<Uri, Promise<WorkspaceContextState | undefined>>(async (uri) => {
+  const folder = workspace.getWorkspaceFolder(uri)
+  if (!folder)
+    return
+
   const workspacePath = folder.uri.path
   const packageManager = await detectPackageManager(folder)
-
-  logger.info(`[workspace-context] built ${workspacePath}`)
 
   const loadWorkspaceCatalogInfo = memoize(async (uri: Uri): Promise<WithResolvedDependencyInfo<WorkspaceCatalogInfo> | undefined> => {
     const path = uri.path
@@ -96,6 +98,8 @@ async function createWorkspaceContext(folder: WorkspaceFolder): Promise<Workspac
     ? undefined
     : (await loadWorkspaceCatalogInfo(folder.uri))?.catalogs
 
+  logger.info(`[workspace-context] built ${workspacePath}`)
+
   return {
     folder,
     workspaceContext: {
@@ -119,23 +123,11 @@ async function createWorkspaceContext(folder: WorkspaceFolder): Promise<Workspac
     }, { ttl: false, maxSize: Number.POSITIVE_INFINITY, fallbackToCachedOnError: false }),
     loadWorkspaceCatalogInfo,
   }
-}
-
-export const getWorkspaceContextState = memoize<Uri, Promise<WorkspaceContextState | undefined>>(async (uri) => {
-  const folder = workspace.getWorkspaceFolder(uri)
-  if (!folder)
-    return
-
-  return createWorkspaceContext(folder)
 }, {
   getKey: (uri: Uri) => workspace.getWorkspaceFolder(uri)!.uri.path,
   ttl: false,
   fallbackToCachedOnError: false,
 })
-
-export function deleteWorkspaceContextState(workspacePath: string) {
-  getWorkspaceContextState.deleteByKey(workspacePath)
-}
 
 export async function getResolvedDependencies(uri: Uri): Promise<ResolvedDependencyInfo[] | undefined> {
   const state = await getWorkspaceContextState(uri)
