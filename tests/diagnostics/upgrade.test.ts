@@ -48,6 +48,6 @@ describe('resolveUpgrade', () => {
   })
 
   it('should preserve protocol prefix in targetVersion', async () => {
-    expect(resolveUpgrade(...await createOptions('npm:^1.0.0'))).toBe('npm:^2.7.0')
+    expect(resolveUpgrade(...await createOptions('npm:foo@^1.0.0'))).toBe('npm:foo@^2.7.0')
   })
 })
