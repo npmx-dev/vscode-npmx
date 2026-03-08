@@ -5,7 +5,8 @@ import { npmxPackageUrl } from '#utils/links'
 import { formatPackageId } from '#utils/package'
 import { DiagnosticSeverity, DiagnosticTag, Uri } from 'vscode'
 
-export const checkDeprecation: DiagnosticRule = ({ dep, pkg, exactVersion }) => {
+export const checkDeprecation: DiagnosticRule = async ({ dep, pkg }) => {
+  const exactVersion = await dep.resolvedVersion()
   if (!exactVersion)
     return
 

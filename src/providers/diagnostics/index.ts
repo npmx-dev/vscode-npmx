@@ -1,15 +1,12 @@
 import type { ResolvedDependencyInfo } from '#types/context'
 import type { OffsetRange } from '#types/extractor'
-import type { Engines } from 'fast-npm-meta'
 import type { Awaitable } from 'reactive-vscode'
 import type { Diagnostic, TextDocument, Uri } from 'vscode'
 import { SUPPORTED_DOCUMENT_PATTERN } from '#constants'
 import { isSupportedDependencyDocument } from '#extractors'
 import { config, logger } from '#state'
 import { offsetRangeToRange } from '#utils/ast'
-import { resolveExactVersion } from '#utils/package'
-import { isSupportedProtocol } from '#utils/version'
-import { getPackageContext, getResolvedDependencies } from '#utils/workspace'
+import { getResolvedDependencies } from '#utils/workspace'
 import { debounce } from 'perfect-debounce'
 import { computed, useActiveTextEditor, useDisposable, useDocumentText, useFileSystemWatcher, watch } from 'reactive-vscode'
 import { languages, TabInputText, window, workspace } from 'vscode'
@@ -22,10 +19,9 @@ import { checkUpgrade } from './rules/upgrade'
 import { checkVulnerability } from './rules/vulnerability'
 
 export interface DiagnosticContext {
+  uri: Uri
   dep: ResolvedDependencyInfo
   pkg: NonNullable<Awaited<ReturnType<ResolvedDependencyInfo['packageInfo']>>>
-  exactVersion: string | null
-  engines: Engines | undefined
 }
 
 export interface RangeDiagnosticInfo extends Omit<Diagnostic, 'range' | 'source'> {
@@ -69,11 +65,10 @@ export function useDiagnostics() {
       return
 
     const targetVersion = document.version
-    const [dependencies, packageContext] = await Promise.all([
-      getResolvedDependencies(document.uri),
-      getPackageContext(document.uri),
-    ])
-    const engines = packageContext?.engines
+    const dependencies = await getResolvedDependencies(document.uri)
+    if (!dependencies)
+      return
+
     const diagnostics: Diagnostic[] = []
 
     const flush = debounce(() => {
@@ -112,12 +107,8 @@ export function useDiagnostics() {
         if (!pkg || isStale(document, targetVersion))
           return
 
-        const exactVersion = isSupportedProtocol(dep.protocol)
-          ? resolveExactVersion(pkg, dep.resolvedSpec)
-          : null
-
         for (const rule of rules) {
-          runRule(rule, { dep, pkg, exactVersion, engines })
+          runRule(rule, { uri: document.uri, dep, pkg })
         }
       } catch (err) {
         logger.warn(`[diagnostics] fail to check ${dep.rawName}: ${err}`)

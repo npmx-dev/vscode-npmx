@@ -2,8 +2,6 @@ import type { PackageInfo } from '#utils/api/package'
 import type { Engines } from 'fast-npm-meta'
 import type { DiagnosticContext } from '../../src/providers/diagnostics'
 import { resolveDependencySpec } from '#utils/dependency'
-import { resolveExactVersion } from '#utils/package'
-import { isSupportedProtocol } from '#utils/version'
 
 interface CreateContextOptions {
   name: string
@@ -17,7 +15,7 @@ interface CreateContextOptions {
 }
 
 export function createContext(options: CreateContextOptions): DiagnosticContext {
-  const { name, version, distTags = {}, versionsMeta = {}, engines } = options
+  const { name, version, distTags = {}, versionsMeta = {} } = options
   const { protocol, resolvedName, resolvedSpec, resolvedProtocol } = resolveDependencySpec(name, version)
   const pkg = { distTags, versionsMeta, versionToTag: new Map() } as PackageInfo
 
@@ -34,8 +32,5 @@ export function createContext(options: CreateContextOptions): DiagnosticContext 
     resolvedVersion: async () => '',
     packageInfo: async () => (pkg),
   }
-  const exactVersion = isSupportedProtocol(resolvedProtocol)
-    ? resolveExactVersion(pkg, resolvedSpec)
-    : null
-  return { dep, pkg, exactVersion, engines }
+  return { uri, dep, pkg }
 }

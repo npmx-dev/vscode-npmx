@@ -21,7 +21,8 @@ function createUpgradeDiagnostic(range: OffsetRange, name: string, targetVersion
   }
 }
 
-export const checkUpgrade: DiagnosticRule = ({ dep, pkg, exactVersion }) => {
+export const checkUpgrade: DiagnosticRule = async ({ dep, pkg }) => {
+  const exactVersion = await dep.resolvedVersion()
   if (!exactVersion)
     return
 

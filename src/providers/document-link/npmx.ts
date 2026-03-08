@@ -1,17 +1,18 @@
 import type { DocumentLink, DocumentLinkProvider, TextDocument } from 'vscode'
 import { config } from '#state'
-import { getPackageInfo } from '#utils/api/package'
 import { offsetRangeToRange } from '#utils/ast'
 import { npmxPackageUrl } from '#utils/links'
-import { resolveExactVersion } from '#utils/package'
 import { isSupportedProtocol } from '#utils/version'
 import { getResolvedDependencies } from '#utils/workspace'
 import { Uri, DocumentLink as VscodeDocumentLink } from 'vscode'
 
 export class NpmxDocumentLinkProvider implements DocumentLinkProvider {
   async provideDocumentLinks(document: TextDocument): Promise<DocumentLink[]> {
-    const links: DocumentLink[] = []
     const dependencies = await getResolvedDependencies(document.uri)
+    if (!dependencies)
+      return []
+
+    const links: DocumentLink[] = []
     const linkMode = config.packageLinks
     const supportedDeps = dependencies.filter((dep) => isSupportedProtocol(dep.protocol))
 
@@ -23,9 +24,7 @@ export class NpmxDocumentLinkProvider implements DocumentLinkProvider {
       if (linkMode === 'declared') {
         targetVersion = resolvedSpec
       } else if (linkMode === 'resolved') {
-        const pkg = await getPackageInfo(resolvedName)
-        const exactVersion = pkg ? resolveExactVersion(pkg, resolvedSpec) : null
-        targetVersion = exactVersion ?? resolvedSpec
+        targetVersion = await dep.resolvedVersion() ?? resolvedSpec
       }
 
       const url = targetVersion

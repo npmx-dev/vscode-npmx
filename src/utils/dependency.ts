@@ -1,7 +1,5 @@
-import type { ResolvedDependencyInfo } from '#types/context'
+import type { CatalogsInfo, ResolvedDependencyInfo } from '#types/context'
 import { isJsrNpmPackage, jsrNpmToJsrName, parsePackageId } from '#utils/package'
-
-export type CatalogsInfo = Record<string, Record<string, string>>
 
 interface FinalResolution extends Pick<ResolvedDependencyInfo, 'resolvedName' | 'resolvedSpec' | 'resolvedProtocol'> {
 }

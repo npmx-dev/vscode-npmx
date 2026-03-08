@@ -17,12 +17,12 @@ export class PackageJsonDocumentExtractor implements PackageManifestExtractor<Js
     return typeof node?.value === 'string' ? node.value : undefined
   }
 
-  getPackageName(root: JsonNode): string | undefined {
-    return this.getStringValue(root, 'name')
+  getPackageName(root: JsonNode): string {
+    return this.getStringValue(root, 'name')!
   }
 
-  getPackageVersion(root: JsonNode): string | undefined {
-    return this.getStringValue(root, 'version')
+  getPackageVersion(root: JsonNode): string {
+    return this.getStringValue(root, 'version')!
   }
 
   getPackageManager(root: JsonNode): string | undefined {

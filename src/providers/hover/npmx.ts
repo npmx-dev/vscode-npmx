@@ -2,7 +2,7 @@ import type { HoverProvider, Position, TextDocument } from 'vscode'
 import { SPACER } from '#constants'
 import { getPackageInfo } from '#utils/api/package'
 import { jsrPackageUrl, npmxDocsUrl, npmxPackageUrl } from '#utils/links'
-import { isJsrNpmPackage, jsrNpmToJsrName, resolveExactVersion } from '#utils/package'
+import { isJsrNpmPackage, jsrNpmToJsrName } from '#utils/package'
 import { isSupportedProtocol } from '#utils/version'
 import { getResolvedDependencyByOffset } from '#utils/workspace'
 import { Hover, MarkdownString } from 'vscode'
@@ -42,7 +42,7 @@ export class NpmxHoverProvider implements HoverProvider {
     const md = new MarkdownString('', true)
     md.isTrusted = true
 
-    const exactVersion = resolveExactVersion(pkg, resolvedSpec)
+    const exactVersion = await dep.resolvedVersion()
     if (exactVersion && pkg.versionsMeta[exactVersion]?.provenance)
       md.appendMarkdown(`[$(verified)${SPACER}Verified provenance](${npmxPackageUrl(resolvedName, resolvedSpec)}#provenance)\n\n`)
 

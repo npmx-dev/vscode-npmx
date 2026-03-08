@@ -2,7 +2,8 @@ import type { DiagnosticRule } from '..'
 import { npmxPackageUrl } from '#utils/links'
 import { DiagnosticSeverity, Uri } from 'vscode'
 
-export const checkDistTag: DiagnosticRule = ({ dep, pkg, exactVersion }) => {
+export const checkDistTag: DiagnosticRule = async ({ dep, pkg }) => {
+  const exactVersion = await dep.resolvedVersion()
   if (!exactVersion)
     return
 

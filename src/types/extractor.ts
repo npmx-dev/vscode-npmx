@@ -27,24 +27,24 @@ export interface DependencyInfo {
   specRange: OffsetRange
 }
 
-export interface PackageManifestInfo {
+interface DependenciesInfo {
+  dependencies: DependencyInfo[]
+}
+
+export interface PackageManifestInfo extends DependenciesInfo {
   name: string
   version: string
   packageManager?: string
   engines?: Engines
-  dependencies: DependencyInfo[]
 }
 
-export interface WorkspaceCatalogInfo {
+export interface WorkspaceCatalogInfo extends DependenciesInfo {
   catalogs?: Record<string, Record<string, string>>
-  dependencies: DependencyInfo[]
 }
 
 export interface Extractor<T = any> {
   parse: (text: string) => T | null | undefined
-
   getDependenciesInfo: (root: T) => DependencyInfo[]
-
   getEngines?: (root: T) => Engines | undefined
 }
 

@@ -2,6 +2,7 @@ import type { Engines } from 'fast-npm-meta'
 import type { DiagnosticRule } from '..'
 import { npmxPackageUrl } from '#utils/links'
 import { formatPackageId } from '#utils/package'
+import { getWorkspaceContextState, isPackageManifestPath } from '#utils/workspace'
 import Range from 'semver/classes/range'
 import intersects from 'semver/ranges/intersects'
 import subset from 'semver/ranges/subset'
@@ -46,9 +47,21 @@ function resolveEngineMismatches(
   return mismatches
 }
 
-export const checkEngineMismatch: DiagnosticRule = ({ dep: { specRange, resolvedName, resolvedSpec }, pkg, exactVersion, engines }) => {
-  if (!exactVersion || !engines)
+export const checkEngineMismatch: DiagnosticRule = async ({ uri, dep, pkg }) => {
+  if (!isPackageManifestPath(uri.path))
     return
+
+  const exactVersion = await dep.resolvedVersion()
+  if (!exactVersion)
+    return
+
+  const state = await getWorkspaceContextState(uri)
+  const engines = (await state?.loadPackageManifestInfo(uri))?.engines
+
+  if (!engines)
+    return
+
+  const { specRange, resolvedName, resolvedSpec } = dep
 
   const dependencyEngines = pkg.versionsMeta[exactVersion]?.engines
   if (!dependencyEngines)
