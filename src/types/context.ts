@@ -15,11 +15,6 @@ export type DependencyProtocol
 
 export type CatalogsInfo = Record<string, Record<string, string>>
 
-export interface WorkspaceContext {
-  packageManager: PackageManager
-  catalogs?: CatalogsInfo
-}
-
 export interface ResolvedDependencyInfo extends DependencyInfo {
   protocol: DependencyProtocol
   resolvedName: string

@@ -2,7 +2,7 @@ import type { Engines } from 'fast-npm-meta'
 import type { DiagnosticRule } from '..'
 import { npmxPackageUrl } from '#utils/links'
 import { formatPackageId } from '#utils/package'
-import { getWorkspaceContextState, isPackageManifestPath } from '#utils/workspace'
+import { getWorkspaceContext, isPackageManifestPath } from '#utils/workspace'
 import Range from 'semver/classes/range'
 import intersects from 'semver/ranges/intersects'
 import subset from 'semver/ranges/subset'
@@ -55,7 +55,7 @@ export const checkEngineMismatch: DiagnosticRule = async ({ uri, dep, pkg }) => 
   if (!exactVersion)
     return
 
-  const state = await getWorkspaceContextState(uri)
+  const state = await getWorkspaceContext(uri)
   const engines = (await state?.loadPackageManifestInfo(uri))?.engines
 
   if (!engines)

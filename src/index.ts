@@ -15,10 +15,10 @@ export const { activate, deactivate } = defineExtension(() => {
 
   useWorkspaceContext()
 
-  useDiagnostics()
-  useCodeActions()
   useHover()
   useCompletionItem()
+  useDiagnostics()
+  useCodeActions()
   useDocumentLink()
 
   useCommands({

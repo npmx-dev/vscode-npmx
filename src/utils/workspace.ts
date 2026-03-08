@@ -1,6 +1,6 @@
-import type { CatalogsInfo, ResolvedDependencyInfo, WorkspaceContext } from '#types/context'
+import type { CatalogsInfo, PackageManager, ResolvedDependencyInfo } from '#types/context'
 import type { DependencyInfo, PackageManifestInfo, WorkspaceCatalogInfo } from '#types/extractor'
-import type { MemoizedFunction } from '#utils/memoize'
+import type { MemoizeOptions } from '#utils/memoize'
 import type { WorkspaceFolder } from 'vscode'
 import { packageManifestExtractorEntry, workspaceCatalogExtractorEntries } from '#extractors'
 import { logger } from '#state'
@@ -12,69 +12,99 @@ import { resolveExactVersion } from '#utils/package'
 import { detectPackageManager } from '#utils/package-manager'
 import { Uri, workspace } from 'vscode'
 import { getDocumentText } from './document'
+import { lazyInit } from './shared'
 
 type WithResolvedDependencyInfo<T> = Omit<T, 'dependencies'> & {
   dependencies: ResolvedDependencyInfo[]
-}
-
-interface WorkspaceContextState {
-  folder: WorkspaceFolder
-  workspaceContext: WorkspaceContext
-  loadPackageManifestInfo: MemoizedFunction<Uri, Promise<WithResolvedDependencyInfo<PackageManifestInfo> | undefined>>
-  loadWorkspaceCatalogInfo: MemoizedFunction<Uri, Promise<WithResolvedDependencyInfo<WorkspaceCatalogInfo> | undefined>>
 }
 
 export function isPackageManifestPath(path: string) {
   return path.endsWith(`/${packageManifestExtractorEntry.basename}`)
 }
 
-function lazyInit<T>(factory: () => T): () => T {
-  let cached: { value: T } | undefined
-  return () => {
-    if (!cached)
-      cached = { value: factory() }
-    return cached.value
+class WorkspaceContext {
+  folder: WorkspaceFolder
+  packageManager: PackageManager = 'npm'
+  catalogs?: CatalogsInfo
+
+  constructor(folder: WorkspaceFolder) {
+    this.folder = folder
+    this.#init()
   }
-}
 
-function createResolvedDependencyInfo(
-  dependency: DependencyInfo,
-  catalogs?: CatalogsInfo,
-): ResolvedDependencyInfo {
-  const resolution = resolveDependencySpec(dependency.rawName, dependency.rawSpec, catalogs)
+  async #init() {
+    this.packageManager = await detectPackageManager(this.folder)
 
-  const packageInfo = lazyInit(
-    async () => resolution.resolvedProtocol === 'npm'
-      ? await getPackageInfo(resolution.resolvedName) ?? null
-      : null,
-  )
-
-  return {
-    ...dependency,
-    ...resolution,
-    categoryName: dependency.categoryName ?? resolution.categoryName,
-    packageInfo,
-    resolvedVersion: lazyInit(async () => {
-      if (resolution.resolvedProtocol !== 'npm')
-        return null
-
-      const pkg = await packageInfo()
-      if (!pkg)
-        return null
-
-      return resolveExactVersion(pkg, resolution.resolvedSpec)
-    }),
+    if (this.packageManager !== 'npm') {
+      const workspaceFilename = workspaceCatalogExtractorEntries.find(
+        (entry) => this.packageManager === entry.packageManager,
+      )!.basename
+      const workspaceFile = Uri.joinPath(
+        this.folder.uri,
+        workspaceFilename,
+      )
+      this.catalogs = (await this.loadWorkspaceCatalogInfo(workspaceFile))?.catalogs
+    }
   }
-}
 
-export const getWorkspaceContextState = memoize<Uri, Promise<WorkspaceContextState | undefined>>(async (uri) => {
-  const folder = workspace.getWorkspaceFolder(uri)
-  if (!folder)
-    return
+  #memoizeOptions: MemoizeOptions<Uri> = {
+    getKey: (uri) => uri.path,
+    ttl: false,
+    maxSize: Number.POSITIVE_INFINITY,
+    fallbackToCachedOnError: false,
+  }
 
-  const packageManager = await detectPackageManager(folder)
+  #createResolvedDependencyInfo(dependency: DependencyInfo): ResolvedDependencyInfo {
+    const resolution = resolveDependencySpec(dependency.rawName, dependency.rawSpec, this.catalogs)
 
-  const loadWorkspaceCatalogInfo = memoize(async (uri: Uri): Promise<WithResolvedDependencyInfo<WorkspaceCatalogInfo> | undefined> => {
+    const packageInfo = lazyInit(
+      async () => resolution.resolvedProtocol === 'npm'
+        ? await getPackageInfo(resolution.resolvedName) ?? null
+        : null,
+    )
+
+    return {
+      ...dependency,
+      ...resolution,
+      categoryName: dependency.categoryName ?? resolution.categoryName,
+      packageInfo,
+      resolvedVersion: lazyInit(async () => {
+        if (resolution.resolvedProtocol !== 'npm')
+          return null
+
+        const pkg = await packageInfo()
+        if (!pkg)
+          return null
+
+        return resolveExactVersion(pkg, resolution.resolvedSpec)
+      }),
+    }
+  }
+
+  loadPackageManifestInfo = memoize<
+    Uri,
+    Promise<WithResolvedDependencyInfo<PackageManifestInfo> | undefined>
+  >(async (uri) => {
+    if (!isPackageManifestPath(uri.path))
+      return
+
+    logger.info(`[workspace-context] load package manifest info: ${uri.path}`)
+    const text = await getDocumentText(uri)
+
+    const info = packageManifestExtractorEntry.extractor.getPackageManifestInfo(text)
+    if (!info)
+      return
+
+    return {
+      ...info,
+      dependencies: info.dependencies.map(this.#createResolvedDependencyInfo),
+    }
+  }, this.#memoizeOptions)
+
+  loadWorkspaceCatalogInfo = memoize<
+    Uri,
+    Promise<WithResolvedDependencyInfo<WorkspaceCatalogInfo> | undefined>
+  >(async (uri) => {
     const path = uri.path
     logger.info(`[workspace-context] load workspace catalog info: ${path}`)
 
@@ -90,47 +120,19 @@ export const getWorkspaceContextState = memoize<Uri, Promise<WorkspaceContextSta
 
       return {
         ...info,
-        dependencies: info.dependencies.map((dependency) => createResolvedDependencyInfo(dependency)),
+        dependencies: info.dependencies.map(this.#createResolvedDependencyInfo),
       }
     }
-  }, { getKey: (uri) => uri.path, ttl: false, maxSize: Number.POSITIVE_INFINITY, fallbackToCachedOnError: false })
+  }, this.#memoizeOptions)
+}
 
-  let catalogs: CatalogsInfo | undefined
-
-  if (packageManager !== 'npm') {
-    const workspaceFile = Uri.joinPath(
-      folder.uri,
-      workspaceCatalogExtractorEntries.find((entry) => packageManager === entry.packageManager)!.basename,
-    )
-    catalogs = (await loadWorkspaceCatalogInfo(workspaceFile))?.catalogs
-  }
+export const getWorkspaceContext = memoize<Uri, Promise<WorkspaceContext | undefined>>(async (uri) => {
+  const folder = workspace.getWorkspaceFolder(uri)
+  if (!folder)
+    return
 
   logger.info(`[workspace-context] built ${folder.uri.path}`)
-
-  return {
-    folder,
-    workspaceContext: {
-      packageManager,
-      catalogs,
-    },
-    loadPackageManifestInfo: memoize(async (uri: Uri) => {
-      if (!isPackageManifestPath(uri.path))
-        return
-
-      logger.info(`[workspace-context] load package manifest info: ${uri.path}`)
-      const text = await getDocumentText(uri)
-
-      const info = packageManifestExtractorEntry.extractor.getPackageManifestInfo(text)
-      if (!info)
-        return
-
-      return {
-        ...info,
-        dependencies: info.dependencies.map((dependency) => createResolvedDependencyInfo(dependency, catalogs)),
-      }
-    }, { getKey: (uri) => uri.path, ttl: false, maxSize: Number.POSITIVE_INFINITY, fallbackToCachedOnError: false }),
-    loadWorkspaceCatalogInfo,
-  }
+  return new WorkspaceContext(folder)
 }, {
   getKey: (uri: Uri) => workspace.getWorkspaceFolder(uri)!.uri.path,
   ttl: false,
@@ -138,14 +140,14 @@ export const getWorkspaceContextState = memoize<Uri, Promise<WorkspaceContextSta
 })
 
 export async function getResolvedDependencies(uri: Uri): Promise<ResolvedDependencyInfo[] | undefined> {
-  const state = await getWorkspaceContextState(uri)
-  if (!state)
+  const ctx = await getWorkspaceContext(uri)
+  if (!ctx)
     return []
 
   return (
     isPackageManifestPath(uri.path)
-      ? await state.loadPackageManifestInfo(uri)
-      : await state.loadWorkspaceCatalogInfo(uri)
+      ? await ctx.loadPackageManifestInfo(uri)
+      : await ctx.loadWorkspaceCatalogInfo(uri)
   )?.dependencies
 }
 
