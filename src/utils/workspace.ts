@@ -1,7 +1,7 @@
 import type { CatalogsInfo, ResolvedDependencyInfo, WorkspaceContext } from '#types/context'
 import type { DependencyInfo, PackageManifestInfo, WorkspaceCatalogInfo } from '#types/extractor'
 import type { MemoizedFunction } from '#utils/memoize'
-import type { Uri, WorkspaceFolder } from 'vscode'
+import type { WorkspaceFolder } from 'vscode'
 import { packageManifestExtractorEntry, workspaceCatalogExtractorEntries } from '#extractors'
 import { logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
@@ -10,7 +10,7 @@ import { resolveDependencySpec } from '#utils/dependency'
 import { memoize } from '#utils/memoize'
 import { resolveExactVersion } from '#utils/package'
 import { detectPackageManager } from '#utils/package-manager'
-import { workspace } from 'vscode'
+import { Uri, workspace } from 'vscode'
 import { getDocumentText } from './document'
 
 type WithResolvedDependencyInfo<T> = Omit<T, 'dependencies'> & {
@@ -71,7 +71,6 @@ export const getWorkspaceContextState = memoize<Uri, Promise<WorkspaceContextSta
   if (!folder)
     return
 
-  const workspacePath = folder.uri.path
   const packageManager = await detectPackageManager(folder)
 
   const loadWorkspaceCatalogInfo = memoize(async (uri: Uri): Promise<WithResolvedDependencyInfo<WorkspaceCatalogInfo> | undefined> => {
@@ -94,11 +93,17 @@ export const getWorkspaceContextState = memoize<Uri, Promise<WorkspaceContextSta
     }
   }, { ttl: false, maxSize: Number.POSITIVE_INFINITY, fallbackToCachedOnError: false })
 
-  const catalogs = packageManager === 'npm'
-    ? undefined
-    : (await loadWorkspaceCatalogInfo(folder.uri))?.catalogs
+  let catalogs: CatalogsInfo | undefined
 
-  logger.info(`[workspace-context] built ${workspacePath}`)
+  if (packageManager !== 'npm') {
+    const workspaceFile = Uri.joinPath(
+      folder.uri,
+      workspaceCatalogExtractorEntries.find((entry) => packageManager === entry.packageManager)!.basename,
+    )
+    catalogs = (await loadWorkspaceCatalogInfo(workspaceFile))?.catalogs
+  }
+
+  logger.info(`[workspace-context] built ${folder.uri.path}`)
 
   return {
     folder,
@@ -107,7 +112,7 @@ export const getWorkspaceContextState = memoize<Uri, Promise<WorkspaceContextSta
       catalogs,
     },
     loadPackageManifestInfo: memoize(async (uri: Uri) => {
-      if (isPackageManifestPath(uri.path))
+      if (!isPackageManifestPath(uri.path))
         return
 
       const text = await getDocumentText(uri)
