@@ -2,6 +2,7 @@ import type { PackageInfo } from '#utils/api/package'
 import type { Engines } from 'fast-npm-meta'
 import type { DiagnosticContext } from '../../src/providers/diagnostics'
 import { resolveDependencySpec } from '#utils/dependency'
+import { resolveExactVersion } from '#utils/package'
 import { Uri } from 'vscode'
 
 interface CreateContextOptions {
@@ -30,7 +31,7 @@ export function createContext(options: CreateContextOptions): DiagnosticContext 
     resolvedName,
     resolvedSpec,
     resolvedProtocol,
-    resolvedVersion: async () => '',
+    resolvedVersion: async () => resolveExactVersion(pkg, resolvedSpec),
     packageInfo: async () => (pkg),
   }
   return { uri: Uri.file('package.json'), dep, pkg }
