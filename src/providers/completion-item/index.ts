@@ -8,7 +8,7 @@ export const VERSION_TRIGGER_CHARACTERS = [':', '^', '~', '.', ...Array.from({ l
 
 export function useCompletionItem() {
   watchEffect((onCleanup) => {
-    if (!config.hover.enabled)
+    if (config.completion.version === 'off')
       return
 
     const disposable = languages.registerCompletionItemProvider(

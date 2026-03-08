@@ -51,19 +51,19 @@ export const checkEngineMismatch: DiagnosticRule = async ({ uri, dep, pkg }) => 
   if (!isPackageManifestPath(uri.path))
     return
 
-  const exactVersion = await dep.resolvedVersion()
-  if (!exactVersion)
+  const resolvedVersion = await dep.resolvedVersion()
+  if (!resolvedVersion)
     return
 
-  const state = await getWorkspaceContext(uri)
-  const engines = (await state?.loadPackageManifestInfo(uri))?.engines
+  const ctx = await getWorkspaceContext(uri)
+  const engines = (await ctx?.loadPackageManifestInfo(uri))?.engines
 
   if (!engines)
     return
 
   const { specRange, resolvedName, resolvedSpec } = dep
 
-  const dependencyEngines = pkg.versionsMeta[exactVersion]?.engines
+  const dependencyEngines = pkg.versionsMeta[resolvedVersion]?.engines
   if (!dependencyEngines)
     return
 
@@ -77,7 +77,7 @@ export const checkEngineMismatch: DiagnosticRule = async ({ uri, dep, pkg }) => 
 
   return {
     range: specRange,
-    message: `Engines mismatch for "${formatPackageId(resolvedName, exactVersion)}": ${mismatchDetails}.`,
+    message: `Engines mismatch for "${formatPackageId(resolvedName, resolvedVersion)}": ${mismatchDetails}.`,
     severity: DiagnosticSeverity.Warning,
     code: {
       value: 'engine-mismatch',

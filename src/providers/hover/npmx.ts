@@ -36,8 +36,8 @@ export class NpmxHoverProvider implements HoverProvider {
         const md = new MarkdownString('', true)
         md.isTrusted = true
 
-        const exactVersion = await dep.resolvedVersion()
-        if (exactVersion && pkg.versionsMeta[exactVersion]?.provenance)
+        const resolvedVersion = await dep.resolvedVersion()
+        if (resolvedVersion && pkg.versionsMeta[resolvedVersion]?.provenance)
           md.appendMarkdown(`[$(verified)${SPACER}Verified provenance](${npmxPackageUrl(resolvedName, resolvedSpec)}#provenance)\n\n`)
 
         const packageLink = `[$(package)${SPACER}View on npmx.dev](${npmxPackageUrl(resolvedName)})`

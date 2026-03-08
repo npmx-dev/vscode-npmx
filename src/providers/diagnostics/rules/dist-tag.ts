@@ -3,8 +3,8 @@ import { npmxPackageUrl } from '#utils/links'
 import { DiagnosticSeverity, Uri } from 'vscode'
 
 export const checkDistTag: DiagnosticRule = async ({ dep, pkg }) => {
-  const exactVersion = await dep.resolvedVersion()
-  if (!exactVersion)
+  const resolvedVersion = await dep.resolvedVersion()
+  if (!resolvedVersion)
     return
 
   const tag = dep.resolvedSpec

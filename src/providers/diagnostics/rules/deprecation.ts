@@ -6,23 +6,23 @@ import { formatPackageId } from '#utils/package'
 import { DiagnosticSeverity, DiagnosticTag, Uri } from 'vscode'
 
 export const checkDeprecation: DiagnosticRule = async ({ dep, pkg }) => {
-  const exactVersion = await dep.resolvedVersion()
-  if (!exactVersion)
+  const resolvedVersion = await dep.resolvedVersion()
+  if (!resolvedVersion)
     return
 
-  const versionInfo = pkg.versionsMeta[exactVersion]
+  const versionInfo = pkg.versionsMeta[resolvedVersion]
 
   if (!versionInfo.deprecated)
     return
 
   const { resolvedName } = dep
 
-  if (checkIgnored({ ignoreList: config.ignore.deprecation, name: resolvedName, version: exactVersion }))
+  if (checkIgnored({ ignoreList: config.ignore.deprecation, name: resolvedName, version: resolvedVersion }))
     return
 
   return {
     range: dep.specRange,
-    message: `"${formatPackageId(resolvedName, exactVersion)}" has been deprecated: ${versionInfo.deprecated}`,
+    message: `"${formatPackageId(resolvedName, resolvedVersion)}" has been deprecated: ${versionInfo.deprecated}`,
     severity: DiagnosticSeverity.Error,
     code: {
       value: 'deprecation',
