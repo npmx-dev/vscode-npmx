@@ -31,15 +31,17 @@ const PROTOCOL_PATTERN = /^[a-z]+:/
 
 export function formatUpgradeVersion(dep: ResolvedDependencyInfo, target: string): string {
   const { rawName, rawSpec, resolvedName, resolvedSpec, protocol } = dep
-  const prefix = getVersionRangePrefix(resolvedSpec)
 
+  const isAlias = resolvedName !== rawName
+  const prefix = getVersionRangePrefix(resolvedSpec)
   const result = prefix === '*' ? '*' : `${prefix}${target}`
+
+  if (!isAlias)
+    return result
 
   const declaredProtocol = PROTOCOL_PATTERN.test(rawSpec) ? protocol : null
   if (!declaredProtocol)
     return result
 
-  const isAlias = resolvedName !== rawName
-  const versionPart = isAlias ? formatPackageId(resolvedName, result) : result
-  return `${declaredProtocol}:${versionPart}`
+  return `${declaredProtocol}:${formatPackageId(resolvedName, result)}`
 }
