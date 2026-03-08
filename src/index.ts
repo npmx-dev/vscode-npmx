@@ -1,3 +1,4 @@
+import { useWorkspaceContext } from '#composables/workspace-context'
 import { defineExtension, useCommands } from 'reactive-vscode'
 import { openFileInNpmx } from './commands/open-file-in-npmx'
 import { openInBrowser } from './commands/open-in-browser'
@@ -11,6 +12,8 @@ import { logger } from './state'
 
 export const { activate, deactivate } = defineExtension(() => {
   logger.info(`${displayName} Activated, v${version}`)
+
+  useWorkspaceContext()
 
   useDiagnostics()
   useCodeActions()

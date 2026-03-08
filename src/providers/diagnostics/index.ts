@@ -8,7 +8,7 @@ import { config, logger } from '#state'
 import { offsetRangeToRange } from '#utils/ast'
 import { getResolvedDependencies } from '#utils/workspace'
 import { debounce } from 'perfect-debounce'
-import { computed, useActiveTextEditor, useDisposable, useDocumentText, useFileSystemWatcher, watch } from 'reactive-vscode'
+import { computed, nextTick, useActiveTextEditor, useDisposable, useDocumentText, useFileSystemWatcher, watch } from 'reactive-vscode'
 import { languages, TabInputText, window, workspace } from 'vscode'
 import { displayName } from '../../generated-meta'
 import { checkDeprecation } from './rules/deprecation'
@@ -57,6 +57,7 @@ export function useDiagnostics() {
   }
 
   async function collectDiagnostics(document: TextDocument) {
+    await nextTick()
     logger.info(`[diagnostics] collect: ${document.uri.path}`)
     diagnosticCollection.set(document.uri, [])
 

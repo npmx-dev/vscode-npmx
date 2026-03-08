@@ -20,7 +20,7 @@ type MemoizeReturn<R> = R extends Promise<infer V> ? Promise<V | undefined> : R 
 
 export interface MemoizedFunction<P, V> {
   (params: P): MemoizeReturn<V>
-  deleteByKey: (key: MemoizeKey) => void
+  delete: (params: P) => void
 }
 
 export function memoize<P, V>(fn: (params: P) => V, options: MemoizeOptions<P> = {}): MemoizedFunction<P, V> {
@@ -77,12 +77,6 @@ export function memoize<P, V>(fn: (params: P) => V, options: MemoizeOptions<P> =
     })
   }
 
-  function deleteByKey(key: MemoizeKey): void {
-    cache.delete(key)
-    pending.delete(key)
-    versions.set(key, getVersion(key) + 1)
-  }
-
   const cachedFn = function cachedFn(params: P) {
     const key = getKey(params)
     const keyVersion = getVersion(key)
@@ -121,7 +115,12 @@ export function memoize<P, V>(fn: (params: P) => V, options: MemoizeOptions<P> =
     }
   } as MemoizedFunction<P, V>
 
-  cachedFn.deleteByKey = deleteByKey
+  cachedFn.delete = (p: P) => {
+    const key = getKey(p)
+    cache.delete(key)
+    pending.delete(key)
+    versions.set(key, getVersion(key) + 1)
+  }
 
   return cachedFn
 }

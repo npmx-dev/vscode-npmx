@@ -1,5 +1,5 @@
 import type { DocumentLink, DocumentLinkProvider, TextDocument } from 'vscode'
-import { config } from '#state'
+import { config, logger } from '#state'
 import { offsetRangeToRange } from '#utils/ast'
 import { npmxPackageUrl } from '#utils/links'
 import { getResolvedDependencies } from '#utils/workspace'
@@ -7,6 +7,7 @@ import { Uri, DocumentLink as VscodeDocumentLink } from 'vscode'
 
 export class NpmxDocumentLinkProvider implements DocumentLinkProvider {
   async provideDocumentLinks(document: TextDocument): Promise<DocumentLink[]> {
+    logger.info('[document-link] set document links')
     const dependencies = await getResolvedDependencies(document.uri)
     if (!dependencies)
       return []

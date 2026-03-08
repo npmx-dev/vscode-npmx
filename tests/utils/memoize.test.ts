@@ -115,7 +115,7 @@ describe('memoize', () => {
     const memoized = memoize(fn, { ttl: 0 })
 
     const stalePromise = memoized('key')
-    memoized.deleteByKey('key')
+    memoized.delete('key')
     const freshPromise = memoized('key')
 
     expect(fn).toHaveBeenCalledTimes(2)

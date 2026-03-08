@@ -1,7 +1,6 @@
 import type { CompletionItemProvider, Position, TextDocument } from 'vscode'
 import { PRERELEASE_PATTERN } from '#constants'
 import { config } from '#state'
-import { getPackageInfo } from '#utils/api/package'
 import { offsetRangeToRange } from '#utils/ast'
 import { formatUpgradeVersion } from '#utils/version'
 import { getResolvedDependencyByOffset } from '#utils/workspace'
@@ -17,7 +16,7 @@ export class VersionCompletionItemProvider implements CompletionItemProvider {
     if (info.resolvedProtocol !== 'npm')
       return
 
-    const pkg = await getPackageInfo(info.resolvedName)
+    const pkg = await info.packageInfo()
     if (!pkg)
       return
 

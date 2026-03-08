@@ -42,10 +42,11 @@ function createResolvedDependencyInfo(
   catalogs?: CatalogsInfo,
 ): ResolvedDependencyInfo {
   const resolution = resolveDependencySpec(dependency.rawName, dependency.rawSpec, catalogs)
+
   const packageInfo = lazyInit(
-    () => resolution.resolvedProtocol === 'npm'
-      ? getPackageInfo(resolution.resolvedName).then((pkg) => pkg ?? null)
-      : Promise.resolve(null),
+    async () => resolution.resolvedProtocol === 'npm'
+      ? await getPackageInfo(resolution.resolvedName) ?? null
+      : null,
   )
 
   return {
@@ -75,6 +76,7 @@ export const getWorkspaceContextState = memoize<Uri, Promise<WorkspaceContextSta
 
   const loadWorkspaceCatalogInfo = memoize(async (uri: Uri): Promise<WithResolvedDependencyInfo<WorkspaceCatalogInfo> | undefined> => {
     const path = uri.path
+    logger.info(`[workspace-context] load workspace catalog info: ${path}`)
 
     for (const entry of workspaceCatalogExtractorEntries) {
       if (!path.endsWith(`/${entry.basename}`))
@@ -91,7 +93,7 @@ export const getWorkspaceContextState = memoize<Uri, Promise<WorkspaceContextSta
         dependencies: info.dependencies.map((dependency) => createResolvedDependencyInfo(dependency)),
       }
     }
-  }, { ttl: false, maxSize: Number.POSITIVE_INFINITY, fallbackToCachedOnError: false })
+  }, { getKey: (uri) => uri.path, ttl: false, maxSize: Number.POSITIVE_INFINITY, fallbackToCachedOnError: false })
 
   let catalogs: CatalogsInfo | undefined
 
@@ -115,6 +117,7 @@ export const getWorkspaceContextState = memoize<Uri, Promise<WorkspaceContextSta
       if (!isPackageManifestPath(uri.path))
         return
 
+      logger.info(`[workspace-context] load package manifest info: ${uri.path}`)
       const text = await getDocumentText(uri)
 
       const info = packageManifestExtractorEntry.extractor.getPackageManifestInfo(text)
@@ -125,7 +128,7 @@ export const getWorkspaceContextState = memoize<Uri, Promise<WorkspaceContextSta
         ...info,
         dependencies: info.dependencies.map((dependency) => createResolvedDependencyInfo(dependency, catalogs)),
       }
-    }, { ttl: false, maxSize: Number.POSITIVE_INFINITY, fallbackToCachedOnError: false }),
+    }, { getKey: (uri) => uri.path, ttl: false, maxSize: Number.POSITIVE_INFINITY, fallbackToCachedOnError: false }),
     loadWorkspaceCatalogInfo,
   }
 }, {
