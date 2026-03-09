@@ -93,7 +93,7 @@ class WorkspaceContext {
 
     return {
       ...info,
-      dependencies: info.dependencies.map(this.#createResolvedDependencyInfo),
+      dependencies: info.dependencies.map(dep => this.#createResolvedDependencyInfo(dep)),
     }
   }, this.#memoizeOptions)
 
@@ -118,7 +118,7 @@ class WorkspaceContext {
 
     return {
       ...info,
-      dependencies: info.dependencies.map(this.#createResolvedDependencyInfo),
+      dependencies: info.dependencies.map(dep => this.#createResolvedDependencyInfo(dep)),
     }
   }, this.#memoizeOptions)
 }

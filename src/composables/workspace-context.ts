@@ -3,8 +3,8 @@ import { SUPPORTED_DOCUMENT_PATTERN } from '#constants'
 import { logger } from '#state'
 import { isSupportedDependencyDocument } from '#utils/file'
 import { getWorkspaceContext } from '#utils/workspace'
-import { useActiveTextEditor, useDocumentText, useFileSystemWatcher, watch } from 'reactive-vscode'
-import { workspace } from 'vscode'
+import { useDisposable, useFileSystemWatcher } from 'reactive-vscode'
+import { window, workspace } from 'vscode'
 
 export function useWorkspaceContext() {
   workspace.onDidChangeWorkspaceFolders(({ removed }) => {
@@ -15,6 +15,9 @@ export function useWorkspaceContext() {
   })
 
   async function deleteCacheByUri(uri: Uri) {
+    if (!isSupportedDependencyDocument(uri))
+      return
+
     const ctx = await getWorkspaceContext(uri)
     if (!ctx)
       return
@@ -24,16 +27,12 @@ export function useWorkspaceContext() {
     logger.info(`[workspace-context] delete cache: ${uri.path}`)
   }
 
-  const activeEditor = useActiveTextEditor()
-  const activeDocumentText = useDocumentText(() => activeEditor.value?.document)
-
-  watch(activeDocumentText, async () => {
-    const document = activeEditor.value?.document
-    if (!document || !isSupportedDependencyDocument(document))
+  useDisposable(workspace.onDidChangeTextDocument(({ document }) => {
+    if (document !== window.activeTextEditor?.document)
       return
 
     deleteCacheByUri(document.uri)
-  }, { flush: 'pre' })
+  }))
 
   const { onDidChange, onDidDelete } = useFileSystemWatcher(SUPPORTED_DOCUMENT_PATTERN)
 
