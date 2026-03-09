@@ -24,7 +24,7 @@ export function useWorkspaceContext() {
 
     ctx.loadPackageManifestInfo.delete(uri)
     ctx.loadWorkspaceCatalogInfo.delete(uri)
-    logger.info(`[workspace-context] delete cache: ${uri.path}`)
+    logger.info(`[workspace-context] delete dependencies cache: ${uri.path}`)
   }
 
   useDisposable(workspace.onDidChangeTextDocument(({ document }) => {
