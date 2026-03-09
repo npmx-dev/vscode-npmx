@@ -42,16 +42,15 @@ export interface WorkspaceCatalogInfo extends DependenciesInfo {
   catalogs?: Record<string, Record<string, string>>
 }
 
-export interface Extractor<T = any> {
+export interface BaseExtractor<T = any> {
   parse: (text: string) => T | null | undefined
   getDependenciesInfo: (root: T) => DependencyInfo[]
-  getEngines?: (root: T) => Engines | undefined
 }
 
-export interface PackageManifestExtractor<T = any> extends Extractor<T> {
+export interface PackageManifestExtractor {
   getPackageManifestInfo: (text: string) => PackageManifestInfo | undefined
 }
 
-export interface WorkspaceCatalogExtractor<T = any> extends Extractor<T> {
+export interface WorkspaceCatalogExtractor {
   getWorkspaceCatalogInfo: (text: string) => WorkspaceCatalogInfo | undefined
 }

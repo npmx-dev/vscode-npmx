@@ -1,6 +1,7 @@
 import type { PackageManifestInfo } from '#types/extractor'
-import type { Uri } from 'vscode'
-import { PACKAGE_JSON_BASENAME } from '#constants'
+import type { TextDocument, Uri } from 'vscode'
+import { PACKAGE_JSON_BASENAME, PNPM_WORKSPACE_BASENAME, YARN_WORKSPACE_BASENAME } from '#constants'
+import { basename } from 'pathe'
 import { workspace } from 'vscode'
 
 export async function getDocumentText(uri: Uri) {
@@ -8,9 +9,26 @@ export async function getDocumentText(uri: Uri) {
   return document.getText()
 }
 
-export function isPackageManifestPath(uri: Uri) {
-  return uri.path.endsWith(`/${PACKAGE_JSON_BASENAME}`)
+const SUPPORTED_BASENAMES = new Set([
+  PACKAGE_JSON_BASENAME,
+  PNPM_WORKSPACE_BASENAME,
+  YARN_WORKSPACE_BASENAME,
+])
+
+export function isSupportedDependencyDocument(documentOrUri: TextDocument | Uri): boolean {
+  const path = 'uri' in documentOrUri ? documentOrUri.uri.path : documentOrUri.path
+  return SUPPORTED_BASENAMES.has(basename(path))
 }
+
+export function isPackageManifestPath(path: string): path is `${string}/${typeof PACKAGE_JSON_BASENAME}` {
+  return path.endsWith(`/${PACKAGE_JSON_BASENAME}`)
+}
+
+export function isWorkspaceFilePath(path: string): path is `${string}/${typeof PNPM_WORKSPACE_BASENAME}` | `${string}/${typeof YARN_WORKSPACE_BASENAME}` {
+  return path.endsWith(`/${PNPM_WORKSPACE_BASENAME}`)
+    || path.endsWith(`/${YARN_WORKSPACE_BASENAME}`)
+}
+
 /**
  * Reads and parses a `package.json` file.
  *

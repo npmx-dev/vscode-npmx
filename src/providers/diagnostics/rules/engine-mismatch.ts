@@ -49,7 +49,7 @@ export function resolveEngineMismatches(
 }
 
 export const checkEngineMismatch: DiagnosticRule = async ({ uri, dep, pkg }) => {
-  if (!isPackageManifestPath(uri))
+  if (!isPackageManifestPath(uri.path))
     return
 
   const resolvedVersion = await dep.resolvedVersion()

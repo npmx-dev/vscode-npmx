@@ -1,50 +1,21 @@
-import type { PackageManager } from '#types/context'
-import type { Extractor, PackageManifestExtractor, WorkspaceCatalogExtractor } from '#types/extractor'
-import type { TextDocument, Uri } from 'vscode'
-import { PACKAGE_JSON_BASENAME, PNPM_WORKSPACE_BASENAME, YARN_WORKSPACE_BASENAME } from '#constants'
-import { basename } from 'pathe'
-import { PackageJsonDocumentExtractor } from './package-json'
-import { WorkspaceCatalogDocumentExtractor } from './workspace-catalog'
+import { extname } from 'pathe'
+import { JsonExtractor } from './json'
+import { YamlExtractor } from './yaml'
 
-interface BaseExtractorEntry<TExtractor extends Extractor = Extractor> {
-  basename: string
-  extractor: TExtractor
-}
+const jsonExtractor = new JsonExtractor()
+const yamlExtractor = new YamlExtractor()
 
-interface PackageManifestExtractorEntry extends BaseExtractorEntry<PackageManifestExtractor> {}
+const extractorsByExtension = {
+  '.json': jsonExtractor,
+  '.yaml': yamlExtractor,
+  '.yml': yamlExtractor,
+} as const satisfies Record<string, JsonExtractor | YamlExtractor>
 
-interface WorkspaceCatalogExtractorEntry extends BaseExtractorEntry<WorkspaceCatalogExtractor> {
-  packageManager: Exclude<PackageManager, 'npm'>
-}
+type ExtractorByExt<T extends string>
+  = T extends `${string}.json` ? JsonExtractor
+  : T extends `${string}.yaml` | `${string}.yml` ? YamlExtractor
+  : JsonExtractor | YamlExtractor | undefined
 
-const packageJsonExtractor = new PackageJsonDocumentExtractor()
-const workspaceCatalogExtractor = new WorkspaceCatalogDocumentExtractor()
-
-export const packageManifestExtractorEntry: PackageManifestExtractorEntry = {
-  basename: PACKAGE_JSON_BASENAME,
-  extractor: packageJsonExtractor,
-}
-
-export const workspaceCatalogExtractorEntries: WorkspaceCatalogExtractorEntry[] = [
-  {
-    basename: PNPM_WORKSPACE_BASENAME,
-    extractor: workspaceCatalogExtractor,
-    packageManager: 'pnpm',
-  },
-  {
-    basename: YARN_WORKSPACE_BASENAME,
-    extractor: workspaceCatalogExtractor,
-    packageManager: 'yarn',
-  },
-]
-
-const SUPPORTED_BASENAMES = new Set([
-  PACKAGE_JSON_BASENAME,
-  PNPM_WORKSPACE_BASENAME,
-  YARN_WORKSPACE_BASENAME,
-])
-
-export function isSupportedDependencyDocument(documentOrUri: TextDocument | Uri): boolean {
-  const path = 'uri' in documentOrUri ? documentOrUri.uri.path : documentOrUri.path
-  return SUPPORTED_BASENAMES.has(basename(path))
+export function getExtractor<T extends string>(filename: T): ExtractorByExt<T> {
+  return extractorsByExtension[extname(filename) as keyof typeof extractorsByExtension] as ExtractorByExt<T>
 }

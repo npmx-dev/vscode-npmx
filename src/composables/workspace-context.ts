@@ -1,7 +1,7 @@
 import type { Uri } from 'vscode'
 import { SUPPORTED_DOCUMENT_PATTERN } from '#constants'
-import { isSupportedDependencyDocument } from '#extractors'
 import { logger } from '#state'
+import { isSupportedDependencyDocument } from '#utils/file'
 import { getWorkspaceContext } from '#utils/workspace'
 import { useActiveTextEditor, useDocumentText, useFileSystemWatcher, watch } from 'reactive-vscode'
 import { workspace } from 'vscode'

@@ -2,16 +2,16 @@ import type { CatalogsInfo, PackageManager, ResolvedDependencyInfo } from '#type
 import type { DependencyInfo, PackageManifestInfo, WorkspaceCatalogInfo } from '#types/extractor'
 import type { MemoizeOptions } from '#utils/memoize'
 import type { WorkspaceFolder } from 'vscode'
-import { packageManifestExtractorEntry, workspaceCatalogExtractorEntries } from '#extractors'
+import { getExtractor } from '#extractors'
 import { logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
 import { isOffsetInRange } from '#utils/ast'
 import { resolveDependencySpec } from '#utils/dependency'
 import { memoize } from '#utils/memoize'
 import { resolveExactVersion } from '#utils/package'
-import { detectPackageManager } from '#utils/package-manager'
+import { detectPackageManager, workspaceFileMapping } from '#utils/package-manager'
 import { Uri, workspace } from 'vscode'
-import { getDocumentText, isPackageManifestPath } from './file'
+import { getDocumentText, isPackageManifestPath, isWorkspaceFilePath } from './file'
 import { lazyInit } from './shared'
 
 type WithResolvedDependencyInfo<T> = Omit<T, 'dependencies'> & {
@@ -32,13 +32,8 @@ class WorkspaceContext {
     this.packageManager = await detectPackageManager(this.folder)
 
     if (this.packageManager !== 'npm') {
-      const workspaceFilename = workspaceCatalogExtractorEntries.find(
-        (entry) => this.packageManager === entry.packageManager,
-      )!.basename
-      const workspaceFile = Uri.joinPath(
-        this.folder.uri,
-        workspaceFilename,
-      )
+      const workspaceFilename = workspaceFileMapping[this.packageManager]
+      const workspaceFile = Uri.joinPath(this.folder.uri, workspaceFilename)
       this.catalogs = (await this.loadWorkspaceCatalogInfo(workspaceFile))?.catalogs
     }
   }
@@ -81,13 +76,18 @@ class WorkspaceContext {
     Uri,
     Promise<WithResolvedDependencyInfo<PackageManifestInfo> | undefined>
   >(async (uri) => {
-    if (!isPackageManifestPath(uri))
+    const path = uri.path
+    if (!isPackageManifestPath(path))
       return
 
-    logger.info(`[workspace-context] load package manifest info: ${uri.path}`)
+    logger.info(`[workspace-context] load package manifest info: ${path}`)
     const text = await getDocumentText(uri)
 
-    const info = packageManifestExtractorEntry.extractor.getPackageManifestInfo(text)
+    const extractor = getExtractor(path)
+    if (!extractor)
+      return
+
+    const info = extractor.getPackageManifestInfo(text)
     if (!info)
       return
 
@@ -102,22 +102,23 @@ class WorkspaceContext {
     Promise<WithResolvedDependencyInfo<WorkspaceCatalogInfo> | undefined>
   >(async (uri) => {
     const path = uri.path
+    if (!isWorkspaceFilePath(path))
+      return
     logger.info(`[workspace-context] load workspace catalog info: ${path}`)
 
-    for (const entry of workspaceCatalogExtractorEntries) {
-      if (!path.endsWith(`/${entry.basename}`))
-        continue
+    const extractor = getExtractor(path)
+    if (!extractor)
+      return
 
-      const text = await getDocumentText(uri)
+    const text = await getDocumentText(uri)
 
-      const info = entry.extractor.getWorkspaceCatalogInfo(text)
-      if (!info)
-        return
+    const info = extractor.getWorkspaceCatalogInfo(text)
+    if (!info)
+      return
 
-      return {
-        ...info,
-        dependencies: info.dependencies.map(this.#createResolvedDependencyInfo),
-      }
+    return {
+      ...info,
+      dependencies: info.dependencies.map(this.#createResolvedDependencyInfo),
     }
   }, this.#memoizeOptions)
 }
@@ -141,7 +142,7 @@ export async function getResolvedDependencies(uri: Uri): Promise<ResolvedDepende
     return []
 
   return (
-    isPackageManifestPath(uri)
+    isPackageManifestPath(uri.path)
       ? await ctx.loadPackageManifestInfo(uri)
       : await ctx.loadWorkspaceCatalogInfo(uri)
   )?.dependencies
