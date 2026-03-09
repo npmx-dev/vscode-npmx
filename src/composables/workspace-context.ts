@@ -2,14 +2,14 @@ import type { Uri } from 'vscode'
 import { SUPPORTED_DOCUMENT_PATTERN } from '#constants'
 import { logger } from '#state'
 import { isSupportedDependencyDocument } from '#utils/file'
-import { getWorkspaceContext } from '#utils/workspace'
+import { deleteWorkspaceContextCache, getWorkspaceContext } from '#utils/workspace'
 import { useDisposable, useFileSystemWatcher } from 'reactive-vscode'
 import { window, workspace } from 'vscode'
 
 export function useWorkspaceContext() {
   useDisposable(workspace.onDidChangeWorkspaceFolders(({ removed }) => {
     removed.forEach((folder) => {
-      getWorkspaceContext.delete(folder.uri)
+      deleteWorkspaceContextCache(folder)
       logger.info(`[workspace-context] delete workspace folder cache: ${folder.uri.path}`)
     })
   }))

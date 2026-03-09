@@ -136,6 +136,10 @@ const getWorkspaceContextByFolder = memoize<WorkspaceFolder, Promise<WorkspaceCo
   fallbackToCachedOnError: false,
 })
 
+export function deleteWorkspaceContextCache(folder: WorkspaceFolder) {
+  getWorkspaceContextByFolder.delete(folder)
+}
+
 export function getWorkspaceContext(uri: Uri) {
   const folder = workspace.getWorkspaceFolder(uri)
   if (!folder)
