@@ -14,7 +14,7 @@ export function useCompletionItem() {
     const disposable = languages.registerCompletionItemProvider(
       { pattern: SUPPORTED_DOCUMENT_PATTERN },
       new VersionCompletionItemProvider(),
-      ...VERSION_TRIGGER_CHARACTERS,
+      ...VersionCompletionItemProvider.triggers,
     )
 
     onCleanup(() => disposable.dispose())

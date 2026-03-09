@@ -1,5 +1,6 @@
 import type { PackageManifestInfo } from '#types/extractor'
 import type { Uri } from 'vscode'
+import { PACKAGE_JSON_BASENAME } from '#constants'
 import { workspace } from 'vscode'
 
 export async function getDocumentText(uri: Uri) {
@@ -7,6 +8,9 @@ export async function getDocumentText(uri: Uri) {
   return document.getText()
 }
 
+export function isPackageManifestPath(uri: Uri) {
+  return uri.path.endsWith(`/${PACKAGE_JSON_BASENAME}`)
+}
 /**
  * Reads and parses a `package.json` file.
  *
@@ -14,7 +18,7 @@ export async function getDocumentText(uri: Uri) {
  * @returns A promise that resolves to the parsed manifest,
  *     or `undefined` if the file is invalid or missing required fields.
  */
-export async function getPackageManifest(pkgJsonUri: Uri): Promise<PackageManifestInfo | undefined> {
+export async function readPackageManifest(pkgJsonUri: Uri): Promise<PackageManifestInfo | undefined> {
   try {
     const content = await workspace.fs.readFile(pkgJsonUri)
     const manifest = JSON.parse(new TextDecoder().decode(content)) as PackageManifestInfo

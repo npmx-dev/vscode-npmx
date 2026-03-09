@@ -11,15 +11,11 @@ import { memoize } from '#utils/memoize'
 import { resolveExactVersion } from '#utils/package'
 import { detectPackageManager } from '#utils/package-manager'
 import { Uri, workspace } from 'vscode'
-import { getDocumentText } from './document'
+import { getDocumentText, isPackageManifestPath } from './file'
 import { lazyInit } from './shared'
 
 type WithResolvedDependencyInfo<T> = Omit<T, 'dependencies'> & {
   dependencies: ResolvedDependencyInfo[]
-}
-
-export function isPackageManifestPath(path: string) {
-  return path.endsWith(`/${packageManifestExtractorEntry.basename}`)
 }
 
 class WorkspaceContext {
@@ -85,7 +81,7 @@ class WorkspaceContext {
     Uri,
     Promise<WithResolvedDependencyInfo<PackageManifestInfo> | undefined>
   >(async (uri) => {
-    if (!isPackageManifestPath(uri.path))
+    if (!isPackageManifestPath(uri))
       return
 
     logger.info(`[workspace-context] load package manifest info: ${uri.path}`)
@@ -145,7 +141,7 @@ export async function getResolvedDependencies(uri: Uri): Promise<ResolvedDepende
     return []
 
   return (
-    isPackageManifestPath(uri.path)
+    isPackageManifestPath(uri)
       ? await ctx.loadPackageManifestInfo(uri)
       : await ctx.loadWorkspaceCatalogInfo(uri)
   )?.dependencies

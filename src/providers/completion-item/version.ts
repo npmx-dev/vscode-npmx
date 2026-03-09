@@ -7,6 +7,8 @@ import { getResolvedDependencyByOffset } from '#utils/workspace'
 import { CompletionItem, CompletionItemKind } from 'vscode'
 
 export class VersionCompletionItemProvider implements CompletionItemProvider {
+  static triggers = [':', '^', '~', '.', ...Array.from({ length: 10 }).map((_, i) => `${i}`)]
+
   async provideCompletionItems(document: TextDocument, position: Position) {
     const offset = document.offsetAt(position)
     const info = await getResolvedDependencyByOffset(document.uri, offset)
