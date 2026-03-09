@@ -205,7 +205,7 @@
     "test": "vitest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsgo --noEmit",
     "vscode:prepublish": "npm run build",
     "publish": "npx @vscode/vsce publish --no-dependencies",
     "package": "npx @vscode/vsce package --no-dependencies",
