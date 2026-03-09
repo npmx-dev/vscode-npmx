@@ -11,6 +11,7 @@ import { memoize } from '#utils/memoize'
 import { resolveExactVersion } from '#utils/package'
 import { detectPackageManager, workspaceFileMapping } from '#utils/package-manager'
 import { Uri, workspace } from 'vscode'
+import { accessOk } from 'vscode-find-up'
 import { getDocumentText, isPackageManifestPath, isWorkspaceFilePath } from './file'
 import { lazyInit } from './shared'
 
@@ -34,7 +35,8 @@ class WorkspaceContext {
     if (ctx.packageManager !== 'npm') {
       const workspaceFilename = workspaceFileMapping[ctx.packageManager]
       const workspaceFile = Uri.joinPath(folder.uri, workspaceFilename)
-      ctx.catalogs = (await ctx.loadWorkspaceCatalogInfo(workspaceFile))?.catalogs
+      if (await accessOk(workspaceFile))
+        ctx.catalogs = (await ctx.loadWorkspaceCatalogInfo(workspaceFile))?.catalogs
     }
 
     return ctx
@@ -125,18 +127,22 @@ class WorkspaceContext {
   }, this.#memoizeOptions)
 }
 
-export const getWorkspaceContext = memoize<Uri, Promise<WorkspaceContext | undefined>>(async (uri) => {
+const getWorkspaceContextByFolder = memoize<WorkspaceFolder, Promise<WorkspaceContext | undefined>>(async (folder) => {
+  logger.info(`[workspace-context] built ${folder.uri.path}`)
+  return WorkspaceContext.create(folder)
+}, {
+  getKey: (folder) => folder.uri.path,
+  ttl: false,
+  fallbackToCachedOnError: false,
+})
+
+export function getWorkspaceContext(uri: Uri) {
   const folder = workspace.getWorkspaceFolder(uri)
   if (!folder)
     return
 
-  logger.info(`[workspace-context] built ${folder.uri.path}`)
-  return WorkspaceContext.create(folder)
-}, {
-  getKey: (uri: Uri) => workspace.getWorkspaceFolder(uri)!.uri.path,
-  ttl: false,
-  fallbackToCachedOnError: false,
-})
+  return getWorkspaceContextByFolder(folder)
+}
 
 export async function getResolvedDependencies(uri: Uri): Promise<ResolvedDependencyInfo[] | undefined> {
   const ctx = await getWorkspaceContext(uri)

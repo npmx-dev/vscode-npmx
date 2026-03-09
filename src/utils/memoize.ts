@@ -80,6 +80,7 @@ export function memoize<P, V>(fn: (params: P) => V, options: MemoizeOptions<P> =
   const cachedFn = function cachedFn(params: P) {
     const key = getKey(params)
     const keyVersion = getVersion(key)
+    const staleEntry = cache.get(key)
 
     const hit = get(key)
     if (hit !== undefined)
@@ -99,7 +100,7 @@ export function memoize<P, V>(fn: (params: P) => V, options: MemoizeOptions<P> =
         })
         .catch((error) => {
           if (fallbackToCachedOnError)
-            return get(key)
+            return staleEntry?.value ?? get(key)
 
           throw error
         })
