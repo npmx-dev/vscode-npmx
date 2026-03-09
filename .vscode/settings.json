@@ -1,5 +1,6 @@
 {
   "cSpell.words": [
     "npmx"
-  ]
+  ],
+  "js/ts.experimental.useTsgo": true
 }
