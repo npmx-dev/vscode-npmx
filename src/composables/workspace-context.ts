@@ -7,12 +7,12 @@ import { useDisposable, useFileSystemWatcher } from 'reactive-vscode'
 import { window, workspace } from 'vscode'
 
 export function useWorkspaceContext() {
-  workspace.onDidChangeWorkspaceFolders(({ removed }) => {
+  useDisposable(workspace.onDidChangeWorkspaceFolders(({ removed }) => {
     removed.forEach((folder) => {
       getWorkspaceContext.delete(folder.uri)
       logger.info(`[workspace-context] delete workspace folder cache: ${folder.uri.path}`)
     })
-  })
+  }))
 
   async function deleteCacheByUri(uri: Uri) {
     if (!isSupportedDependencyDocument(uri))

@@ -86,9 +86,14 @@ export class JsonExtractor implements PackageManifestExtractor, BaseExtractor<Js
     if (!root)
       return
 
+    const name = this.#getStringValue(root, 'name')
+    const version = this.#getStringValue(root, 'version')
+    if (!name || !version)
+      return
+
     return {
-      name: this.#getStringValue(root, 'name')!,
-      version: this.#getStringValue(root, 'version')!,
+      name,
+      version,
       packageManager: this.#getStringValue(root, 'packageManager'),
       engines: this.#getEngines(root),
       dependencies: this.getDependenciesInfo(root),

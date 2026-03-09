@@ -38,9 +38,11 @@ export class NpmxHoverProvider implements HoverProvider {
 
         const resolvedVersion = await dep.resolvedVersion()
         if (resolvedVersion && pkg.versionsMeta[resolvedVersion]?.provenance)
+          // npmx.dev can resolve ranges and tags version specifier
           md.appendMarkdown(`[$(verified)${SPACER}Verified provenance](${npmxPackageUrl(resolvedName, resolvedSpec)}#provenance)\n\n`)
 
         const packageLink = `[$(package)${SPACER}View on npmx.dev](${npmxPackageUrl(resolvedName)})`
+        // npmx.dev can resolve ranges and tags version specifier
         const docsLink = `[$(book)${SPACER}View docs on npmx.dev](${npmxDocsUrl(resolvedName, resolvedSpec)})`
 
         md.appendMarkdown(`${packageLink} | ${docsLink}`)

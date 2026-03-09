@@ -12,7 +12,7 @@ export const checkDeprecation: DiagnosticRule = async ({ dep, pkg }) => {
 
   const versionInfo = pkg.versionsMeta[resolvedVersion]
 
-  if (!versionInfo.deprecated)
+  if (!versionInfo?.deprecated)
     return
 
   const { specRange, resolvedName, resolvedSpec } = dep
