@@ -23,19 +23,21 @@ class WorkspaceContext {
   packageManager: PackageManager = 'npm'
   catalogs?: CatalogsInfo
 
-  constructor(folder: WorkspaceFolder) {
+  private constructor(folder: WorkspaceFolder) {
     this.folder = folder
-    this.#init()
   }
 
-  async #init() {
-    this.packageManager = await detectPackageManager(this.folder)
+  static async create(folder: WorkspaceFolder): Promise<WorkspaceContext> {
+    const ctx = new WorkspaceContext(folder)
+    ctx.packageManager = await detectPackageManager(folder)
 
-    if (this.packageManager !== 'npm') {
-      const workspaceFilename = workspaceFileMapping[this.packageManager]
-      const workspaceFile = Uri.joinPath(this.folder.uri, workspaceFilename)
-      this.catalogs = (await this.loadWorkspaceCatalogInfo(workspaceFile))?.catalogs
+    if (ctx.packageManager !== 'npm') {
+      const workspaceFilename = workspaceFileMapping[ctx.packageManager]
+      const workspaceFile = Uri.joinPath(folder.uri, workspaceFilename)
+      ctx.catalogs = (await ctx.loadWorkspaceCatalogInfo(workspaceFile))?.catalogs
     }
+
+    return ctx
   }
 
   #memoizeOptions: MemoizeOptions<Uri> = {
@@ -93,7 +95,7 @@ class WorkspaceContext {
 
     return {
       ...info,
-      dependencies: info.dependencies.map(dep => this.#createResolvedDependencyInfo(dep)),
+      dependencies: info.dependencies.map((dep) => this.#createResolvedDependencyInfo(dep)),
     }
   }, this.#memoizeOptions)
 
@@ -118,7 +120,7 @@ class WorkspaceContext {
 
     return {
       ...info,
-      dependencies: info.dependencies.map(dep => this.#createResolvedDependencyInfo(dep)),
+      dependencies: info.dependencies.map((dep) => this.#createResolvedDependencyInfo(dep)),
     }
   }, this.#memoizeOptions)
 }
@@ -129,7 +131,7 @@ export const getWorkspaceContext = memoize<Uri, Promise<WorkspaceContext | undef
     return
 
   logger.info(`[workspace-context] built ${folder.uri.path}`)
-  return new WorkspaceContext(folder)
+  return WorkspaceContext.create(folder)
 }, {
   getKey: (uri: Uri) => workspace.getWorkspaceFolder(uri)!.uri.path,
   ttl: false,
