@@ -32,8 +32,8 @@ interface DependenciesInfo {
 }
 
 export interface PackageManifestInfo extends DependenciesInfo {
-  name: string
-  version: string
+  name?: string
+  version?: string
   packageManager?: string
   engines?: Engines
 }

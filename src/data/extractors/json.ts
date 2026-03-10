@@ -1,4 +1,4 @@
-import type { BaseExtractor, DependencyCategory, DependencyInfo, JsonNode, OffsetRange, PackageManifestExtractor } from '#types/extractor'
+import type { BaseExtractor, DependencyCategory, DependencyInfo, JsonNode, OffsetRange, PackageManifestExtractor,PackageManifestInfo } from '#types/extractor'
 import type { Engines } from 'fast-npm-meta'
 import { findNodeAtLocation, parseTree } from 'jsonc-parser'
 
@@ -81,19 +81,14 @@ export class JsonExtractor implements PackageManifestExtractor, BaseExtractor<Js
     return result
   }
 
-  getPackageManifestInfo(text: string) {
+  getPackageManifestInfo(text: string): PackageManifestInfo | undefined {
     const root = this.parse(text)
     if (!root)
       return
 
-    const name = this.#getStringValue(root, 'name')
-    const version = this.#getStringValue(root, 'version')
-    if (!name || !version)
-      return
-
     return {
-      name,
-      version,
+      name: this.#getStringValue(root, 'name'),
+      version: this.#getStringValue(root, 'version'),
       packageManager: this.#getStringValue(root, 'packageManager'),
       engines: this.#getEngines(root),
       dependencies: this.getDependenciesInfo(root),
