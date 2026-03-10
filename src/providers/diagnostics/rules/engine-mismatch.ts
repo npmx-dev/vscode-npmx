@@ -51,6 +51,8 @@ export function resolveEngineMismatches(
 export const checkEngineMismatch: DiagnosticRule = async ({ uri, dep, pkg }) => {
   if (!isPackageManifestPath(uri.path))
     return
+  if (dep.category !== 'dependencies')
+    return
 
   const resolvedVersion = await dep.resolvedVersion()
   if (!resolvedVersion)
