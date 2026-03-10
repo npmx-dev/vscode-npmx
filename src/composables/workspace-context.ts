@@ -22,9 +22,8 @@ export function useWorkspaceContext() {
     if (!ctx)
       return
 
-    ctx.loadPackageManifestInfo.delete(uri)
-    ctx.loadWorkspaceCatalogInfo.delete(uri)
-    logger.info(`[workspace-context] delete dependencies cache: ${uri.path}`)
+    ctx.invalidateDependencyInfo(uri)
+    logger.info(`[workspace-context] invalidate dependencies cache: ${uri.path}`)
     if (reload && isWorkspaceLevelFile(uri)) {
       await ctx.loadWorkspace()
     }

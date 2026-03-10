@@ -228,6 +228,7 @@
     "module-replacements": "catalog:test",
     "msw": "catalog:test",
     "nano-staged": "catalog:dev",
+    "ocache": "catalog:inline",
     "ofetch": "catalog:inline",
     "pathe": "catalog:inline",
     "perfect-debounce": "catalog:inline",

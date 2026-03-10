@@ -40,6 +40,9 @@ catalogs:
     jsonc-parser:
       specifier: ^3.3.1
       version: 3.3.1
+    ocache:
+      specifier: ^0.1.2
+      version: 0.1.2
     ofetch:
       specifier: ^2.0.0-alpha.3
       version: 2.0.0-alpha.3
@@ -121,6 +124,9 @@ importers:
       nano-staged:
         specifier: catalog:dev
         version: 0.9.0
+      ocache:
+        specifier: catalog:inline
+        version: 0.1.2
       ofetch:
         specifier: catalog:inline
         version: 2.0.0-alpha.3
@@ -1928,8 +1934,14 @@ packages:
   obug@2.1.1:
     resolution: {integrity: sha512-uTqF9MuPraAQ+IsnPf366RG4cP9RtUi7MLO1N3KEc+wb0a6yKpeL0lmk2IB1jY5KHPAlTc6T/JRdC/YqxHNwkQ==}
 
+  ocache@0.1.2:
+    resolution: {integrity: sha512-lI34wjM7cahEdrq2I5obbF7MEdE97vULf6vNj6ZCzwEadzyXO1w7QOl2qzzG4IL8cyO7wDtXPj9CqW/aG3mn7g==}
+
   ofetch@2.0.0-alpha.3:
     resolution: {integrity: sha512-zpYTCs2byOuft65vI3z43Dd6iSdFbOZZLb9/d21aCpx2rGastVU9dOCv0lu4ykc1Ur1anAYjDi3SUvR0vq50JA==}
+
+  ohash@2.0.11:
+    resolution: {integrity: sha512-RdR9FQrFwNBNXAr4GixM8YaRZRJ5PUWbKYbE5eOsrwAjJW0q2REGcf79oYPsLyskQCZG1PLN+S/K1V00joZAoQ==}
 
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
@@ -4291,7 +4303,13 @@ snapshots:
 
   obug@2.1.1: {}
 
+  ocache@0.1.2:
+    dependencies:
+      ohash: 2.0.11
+
   ofetch@2.0.0-alpha.3: {}
+
+  ohash@2.0.11: {}
 
   optionator@0.9.4:
     dependencies:

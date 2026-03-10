@@ -14,7 +14,9 @@ export default defineConfig({
     onlyAllowBundle: [
       'fast-npm-meta',
       'jsonc-parser',
+      'ocache',
       'ofetch',
+      'ohash',
       'pathe',
       'perfect-debounce',
       'semver',

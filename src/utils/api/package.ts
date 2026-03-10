@@ -1,8 +1,9 @@
 import type { MaybeError, PackageVersionsInfoWithMetadata } from 'fast-npm-meta'
+import { CACHE_MAX_AGE_ONE_DAY } from '#constants'
 import { logger } from '#state'
 import { createBatchRunner } from '#utils/batch'
 import { getVersionsBatch } from 'fast-npm-meta'
-import { memoize } from '../memoize'
+import { defineCachedFunction } from 'ocache'
 
 const BATCH_SIZE = 20
 
@@ -70,4 +71,8 @@ const getPackageInfoBatch = createBatchRunner<string, PackageInfo | null>({
  *
  * @see https://github.com/antfu/fast-npm-meta
  */
-export const getPackageInfo = memoize<string, Promise<PackageInfo | null>>(async (name) => getPackageInfoBatch(name))
+export const getPackageInfo = defineCachedFunction<PackageInfo | null, [string]>(async (name) => getPackageInfoBatch(name), {
+  name: 'package',
+  getKey: (name) => name,
+  maxAge: CACHE_MAX_AGE_ONE_DAY,
+})

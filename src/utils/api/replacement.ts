@@ -1,11 +1,11 @@
 import type { ModuleReplacement } from 'module-replacements'
-import { NPMX_DEV_API } from '#constants'
+import { CACHE_MAX_AGE_ONE_DAY, NPMX_DEV_API } from '#constants'
 import { logger } from '#state'
+import { defineCachedFunction } from 'ocache'
 import { ofetch } from 'ofetch'
-import { memoize } from '../memoize'
 import { encodePackageName } from '../package'
 
-export const getReplacement = memoize<string, Promise<ModuleReplacement | null>>(async (name) => {
+export const getReplacement = defineCachedFunction<ModuleReplacement | null, [string]>(async (name) => {
   logger.info(`Fetching replacements for ${name}`)
   const encodedName = encodePackageName(name)
 
@@ -13,4 +13,8 @@ export const getReplacement = memoize<string, Promise<ModuleReplacement | null>>
   logger.info(`Fetched replacements for ${name}`)
 
   return result
+}, {
+  name: 'replacement',
+  getKey: (name) => name,
+  maxAge: CACHE_MAX_AGE_ONE_DAY,
 })
