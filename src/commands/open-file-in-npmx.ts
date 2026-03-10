@@ -41,8 +41,8 @@ export async function openFileInNpmx(fileUri?: Uri) {
   // Construct the npmx.dev URL and open it. VSCode uses 0-indexed lines, npmx uses 1-indexed.
   const { selection } = textEditor ?? {}
   const url = npmxFileUrl(
-    manifest.name,
-    manifest.version,
+    manifest.name!,
+    manifest.version!,
     relativePath,
     openingActiveFile && selection ? selection.start.line + 1 : undefined,
     openingActiveFile && selection ? selection.end.line + 1 : undefined,
