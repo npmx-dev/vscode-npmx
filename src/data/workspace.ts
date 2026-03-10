@@ -102,10 +102,7 @@ class WorkspaceContext {
       return
 
     const [info] = await Promise.all([
-      new Promise<PackageManifestInfo | undefined>(async (resolve) => {
-        const text = await getDocumentText(uri)
-        resolve(extractor.getPackageManifestInfo(text))
-      }),
+      getDocumentText(uri).then((text) => extractor.getPackageManifestInfo(text)),
       this.#ready.promise,
     ])
 
@@ -132,10 +129,7 @@ class WorkspaceContext {
       return
 
     const [info] = await Promise.all([
-      new Promise<WorkspaceCatalogInfo | undefined>(async (resolve) => {
-        const text = await getDocumentText(uri)
-        resolve(extractor.getWorkspaceCatalogInfo(text))
-      }),
+      getDocumentText(uri).then((text) => extractor.getWorkspaceCatalogInfo(text)),
       this.#ready.promise,
     ])
 
@@ -173,7 +167,7 @@ export function getWorkspaceContext(uri: Uri) {
 export async function getResolvedDependencies(uri: Uri): Promise<ResolvedDependencyInfo[] | undefined> {
   const ctx = await getWorkspaceContext(uri)
   if (!ctx)
-    return []
+    return
 
   return (
     isPackageManifestPath(uri.path)
