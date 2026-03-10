@@ -1,7 +1,7 @@
 import type { Uri } from 'vscode'
 import { SUPPORTED_DOCUMENT_PATTERN } from '#constants'
 import { logger } from '#state'
-import { isSupportedDependencyDocument } from '#utils/file'
+import { isSupportedDependencyDocument, isWorkspaceLevelFile } from '#utils/file'
 import { deleteWorkspaceContextCache, getWorkspaceContext } from '#data/workspace'
 import { useDisposable, useFileSystemWatcher } from 'reactive-vscode'
 import { window, workspace } from 'vscode'
@@ -25,6 +25,9 @@ export function useWorkspaceContext() {
     ctx.loadPackageManifestInfo.delete(uri)
     ctx.loadWorkspaceCatalogInfo.delete(uri)
     logger.info(`[workspace-context] delete dependencies cache: ${uri.path}`)
+    if (isWorkspaceLevelFile(uri)) {
+      await ctx.loadWorkspace()
+    }
   }
 
   useDisposable(workspace.onDidChangeTextDocument(({ document }) => {

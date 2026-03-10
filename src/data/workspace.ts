@@ -30,16 +30,25 @@ class WorkspaceContext {
 
   static async create(folder: WorkspaceFolder): Promise<WorkspaceContext> {
     const ctx = new WorkspaceContext(folder)
-    ctx.packageManager = await detectPackageManager(folder)
-
-    if (ctx.packageManager !== 'npm') {
-      const workspaceFilename = workspaceFileMapping[ctx.packageManager]
-      const workspaceFile = Uri.joinPath(folder.uri, workspaceFilename)
-      if (await accessOk(workspaceFile))
-        ctx.catalogs = (await ctx.loadWorkspaceCatalogInfo(workspaceFile))?.catalogs
-    }
+    await ctx.loadWorkspace()
 
     return ctx
+  }
+
+  async loadWorkspace() {
+    this.packageManager = await detectPackageManager(this.folder)
+
+    logger.info(`[workspace-context] detect package manager: ${this.packageManager}`)
+
+    if (this.packageManager === 'npm')
+      return
+
+    const workspaceFilename = workspaceFileMapping[this.packageManager]
+    const workspaceFile = Uri.joinPath(this.folder.uri, workspaceFilename)
+    if (!await accessOk(workspaceFile))
+      return
+
+    this.catalogs = (await this.loadWorkspaceCatalogInfo(workspaceFile))?.catalogs
   }
 
   #memoizeOptions: MemoizeOptions<Uri> = {

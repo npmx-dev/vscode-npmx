@@ -1,8 +1,8 @@
 import type { PackageManifestInfo } from '#types/extractor'
-import type { TextDocument, Uri } from 'vscode'
+import type { TextDocument } from 'vscode'
 import { PACKAGE_JSON_BASENAME, PNPM_WORKSPACE_BASENAME, YARN_WORKSPACE_BASENAME } from '#constants'
 import { basename } from 'pathe'
-import { workspace } from 'vscode'
+import { workspace, Uri } from 'vscode'
 
 export async function getDocumentText(uri: Uri) {
   const document = await workspace.openTextDocument(uri)
@@ -27,6 +27,18 @@ export function isPackageManifestPath(path: string): path is `${string}/${typeof
 export function isWorkspaceFilePath(path: string): path is `${string}/${typeof PNPM_WORKSPACE_BASENAME}` | `${string}/${typeof YARN_WORKSPACE_BASENAME}` {
   return path.endsWith(`/${PNPM_WORKSPACE_BASENAME}`)
     || path.endsWith(`/${YARN_WORKSPACE_BASENAME}`)
+}
+
+export function isRootPackageJson(uri: Uri): boolean {
+  const folder = workspace.getWorkspaceFolder(uri)
+  if (!folder)
+    return false
+
+  return uri.path === `${folder.uri.path}/${PACKAGE_JSON_BASENAME}`
+}
+
+export function isWorkspaceLevelFile(uri: Uri): boolean {
+  return isWorkspaceFilePath(uri.path) || isRootPackageJson(uri)
 }
 
 /**
