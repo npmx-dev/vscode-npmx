@@ -83,7 +83,10 @@ playground/             # Playground for testing
 res/                    # Assets (e.g. marketplace icon)
 src/                    # Extension source code
 ├── commands/           # Command handlers (vscode API only, no reactive-vscode)
-├── extractors/         # Extractors (package.json, pnpm-workspace.yaml)
+├── composables/        # Composables (reactive-vscode hooks)
+├── core/               # Core logic
+│   ├── extractors/     # Extractors (JSON, YAML)
+│   └── workspace.ts    # Workspace context resolution
 ├── providers/          # Providers
 │   ├── code-actions/   # Code action providers (quick fixes)
 │   ├── completion-item/ # Completion providers (version autocomplete)
@@ -101,8 +104,16 @@ tests/                  # Tests
 ├── __setup__/          # Test setup and utilities
 ├── code-actions/       # Code action tests
 ├── diagnostics/        # Diagnostic tests
+├── fixtures/           # Test fixtures (workspace scenarios)
 └── utils/              # Utility tests
 ```
+
+### Key concepts
+
+- **Extractor** &ndash; Parses a supported file (`package.json`, `pnpm-workspace.yaml`, `.yarnrc.yml`) and extracts dependency information with AST ranges. Each file format has its own extractor in `src/core/extractors/`.
+- **WorkspaceContext** &ndash; Holds per-workspace-folder state: detected package manager, resolved catalogs, and memoized dependency info. Created lazily and invalidated when workspace-level files change.
+- **ResolvedDependencyInfo** &ndash; A dependency with its protocol resolved (e.g., `catalog:` → actual version, `npm:alias@version` → underlying package). Providers consume resolved dependencies instead of raw AST data.
+- **Provider** &ndash; VS Code language feature (hover, completion, diagnostics, etc.) that operates on resolved dependencies.
 
 ## Code style
 
@@ -122,7 +133,7 @@ If you want to get ahead of any formatting issues, you can also run `pnpm lint:f
 > This will be fixed by eslint.
 
 1. Type imports first (`import type { ... }`)
-2. Internal aliases (`#constants`, `#utils/`, `#composables/`, etc.)
+2. Internal aliases (`#constants`, `#state`, `#utils/`, `#core/`, `#composables/`, `#types/`, etc.)
 3. External packages (including `node:`)
 4. Relative imports (`./`, `../`)
 5. No blank lines between groups
