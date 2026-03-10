@@ -1,21 +1,24 @@
 import type { DecorationOptions } from 'vscode'
 import { getResolvedDependencies } from '#core/workspace'
+import { logger } from '#state'
 import { offsetRangeToRange } from '#utils/ast'
-import { isSupportedDependencyDocument } from '#utils/file'
-import { useActiveTextEditor, useEditorDecorations } from 'reactive-vscode'
+import { isPackageManifestPath } from '#utils/file'
+import { useActiveTextEditor, useEditorDecorations, watch } from 'reactive-vscode'
 import { Range } from 'vscode'
 
 export function useDecorators() {
-  const editor = useActiveTextEditor()
-  useEditorDecorations(
-    editor,
+  const activeEditor = useActiveTextEditor()
+
+  const { update } = useEditorDecorations(
+    activeEditor,
     {
       after: { color: 'rgba(136, 136, 136, 0.63)' },
     },
     async (editor) => {
       const document = editor.document
-      if (!isSupportedDependencyDocument(document))
+      if (!isPackageManifestPath(document.uri.path))
         return []
+      logger.info(`[decorators] updating ${document.uri.path}`)
 
       const dependencies = await getResolvedDependencies(document.uri)
       if (!dependencies)
@@ -43,4 +46,6 @@ export function useDecorators() {
       return result
     },
   )
+
+  watch(activeEditor, update)
 }
