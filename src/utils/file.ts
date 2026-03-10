@@ -1,8 +1,8 @@
 import type { PackageManifestInfo } from '#types/extractor'
-import type { TextDocument } from 'vscode'
+import type { TextDocument, Uri } from 'vscode'
 import { PACKAGE_JSON_BASENAME, PNPM_WORKSPACE_BASENAME, YARN_WORKSPACE_BASENAME } from '#constants'
 import { basename } from 'pathe'
-import { workspace, Uri } from 'vscode'
+import { workspace } from 'vscode'
 
 export async function getDocumentText(uri: Uri) {
   const document = await workspace.openTextDocument(uri)

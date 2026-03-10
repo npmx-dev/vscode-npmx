@@ -1,4 +1,4 @@
-import type { BaseExtractor, DependencyCategory, DependencyInfo, JsonNode, OffsetRange, PackageManifestExtractor,PackageManifestInfo } from '#types/extractor'
+import type { BaseExtractor, DependencyCategory, DependencyInfo, JsonNode, OffsetRange, PackageManifestExtractor, PackageManifestInfo } from '#types/extractor'
 import type { Engines } from 'fast-npm-meta'
 import { findNodeAtLocation, parseTree } from 'jsonc-parser'
 

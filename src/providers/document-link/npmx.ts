@@ -1,8 +1,8 @@
 import type { DocumentLink, DocumentLinkProvider, TextDocument } from 'vscode'
+import { getResolvedDependencies } from '#core/workspace'
 import { config, logger } from '#state'
 import { offsetRangeToRange } from '#utils/ast'
 import { npmxPackageUrl } from '#utils/links'
-import { getResolvedDependencies } from '#core/workspace'
 import { Uri, DocumentLink as VscodeDocumentLink } from 'vscode'
 
 export class NpmxDocumentLinkProvider implements DocumentLinkProvider {

@@ -1,9 +1,9 @@
 import type { CompletionItemProvider, Position, TextDocument } from 'vscode'
 import { PRERELEASE_PATTERN } from '#constants'
+import { getResolvedDependencyByOffset } from '#core/workspace'
 import { config } from '#state'
 import { offsetRangeToRange } from '#utils/ast'
 import { formatUpgradeVersion } from '#utils/version'
-import { getResolvedDependencyByOffset } from '#core/workspace'
 import { CompletionItem, CompletionItemKind } from 'vscode'
 
 export class VersionCompletionItemProvider implements CompletionItemProvider {
