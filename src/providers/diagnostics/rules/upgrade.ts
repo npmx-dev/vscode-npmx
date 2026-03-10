@@ -1,6 +1,6 @@
+import type { PackageInfo } from '#api/package'
 import type { ResolvedDependencyInfo } from '#types/context'
 import type { OffsetRange } from '#types/extractor'
-import type { PackageInfo } from '#utils/api/package'
 import type { DiagnosticRule, RangeDiagnosticInfo } from '..'
 import { config } from '#state'
 import { checkIgnored } from '#utils/ignore'

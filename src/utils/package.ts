@@ -1,4 +1,4 @@
-import type { PackageInfo } from './api/package'
+import type { PackageInfo } from '#api/package'
 import Range from 'semver/classes/range'
 import gt from 'semver/functions/gt'
 import lte from 'semver/functions/lte'

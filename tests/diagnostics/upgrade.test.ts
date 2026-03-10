@@ -1,5 +1,5 @@
+import type { PackageInfo } from '#api/package'
 import type { ResolvedDependencyInfo } from '#types/context'
-import type { PackageInfo } from '#utils/api/package'
 import { describe, expect, it } from 'vitest'
 import { resolveUpgrade } from '../../src/providers/diagnostics/rules/upgrade'
 import { createContext } from './context'

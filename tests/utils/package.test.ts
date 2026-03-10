@@ -1,4 +1,4 @@
-import type { PackageInfo } from '#utils/api/package'
+import type { PackageInfo } from '#api/package'
 import { describe, expect, it } from 'vitest'
 import { encodePackageName, isJsrNpmPackage, jsrNpmToJsrName, parsePackageId, resolveExactVersion } from '../../src/utils/package'
 

@@ -1,4 +1,4 @@
-import type { PackageInfo } from '#utils/api/package'
+import type { PackageInfo } from '#api/package'
 import type { Engines } from 'fast-npm-meta'
 import type { DiagnosticContext } from '../../src/providers/diagnostics'
 import { resolveDependencySpec } from '#utils/dependency'

@@ -1,7 +1,7 @@
 import type { ModuleReplacement } from 'module-replacements'
 import type { DiagnosticRule } from '..'
+import { getReplacement } from '#api/replacement'
 import { config } from '#state'
-import { getReplacement } from '#utils/api/replacement'
 import { checkIgnored } from '#utils/ignore'
 import { DiagnosticSeverity, Uri } from 'vscode'
 

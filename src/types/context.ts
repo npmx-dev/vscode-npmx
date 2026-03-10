@@ -1,5 +1,5 @@
+import type { PackageInfo } from '#api/package'
 import type { DependencyInfo } from '#types/extractor'
-import type { PackageInfo } from '#utils/api/package'
 
 export type PackageManager = 'npm' | 'pnpm' | 'yarn'
 
