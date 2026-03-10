@@ -9,7 +9,7 @@
       "#state": ["./src/state.ts"],
       "#types/*": ["./src/types/*"],
       "#utils/*": ["./src/utils/*"],
-      "#data/*": ["./src/data/*"],
+      "#core/*": ["./src/core/*"],
       "#composables/*": ["./src/composables/*"]
     },
     "resolveJsonModule": true,

@@ -2,7 +2,7 @@ import type { Uri } from 'vscode'
 import { SUPPORTED_DOCUMENT_PATTERN } from '#constants'
 import { logger } from '#state'
 import { isSupportedDependencyDocument, isWorkspaceLevelFile } from '#utils/file'
-import { deleteWorkspaceContextCache, getWorkspaceContext } from '#data/workspace'
+import { deleteWorkspaceContextCache, getWorkspaceContext } from '#core/workspace'
 import { useDisposable, useFileSystemWatcher } from 'reactive-vscode'
 import { window, workspace } from 'vscode'
 
