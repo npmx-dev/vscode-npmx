@@ -1,4 +1,4 @@
-import type { BaseExtractor, DependencyInfo, OffsetRange, WorkspaceCatalogExtractor, YamlNode } from '#types/extractor'
+import type { BaseExtractor, DependencyInfo, OffsetRange, WorkspaceCatalogExtractor, WorkspaceCatalogInfo, YamlNode } from '#types/extractor'
 import type { Pair, Scalar, YAMLMap } from 'yaml'
 import { isMap, isPair, isScalar, parseDocument } from 'yaml'
 
@@ -83,7 +83,7 @@ export class YamlExtractor implements WorkspaceCatalogExtractor, BaseExtractor<Y
     return result
   }
 
-  getWorkspaceCatalogInfo(text: string) {
+  getWorkspaceCatalogInfo(text: string): WorkspaceCatalogInfo | undefined {
     const root = this.parse(text)
     if (!root)
       return

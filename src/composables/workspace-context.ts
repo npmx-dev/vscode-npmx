@@ -14,7 +14,7 @@ export function useWorkspaceContext() {
     })
   }))
 
-  async function deleteCacheByUri(uri: Uri) {
+  async function deleteCacheByUri(uri: Uri, reload = true) {
     if (!isSupportedDependencyDocument(uri))
       return
 
@@ -25,7 +25,7 @@ export function useWorkspaceContext() {
     ctx.loadPackageManifestInfo.delete(uri)
     ctx.loadWorkspaceCatalogInfo.delete(uri)
     logger.info(`[workspace-context] delete dependencies cache: ${uri.path}`)
-    if (isWorkspaceLevelFile(uri)) {
+    if (reload && isWorkspaceLevelFile(uri)) {
       await ctx.loadWorkspace()
     }
   }
@@ -34,11 +34,12 @@ export function useWorkspaceContext() {
     if (document !== window.activeTextEditor?.document)
       return
 
-    deleteCacheByUri(document.uri)
+    deleteCacheByUri(document.uri, false)
   }))
 
-  const { onDidChange, onDidDelete } = useFileSystemWatcher(SUPPORTED_DOCUMENT_PATTERN)
+  const { onDidCreate, onDidChange, onDidDelete } = useFileSystemWatcher(SUPPORTED_DOCUMENT_PATTERN)
 
+  onDidCreate(deleteCacheByUri)
   onDidChange(deleteCacheByUri)
   onDidDelete(deleteCacheByUri)
 }

@@ -24,6 +24,8 @@ class WorkspaceContext {
   packageManager: PackageManager = 'npm'
   catalogs?: CatalogsInfo
 
+  #ready = Promise.withResolvers<void>()
+
   private constructor(folder: WorkspaceFolder) {
     this.folder = folder
   }
@@ -37,18 +39,18 @@ class WorkspaceContext {
 
   async loadWorkspace() {
     this.packageManager = await detectPackageManager(this.folder)
+    this.catalogs = undefined
 
     logger.info(`[workspace-context] detect package manager: ${this.packageManager}`)
 
-    if (this.packageManager === 'npm')
-      return
+    if (this.packageManager !== 'npm') {
+      const workspaceFilename = workspaceFileMapping[this.packageManager]
+      const workspaceFile = Uri.joinPath(this.folder.uri, workspaceFilename)
+      if (await accessOk(workspaceFile))
+        this.catalogs = (await this.loadWorkspaceCatalogInfo(workspaceFile))?.catalogs
+    }
 
-    const workspaceFilename = workspaceFileMapping[this.packageManager]
-    const workspaceFile = Uri.joinPath(this.folder.uri, workspaceFilename)
-    if (!await accessOk(workspaceFile))
-      return
-
-    this.catalogs = (await this.loadWorkspaceCatalogInfo(workspaceFile))?.catalogs
+    this.#ready.resolve()
   }
 
   #memoizeOptions: MemoizeOptions<Uri> = {
@@ -94,13 +96,19 @@ class WorkspaceContext {
       return
 
     logger.info(`[workspace-context] load package manifest info: ${path}`)
-    const text = await getDocumentText(uri)
 
     const extractor = getExtractor(path)
     if (!extractor)
       return
 
-    const info = extractor.getPackageManifestInfo(text)
+    const [info] = await Promise.all([
+      new Promise<PackageManifestInfo | undefined>(async (resolve) => {
+        const text = await getDocumentText(uri)
+        resolve(extractor.getPackageManifestInfo(text))
+      }),
+      this.#ready.promise,
+    ])
+
     if (!info)
       return
 
@@ -123,9 +131,14 @@ class WorkspaceContext {
     if (!extractor)
       return
 
-    const text = await getDocumentText(uri)
+    const [info] = await Promise.all([
+      new Promise<WorkspaceCatalogInfo | undefined>(async (resolve) => {
+        const text = await getDocumentText(uri)
+        resolve(extractor.getWorkspaceCatalogInfo(text))
+      }),
+      this.#ready.promise,
+    ])
 
-    const info = extractor.getWorkspaceCatalogInfo(text)
     if (!info)
       return
 
