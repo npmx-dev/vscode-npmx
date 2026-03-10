@@ -38,22 +38,22 @@ The goal of [vscode-npmx](https://marketplace.visualstudio.com/items?itemName=np
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) (LTS version recommended)
-- [pnpm](https://pnpm.io/) v10.28.1 or later
+- [pnpm](https://pnpm.io/) v10 or later
 
 ### Setup
 
 1. fork and clone the repository
 2. install dependencies:
 
-   ```bash
-   pnpm install
-   ```
+  ```bash
+  pnpm install
+  ```
 
 3. start the development server:
 
-   ```bash
-   pnpm dev
-   ```
+  ```bash
+  pnpm dev
+  ```
 
 4. Press `F5` to open the VS Code debugger and start the extension in a new VS Code window.
 
@@ -104,6 +104,10 @@ If you want to get ahead of any formatting issues, you can also run `pnpm lint:f
 - Validate rather than just assert
 
 ### Import order
+
+> [!TIP]
+>
+> This will be fixed by eslint.
 
 1. Type imports first (`import type { ... }`)
 2. Internal aliases (`#constants`, `#utils/`, etc.)
@@ -172,13 +176,12 @@ Format: `type(scope): description`
 
 **Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
 
-**Scopes (optional):** `docs`, `i18n`, `deps`
+**Scopes (optional):** `docs`, `utils`, `deps`
 
 **Examples:**
 
 - `fix: resolve search pagination issue`
 - `feat: add package version comparison`
-- `fix(i18n): update French translations`
 - `chore(deps): update vite to v6`
 
 > [!NOTE]

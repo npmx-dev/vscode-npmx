@@ -7,10 +7,12 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}"
+        "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "${workspaceFolder}/playground"
       ],
       "outFiles": [
-        "${workspaceFolder}/dist/**/*.mjs"
+        "${workspaceFolder}/dist/**/*.js"
       ]
     }
   ]
