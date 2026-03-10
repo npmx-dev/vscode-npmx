@@ -1,7 +1,7 @@
 import type { HoverProvider, Position, TextDocument } from 'vscode'
 import { SPACER } from '#constants'
 import { jsrPackageUrl, npmxDocsUrl, npmxPackageUrl } from '#utils/links'
-import { getResolvedDependencyByOffset } from '#utils/workspace'
+import { getResolvedDependencyByOffset } from '#data/workspace'
 import { Hover, MarkdownString } from 'vscode'
 
 export class NpmxHoverProvider implements HoverProvider {

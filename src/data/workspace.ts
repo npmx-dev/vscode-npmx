@@ -2,7 +2,7 @@ import type { CatalogsInfo, PackageManager, ResolvedDependencyInfo } from '#type
 import type { DependencyInfo, PackageManifestInfo, WorkspaceCatalogInfo } from '#types/extractor'
 import type { MemoizeOptions } from '#utils/memoize'
 import type { WorkspaceFolder } from 'vscode'
-import { getExtractor } from '#extractors'
+import { getExtractor } from './extractors'
 import { logger } from '#state'
 import { getPackageInfo } from '#utils/api/package'
 import { isOffsetInRange } from '#utils/ast'
@@ -12,8 +12,8 @@ import { resolveExactVersion } from '#utils/package'
 import { detectPackageManager, workspaceFileMapping } from '#utils/package-manager'
 import { Uri, workspace } from 'vscode'
 import { accessOk } from 'vscode-find-up'
-import { getDocumentText, isPackageManifestPath, isWorkspaceFilePath } from './file'
-import { lazyInit } from './shared'
+import { getDocumentText, isPackageManifestPath, isWorkspaceFilePath } from '#utils/file'
+import { lazyInit } from '#utils/shared'
 
 type WithResolvedDependencyInfo<T> = Omit<T, 'dependencies'> & {
   dependencies: ResolvedDependencyInfo[]

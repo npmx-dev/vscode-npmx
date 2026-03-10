@@ -3,7 +3,7 @@ import { PRERELEASE_PATTERN } from '#constants'
 import { config } from '#state'
 import { offsetRangeToRange } from '#utils/ast'
 import { formatUpgradeVersion } from '#utils/version'
-import { getResolvedDependencyByOffset } from '#utils/workspace'
+import { getResolvedDependencyByOffset } from '#data/workspace'
 import { CompletionItem, CompletionItemKind } from 'vscode'
 
 export class VersionCompletionItemProvider implements CompletionItemProvider {
