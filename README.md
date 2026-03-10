@@ -14,6 +14,15 @@
 > [!NOTE]
 > 🚧 **Preview Version** - This extension is under active development. Some features and configurations may change.
 
+## Installation
+
+- [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=npmx-dev.vscode-npmx)
+- [Open VSX](https://open-vsx.org/extension/npmx-dev/vscode-npmx)
+- Run:
+  ```bash
+  code --install-extension npmx-dev.vscode-npmx
+  ```
+
 ## Features
 
 - **Hover Information** &ndash; Quick links to package details and documentation on [npmx.dev](https://npmx.dev), with provenance verification status.
@@ -26,15 +35,22 @@
   - Dist tag warnings when a dependency uses a mutable version tag instead of a pinned version
   - Engine mismatch warnings when dependency engine requirements conflict with the current package
   - Upgrade hints when a newer version is available
+- **Code Actions**
+  - Quick fix actions for diagnostics with ignore list support (workspace or user settings)
 - **Commands**
   - Open [npmx.dev](https://npmx.dev) in external browser
-  - Open `node_modules` files on [npmx.dev](https://npmx.dev) code viewer with syntax highlighting (from editor title, explorer context menu, or command palette)
+  - Open `node_modules` files on [npmx.dev](https://npmx.dev) code viewer with syntax highlighting (from editor title, editor context menu, explorer context menu, or command palette)
 
-## Supported Files
+## Commands
 
-- `package.json`
-- `pnpm-workspace.yaml`
-- `.yarnrc.yml`
+<!-- commands -->
+
+| Command               | Title                                   |
+| --------------------- | --------------------------------------- |
+| `npmx.openInBrowser`  | npmx: Open npmx.dev in external browser |
+| `npmx.openFileInNpmx` | npmx: Open file on npmx.dev             |
+
+<!-- commands -->
 
 ## Configuration
 

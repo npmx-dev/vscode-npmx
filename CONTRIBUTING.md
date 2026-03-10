@@ -68,9 +68,9 @@ pnpm build            # Production build
 pnpm package          # Save extension as vsix file to root
 
 # Code Quality
-pnpm lint             # Run linter (oxlint + oxfmt)
+pnpm lint             # Run linter (ESLint)
 pnpm lint:fix         # Auto-fix lint issues
-pnpm typecheck        # TypeScript type checking
+pnpm typecheck        # TypeScript type checking (tsgo)
 
 # Testing
 pnpm test             # Run tests
@@ -82,14 +82,26 @@ pnpm test             # Run tests
 playground/             # Playground for testing
 res/                    # Assets (e.g. marketplace icon)
 src/                    # Extension source code
-├── extractors/         # Extractors
+├── commands/           # Command handlers (vscode API only, no reactive-vscode)
+├── extractors/         # Extractors (package.json, pnpm-workspace.yaml)
 ├── providers/          # Providers
+│   ├── code-actions/   # Code action providers (quick fixes)
+│   ├── completion-item/ # Completion providers (version autocomplete)
+│   ├── diagnostics/    # Diagnostic providers
+│   ├── document-link/  # Document link providers (package links)
+│   └── hover/          # Hover providers
 ├── types/              # TypeScript types
 ├── utils/              # Utility functions
+│   └── api/            # API clients (package, replacement, vulnerability)
 ├── constants.ts        # Constants
+├── generated-meta.ts   # Auto-generated extension metadata
 ├── state.ts            # State management
 └── index.ts            # Extension entry point
 tests/                  # Tests
+├── __setup__/          # Test setup and utilities
+├── code-actions/       # Code action tests
+├── diagnostics/        # Diagnostic tests
+└── utils/              # Utility tests
 ```
 
 ## Code style
@@ -110,7 +122,7 @@ If you want to get ahead of any formatting issues, you can also run `pnpm lint:f
 > This will be fixed by eslint.
 
 1. Type imports first (`import type { ... }`)
-2. Internal aliases (`#constants`, `#utils/`, etc.)
+2. Internal aliases (`#constants`, `#utils/`, `#composables/`, etc.)
 3. External packages (including `node:`)
 4. Relative imports (`./`, `../`)
 5. No blank lines between groups
