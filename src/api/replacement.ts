@@ -9,15 +9,12 @@ export const getReplacement = defineCachedFunction<ModuleReplacement | null, [st
   logger.info(`[replacement] fetching for ${name}`)
   const encodedName = encodePackageName(name)
 
-  try {
-    const result = await ofetch<ModuleReplacement | undefined>(`${NPMX_DEV_API}/replacements/${encodedName}`) ?? null
-    logger.info(`[replacement] fetched for ${name}`)
+  const result = await ofetch<ModuleReplacement | undefined>(`${NPMX_DEV_API}/replacements/${encodedName}`, {
+    ignoreResponseError: true,
+  }) ?? null
+  logger.info(`[replacement] fetched for ${name}`)
 
-    return result
-  } catch (err) {
-    logger.warn('[replacement] fetched error:', err)
-    return null
-  }
+  return result
 }, {
   name: 'replacement',
   getKey: (name) => name,

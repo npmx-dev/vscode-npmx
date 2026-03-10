@@ -57,6 +57,9 @@ class WorkspaceContext {
   #cacheOptions: CacheOptions<any, [Uri]> = {
     getKey: (uri) => uri.path,
     maxAge: 0,
+    swr: false,
+    staleMaxAge: 0,
+    shouldInvalidateCache: (uri) => this.#invalidatedPaths.delete(uri.path),
   }
 
   invalidateDependencyInfo(uri: Uri) {
@@ -117,10 +120,7 @@ class WorkspaceContext {
       ...info,
       dependencies: info.dependencies.map((dep) => this.#createResolvedDependencyInfo(dep, catalogs)),
     }
-  }, {
-    ...this.#cacheOptions,
-    shouldInvalidateCache: (uri) => this.#invalidatedPaths.delete(uri.path),
-  })
+  }, this.#cacheOptions)
 
   loadWorkspaceCatalogInfo = defineCachedFunction<
     WithResolvedDependencyInfo<WorkspaceCatalogInfo> | undefined,
@@ -145,13 +145,10 @@ class WorkspaceContext {
       ...info,
       dependencies: info.dependencies.map((dep) => this.#createResolvedDependencyInfo(dep)),
     }
-  }, {
-    ...this.#cacheOptions,
-    shouldInvalidateCache: (uri) => this.#invalidatedPaths.delete(uri.path),
-  })
+  }, this.#cacheOptions)
 }
 
-const invalidatedFolder = new WeakSet<WorkspaceFolder>()
+const invalidatedFolderPaths = new Set<string>()
 
 const getWorkspaceContextByFolder = defineCachedFunction<
   WorkspaceContext | undefined,
@@ -162,14 +159,14 @@ const getWorkspaceContextByFolder = defineCachedFunction<
 }, {
   name: 'workspace-context',
   getKey: (folder) => folder.uri.path,
-  shouldInvalidateCache: (folder) => invalidatedFolder.delete(folder),
   swr: false,
   maxAge: 0,
   staleMaxAge: 0,
+  shouldInvalidateCache: (folder) => invalidatedFolderPaths.delete(folder.uri.path),
 })
 
 export function deleteWorkspaceContextCache(folder: WorkspaceFolder) {
-  invalidatedFolder.add(folder)
+  invalidatedFolderPaths.add(folder.uri.path)
 }
 
 export async function getWorkspaceContext(uri: Uri) {
