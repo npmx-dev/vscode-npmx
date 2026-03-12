@@ -11,7 +11,7 @@ import { getDocumentText, isPackageManifestPath, isWorkspaceFilePath } from '#ut
 import { resolveExactVersion } from '#utils/package'
 import { lazyInit } from '#utils/shared'
 import { defineCachedFunction } from 'ocache'
-import { commands, Uri, workspace } from 'vscode'
+import { commands, Uri, window, workspace } from 'vscode'
 import { accessOk } from 'vscode-find-up'
 import { getExtractor } from './extractors'
 
@@ -30,6 +30,7 @@ async function getPackageManager(uri: Uri): Promise<PackageManager> {
     return result || 'npm'
   } catch (error) {
     console.error('Error geting package manager:', error)
+    window.showErrorMessage('Failed to detect package manager. Defaulting to npm.')
     return 'npm'
   }
 }
