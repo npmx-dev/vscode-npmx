@@ -1,5 +1,0 @@
-catalog:
-  lodash: ^4.17.21
-catalogs:
-  dev:
-    vite: npm:vite@latest
