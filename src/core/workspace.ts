@@ -29,7 +29,7 @@ async function getPackageManager(uri: Uri): Promise<PackageManager> {
     const result = await commands.executeCommand<PackageManager>('npm.packageManager', uri)
     return result || 'npm'
   } catch (error) {
-    console.error('Error geting package manager:', error)
+    console.error('Error getting package manager:', error)
     window.showErrorMessage('Failed to detect package manager. Defaulting to npm.')
     return 'npm'
   }
