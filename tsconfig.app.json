@@ -13,5 +13,9 @@
       "#test-utils/*": ["./tests/utils/*"]
     }
   },
-  "include": ["src/**/*"]
+  "include": [
+    "src/**/*",
+    "shared",
+    "tests"
+  ]
 }
