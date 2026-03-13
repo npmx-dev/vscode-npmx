@@ -54,13 +54,12 @@ class WorkspaceContext {
   }
 
   async loadWorkspace() {
-    this.#catalogs = undefined
+    this.#catalogs = Promise.withResolvers()
     this.packageManager = await getPackageManager(this.folder.uri)
 
     logger.info(`[workspace-context] detect package manager: ${this.packageManager}`)
 
     if (this.packageManager !== 'npm') {
-      this.#catalogs = Promise.withResolvers()
       const workspaceFilename = workspaceFileMapping[this.packageManager]
       this.workspaceFileUri = Uri.joinPath(this.folder.uri, workspaceFilename)
       this.#catalogs.resolve(
@@ -68,6 +67,8 @@ class WorkspaceContext {
           ? (await this.loadWorkspaceCatalogInfo(this.workspaceFileUri))?.catalogs
           : undefined,
       )
+    } else {
+      this.#catalogs.resolve(undefined)
     }
   }
 
@@ -85,7 +86,7 @@ class WorkspaceContext {
   }
 
   async getCatalogs(): Promise<CatalogsInfo | undefined> {
-    return this.#catalogs?.promise
+    return this.#catalogs!.promise
   }
 
   #createResolvedDependencyInfo(dependency: DependencyInfo, catalogs?: CatalogsInfo): ResolvedDependencyInfo {
@@ -131,7 +132,7 @@ class WorkspaceContext {
 
     const [info, catalogs] = await Promise.all([
       getDocumentText(uri).then((text) => extractor.getPackageManifestInfo(text)),
-      this.#catalogs?.promise,
+      this.getCatalogs(),
     ])
 
     if (!info)

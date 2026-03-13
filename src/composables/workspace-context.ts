@@ -30,8 +30,14 @@ export function useWorkspaceContext() {
   }
 
   useDisposable(workspace.onDidChangeTextDocument(({ document }) => {
-    if (document !== window.activeTextEditor?.document)
+    const activeEditor = window.activeTextEditor
+    if (
+      !activeEditor
+      || document !== activeEditor.document
+      || document.version === activeEditor.document.version
+    ) {
       return
+    }
 
     deleteCacheByUri(document.uri, false)
   }))
