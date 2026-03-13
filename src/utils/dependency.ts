@@ -11,7 +11,7 @@ const DEFAULT_CATALOG_NAME = 'default'
 const GIT_PATTERN = /^(?:git\+|git:\/\/|github:|gitlab:|bitbucket:|ssh:\/\/git@)/i
 const HTTP_PATTERN = /^https?:/i
 
-function normalizeCatalogName(name: string): string {
+export function normalizeCatalogName(name: string): string {
   return name.trim() || DEFAULT_CATALOG_NAME
 }
 

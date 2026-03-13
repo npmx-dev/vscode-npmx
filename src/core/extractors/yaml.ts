@@ -1,5 +1,6 @@
 import type { BaseExtractor, DependencyInfo, OffsetRange, WorkspaceCatalogExtractor, WorkspaceCatalogInfo, YamlNode } from '#types/extractor'
 import type { Pair, Scalar, YAMLMap } from 'yaml'
+import { normalizeCatalogName } from '#utils/dependency'
 import { isMap, isPair, isScalar, parseDocument } from 'yaml'
 
 const CATALOG_SECTION = 'catalog'
@@ -48,7 +49,7 @@ export class YamlExtractor implements WorkspaceCatalogExtractor, BaseExtractor<Y
 
   #traverseCatalogs(root: YAMLMap, callback: CatalogEntryVisitor): boolean {
     const catalog = root.items.find((i) => isScalar(i.key) && i.key.value === CATALOG_SECTION)
-    if (this.#traverseCatalog(catalog, { category: 'catalog' }, callback))
+    if (this.#traverseCatalog(catalog, { category: 'catalog', categoryName: '' }, callback))
       return true
 
     const catalogs = root.items.find((i) => isScalar(i.key) && i.key.value === CATALOGS_SECTION)
@@ -92,7 +93,7 @@ export class YamlExtractor implements WorkspaceCatalogExtractor, BaseExtractor<Y
     const catalogs: Record<string, Record<string, string>> = {}
 
     for (const dependency of dependencies) {
-      const categoryName = dependency.category === 'catalog' ? 'default' : dependency.categoryName || 'default'
+      const categoryName = normalizeCatalogName(dependency.categoryName!)
       catalogs[categoryName] ??= {}
       catalogs[categoryName][dependency.rawName] = dependency.rawSpec
     }
