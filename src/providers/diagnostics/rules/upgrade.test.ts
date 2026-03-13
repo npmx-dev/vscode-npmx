@@ -1,8 +1,8 @@
 import type { PackageInfo } from '#api/package'
 import type { ResolvedDependencyInfo } from '#types/context'
+import { createContext } from '#test-utils/diagnostics'
 import { describe, expect, it } from 'vitest'
-import { resolveUpgrade } from '../../src/providers/diagnostics/rules/upgrade'
-import { createContext } from './context'
+import { resolveUpgrade } from './upgrade'
 
 const distTags: Record<string, string> = {
   latest: '2.7.0',

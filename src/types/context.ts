@@ -1,8 +1,6 @@
 import type { PackageInfo } from '#api/package'
 import type { DependencyInfo } from '#types/extractor'
 
-export type PackageManager = 'npm' | 'pnpm' | 'yarn'
-
 export type DependencyProtocol
   = | 'npm'
     | 'jsr'

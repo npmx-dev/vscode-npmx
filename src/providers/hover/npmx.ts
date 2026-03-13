@@ -1,6 +1,6 @@
 import type { HoverProvider, Position, TextDocument } from 'vscode'
-import { SPACER } from '#constants'
 import { getResolvedDependencyByOffset } from '#core/workspace'
+import { SPACER } from '#shared/constants'
 import { jsrPackageUrl, npmxDocsUrl, npmxPackageUrl } from '#utils/links'
 import { Hover, MarkdownString } from 'vscode'
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { resolveEngineMismatches } from '../../src/providers/diagnostics/rules/engine-mismatch'
+import { resolveEngineMismatches } from './engine-mismatch'
 
 describe('resolveEngineMismatches', () => {
   it('should flag when engine ranges do not overlap', () => {

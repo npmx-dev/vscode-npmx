@@ -1,6 +1,6 @@
+import { createContext } from '#test-utils/diagnostics'
 import { describe, expect, it } from 'vitest'
-import { checkDeprecation } from '../../src/providers/diagnostics/rules/deprecation'
-import { createContext } from './context'
+import { checkDeprecation } from './deprecation'
 
 function createDeprecationContext(version: string) {
   return createContext({

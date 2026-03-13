@@ -1,6 +1,6 @@
+import { createContext } from '#test-utils/diagnostics'
 import { describe, expect, it } from 'vitest'
-import { checkReplacement } from '../../src/providers/diagnostics/rules/replacement'
-import { createContext } from './context'
+import { checkReplacement } from './replacement'
 
 function createReplacementContext(name: string) {
   return createContext({ name, version: '^1.0.0' })

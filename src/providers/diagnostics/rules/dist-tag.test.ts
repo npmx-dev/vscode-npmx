@@ -1,6 +1,6 @@
+import { createContext } from '#test-utils/diagnostics'
 import { describe, expect, it } from 'vitest'
-import { checkDistTag } from '../../src/providers/diagnostics/rules/dist-tag'
-import { createContext } from './context'
+import { checkDistTag } from './dist-tag'
 
 describe('checkDistTag', () => {
   it('should flag when version matches a dist tag', async () => {

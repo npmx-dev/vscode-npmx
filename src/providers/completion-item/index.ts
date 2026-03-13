@@ -1,4 +1,4 @@
-import { PACKAGE_JSON_BASENAME, SUPPORTED_DOCUMENT_PATTERN } from '#constants'
+import { PACKAGE_JSON_BASENAME, SUPPORTED_DOCUMENT_PATTERN } from '#shared/constants'
 import { config } from '#state'
 import { watchEffect } from 'reactive-vscode'
 import { languages } from 'vscode'

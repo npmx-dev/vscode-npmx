@@ -1,4 +1,4 @@
-import type { DiagnosticsCode } from '#types/meta'
+import type { DiagnosticsCode } from '#shared/types'
 import type { CodeActionContext, CodeActionProvider, Diagnostic, Range, TextDocument } from 'vscode'
 import { internalCommands } from '#state'
 import { CodeAction, CodeActionKind, ConfigurationTarget, WorkspaceEdit } from 'vscode'

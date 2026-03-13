@@ -96,7 +96,7 @@ export function resolveExactVersion(pkg: PackageInfo, version: string) {
     version = 'latest'
 
   if (Object.hasOwn(pkg.distTags, version))
-    return pkg.distTags[version]
+    return pkg.distTags[version]!
 
   const versions = Object.keys(pkg.versionsMeta)
   if (versions.length === 0)

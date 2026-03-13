@@ -1,4 +1,4 @@
-import { SUPPORTED_DOCUMENT_PATTERN } from '#constants'
+import { SUPPORTED_DOCUMENT_PATTERN } from '#shared/constants'
 import { config } from '#state'
 import { watchEffect } from 'reactive-vscode'
 import { languages } from 'vscode'

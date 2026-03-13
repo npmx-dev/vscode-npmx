@@ -1,4 +1,4 @@
-import { SUPPORTED_DOCUMENT_PATTERN } from '#constants'
+import { SUPPORTED_DOCUMENT_PATTERN } from '#shared/constants'
 import { config, internalCommands } from '#state'
 import { computed, useCommand, watch } from 'reactive-vscode'
 import { CodeActionKind, languages } from 'vscode'

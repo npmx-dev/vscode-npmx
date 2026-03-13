@@ -1,6 +1,6 @@
 import type { CompletionItemProvider, Position, TextDocument } from 'vscode'
-import { PRERELEASE_PATTERN } from '#constants'
 import { getResolvedDependencyByOffset } from '#core/workspace'
+import { PRERELEASE_PATTERN } from '#shared/constants'
 import { config } from '#state'
 import { offsetRangeToRange } from '#utils/ast'
 import { formatUpgradeVersion } from '#utils/version'
@@ -25,7 +25,7 @@ export class VersionCompletionItemProvider implements CompletionItemProvider {
     const items: CompletionItem[] = []
 
     for (const version in pkg.versionsMeta) {
-      const meta = pkg.versionsMeta[version]
+      const meta = pkg.versionsMeta[version]!
 
       if (meta.deprecated != null)
         continue

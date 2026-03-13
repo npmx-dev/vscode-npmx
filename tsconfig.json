@@ -1,24 +1,6 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "lib": ["ESNext"],
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "paths": {
-      "#constants": ["./src/constants.ts"],
-      "#state": ["./src/state.ts"],
-      "#types/*": ["./src/types/*"],
-      "#api/*": ["./src/api/*"],
-      "#utils/*": ["./src/utils/*"],
-      "#core/*": ["./src/core/*"],
-      "#composables/*": ["./src/composables/*"]
-    },
-    "resolveJsonModule": true,
-    "strict": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitThis": true,
-    "noUnusedLocals": true,
-    "noEmit": true,
-    "skipLibCheck": true
-  }
+  "references": [
+    { "path": "./tsconfig.app.json" }
+  ],
+  "files": []
 }

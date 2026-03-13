@@ -1,6 +1,6 @@
 import type { PackageManifestInfo } from '#types/extractor'
 import type { TextDocument, Uri } from 'vscode'
-import { PACKAGE_JSON_BASENAME, PNPM_WORKSPACE_BASENAME, YARN_WORKSPACE_BASENAME } from '#constants'
+import { PACKAGE_JSON_BASENAME, PNPM_WORKSPACE_BASENAME, YARN_WORKSPACE_BASENAME } from '#shared/constants'
 import { basename } from 'pathe'
 import { workspace } from 'vscode'
 

@@ -1,9 +1,10 @@
-import type { CatalogsInfo, PackageManager, ResolvedDependencyInfo } from '#types/context'
+import type { PackageManager } from '#shared/types'
+import type { CatalogsInfo, ResolvedDependencyInfo } from '#types/context'
 import type { DependencyInfo, PackageManifestInfo, WorkspaceCatalogInfo } from '#types/extractor'
 import type { CacheOptions } from 'ocache'
 import type { WorkspaceFolder } from 'vscode'
 import { getPackageInfo } from '#api/package'
-import { PNPM_WORKSPACE_BASENAME, YARN_WORKSPACE_BASENAME } from '#constants'
+import { PNPM_WORKSPACE_BASENAME, YARN_WORKSPACE_BASENAME } from '#shared/constants'
 import { logger } from '#state'
 import { isOffsetInRange } from '#utils/ast'
 import { resolveDependencySpec } from '#utils/dependency'
@@ -29,7 +30,7 @@ async function getPackageManager(uri: Uri): Promise<PackageManager> {
     const result = await commands.executeCommand<PackageManager>('npm.packageManager', uri)
     return result || 'npm'
   } catch (error) {
-    console.error('Error getting package manager:', error)
+    logger.error('Error getting package manager:', error)
     window.showErrorMessage('Failed to detect package manager. Defaulting to npm.')
     return 'npm'
   }

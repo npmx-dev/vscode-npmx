@@ -1,7 +1,7 @@
 import type { ConfigurationTarget } from 'vscode'
+import { scopedConfigs } from '#shared/meta'
 import { checkIgnored } from '#utils/ignore'
 import { workspace } from 'vscode'
-import { scopedConfigs } from '../generated-meta'
 
 export async function addToIgnore(scope: string, name: string, target: ConfigurationTarget) {
   const ignoreScope = `ignore.${scope}`

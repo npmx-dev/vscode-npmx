@@ -1,4 +1,4 @@
-import { PACKAGE_JSON_BASENAME } from '#constants'
+import { PACKAGE_JSON_BASENAME } from '#shared/constants'
 import { logger } from '#state'
 import { readPackageManifest } from '#utils/file'
 import { npmxFileUrl } from '#utils/links'

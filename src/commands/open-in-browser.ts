@@ -1,4 +1,4 @@
-import { NPMX_DEV } from '#constants'
+import { NPMX_DEV } from '#shared/constants'
 import { env, Uri } from 'vscode'
 
 export function openInBrowser() {

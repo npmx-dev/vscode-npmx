@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tsbuildinfo/app",
+    "paths": {
+      "#shared/*": ["./shared/*"],
+      "#state": ["./src/state.ts"],
+      "#api/*": ["./src/api/*"],
+      "#types/*": ["./src/types/*"],
+      "#utils/*": ["./src/utils/*"],
+      "#core/*": ["./src/core/*"],
+      "#composables/*": ["./src/composables/*"],
+      "#test-utils/*": ["./tests/utils/*"]
+    }
+  },
+  "include": ["src/**/*"]
+}

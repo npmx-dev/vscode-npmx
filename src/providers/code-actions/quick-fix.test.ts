@@ -1,7 +1,7 @@
 import type { CodeActionContext, TextDocument } from 'vscode'
 import { describe, expect, it } from 'vitest'
 import { CodeActionKind, ConfigurationTarget, Diagnostic, DiagnosticSeverity, Range, Uri } from 'vscode'
-import { QuickFixProvider } from '../../src/providers/code-actions/quick-fix'
+import { QuickFixProvider } from './quick-fix'
 
 const provider = new QuickFixProvider()
 
