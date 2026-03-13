@@ -6,6 +6,7 @@ import { commands, displayName, version } from './generated-meta'
 import { useCodeActions } from './providers/code-actions'
 import { useCompletionItem } from './providers/completion-item'
 import { useDecorators } from './providers/decorators'
+import { useDefinition } from './providers/definition'
 import { useDiagnostics } from './providers/diagnostics'
 import { useDocumentLink } from './providers/document-link'
 import { useHover } from './providers/hover'
@@ -22,6 +23,7 @@ export const { activate, deactivate } = defineExtension(() => {
   useDecorators()
   useCodeActions()
   useDocumentLink()
+  useDefinition()
 
   useCommands({
     [commands.openInBrowser]: openInBrowser,

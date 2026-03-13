@@ -38,6 +38,7 @@ async function getPackageManager(uri: Uri): Promise<PackageManager> {
 class WorkspaceContext {
   folder: WorkspaceFolder
   packageManager: PackageManager = 'npm'
+  workspaceFileUri?: Uri
   #catalogs?: PromiseWithResolvers<CatalogsInfo | undefined>
   #invalidatedPaths = new Set<string>()
 
@@ -61,10 +62,10 @@ class WorkspaceContext {
     if (this.packageManager !== 'npm') {
       this.#catalogs = Promise.withResolvers()
       const workspaceFilename = workspaceFileMapping[this.packageManager]
-      const workspaceFile = Uri.joinPath(this.folder.uri, workspaceFilename)
+      this.workspaceFileUri = Uri.joinPath(this.folder.uri, workspaceFilename)
       this.#catalogs.resolve(
-        await accessOk(workspaceFile)
-          ? (await this.loadWorkspaceCatalogInfo(workspaceFile))?.catalogs
+        await accessOk(this.workspaceFileUri)
+          ? (await this.loadWorkspaceCatalogInfo(this.workspaceFileUri))?.catalogs
           : undefined,
       )
     }
