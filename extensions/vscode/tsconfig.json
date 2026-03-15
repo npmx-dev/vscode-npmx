@@ -9,13 +9,12 @@
       "#types/*": ["./src/types/*"],
       "#utils/*": ["./src/utils/*"],
       "#core/*": ["./src/core/*"],
-      "#composables/*": ["./src/composables/*"],
-      "#test-utils/*": ["../../tests/utils/*"]
+      "#composables/*": ["./src/composables/*"]
     }
   },
   "include": [
     "src/**/*",
-    "../../shared",
-    "../../tests"
+    "tests/**/*",
+    "../../shared"
   ]
 }

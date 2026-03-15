@@ -1,9 +1,9 @@
+import type { PackageInfo } from '#api/package'
 import type { Engines } from 'fast-npm-meta'
-import type { PackageInfo } from '../../src/api/package'
-import type { DiagnosticContext } from '../../src/providers/diagnostics'
+import type { DiagnosticContext } from '../..'
+import { resolveDependencySpec } from '#utils/dependency'
+import { resolveExactVersion } from '#utils/package'
 import { Uri } from 'vscode'
-import { resolveDependencySpec } from '../../src/utils/dependency'
-import { resolveExactVersion } from '../../src/utils/package'
 
 interface CreateContextOptions {
   name: string

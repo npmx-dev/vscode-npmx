@@ -1,5 +1,5 @@
+import { resolveDependencySpec } from '#utils/dependency'
 import { describe, expect, it } from 'vitest'
-import { resolveDependencySpec } from '../../src/utils/dependency'
 
 describe('resolveDependencySpec', () => {
   it('resolves plain npm specs as npm protocol', () => {

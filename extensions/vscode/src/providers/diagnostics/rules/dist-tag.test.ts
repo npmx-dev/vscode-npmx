@@ -1,5 +1,5 @@
-import { createContext } from '#test-utils/diagnostics'
 import { describe, expect, it } from 'vitest'
+import { createContext } from './__tests__/utils'
 import { checkDistTag } from './dist-tag'
 
 describe('checkDistTag', () => {

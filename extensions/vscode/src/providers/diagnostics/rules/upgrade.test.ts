@@ -1,7 +1,7 @@
 import type { PackageInfo } from '#api/package'
 import type { ResolvedDependencyInfo } from '#types/context'
-import { createContext } from '#test-utils/diagnostics'
 import { describe, expect, it } from 'vitest'
+import { createContext } from './__tests__/utils'
 import { resolveUpgrade } from './upgrade'
 
 const distTags: Record<string, string> = {

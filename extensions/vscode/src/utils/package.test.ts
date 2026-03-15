@@ -1,6 +1,6 @@
 import type { PackageInfo } from '#api/package'
+import { encodePackageName, isJsrNpmPackage, jsrNpmToJsrName, parsePackageId, resolveExactVersion } from '#utils/package'
 import { describe, expect, it } from 'vitest'
-import { encodePackageName, isJsrNpmPackage, jsrNpmToJsrName, parsePackageId, resolveExactVersion } from '../../src/utils/package'
 
 describe('encodePackageName', () => {
   it('should encode regular package name', () => {
