@@ -1,11 +1,9 @@
 {
-  "publisher": "npmx-dev",
-  "name": "vscode-npmx",
-  "displayName": "npmx",
+  "name": "npmx-extensions-monorepo",
   "type": "module",
   "version": "0.6.0",
+  "private": true,
   "packageManager": "pnpm@10.32.1",
-  "description": "Enhance your npm package workflow in VS Code",
   "author": {
     "name": "Vida Xie",
     "email": "vida_2020@163.com",
@@ -20,196 +18,13 @@
   "bugs": {
     "url": "https://github.com/npmx-dev/vscode-npmx/issues"
   },
-  "keywords": [
-    "npmx"
-  ],
-  "categories": [
-    "Other"
-  ],
-  "main": "./dist/index.js",
-  "browser": "./dist/index.js",
-  "extensionKind": [
-    "workspace"
-  ],
-  "icon": "res/logo.png",
-  "files": [
-    "LICENSE.md",
-    "dist/*",
-    "res/*"
-  ],
-  "engines": {
-    "vscode": "^1.101.0"
-  },
-  "activationEvents": [
-    "workspaceContains:package.json"
-  ],
-  "contributes": {
-    "configuration": {
-      "title": "npmx",
-      "properties": {
-        "npmx.hover.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable hover information for packages"
-        },
-        "npmx.completion.version": {
-          "type": "string",
-          "enum": [
-            "all",
-            "provenance-only",
-            "off"
-          ],
-          "enumDescriptions": [
-            "Show all versions",
-            "Show only versions with provenance",
-            "Disable version completion"
-          ],
-          "default": "provenance-only",
-          "description": "Version completion behavior"
-        },
-        "npmx.completion.excludePrerelease": {
-          "type": "boolean",
-          "default": true,
-          "description": "Exclude prerelease versions (alpha, beta, rc, canary, etc.) from completion suggestions"
-        },
-        "npmx.diagnostics.upgrade": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show hints when a newer version of a package is available"
-        },
-        "npmx.diagnostics.deprecation": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show warnings for deprecated packages"
-        },
-        "npmx.diagnostics.replacement": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show suggestions for package replacements"
-        },
-        "npmx.diagnostics.vulnerability": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show warnings for packages with known vulnerabilities"
-        },
-        "npmx.diagnostics.distTag": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show warnings when a dependency uses a dist tag"
-        },
-        "npmx.diagnostics.engineMismatch": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show warnings when dependency engines mismatch with the current package"
-        },
-        "npmx.packageLinks": {
-          "type": "string",
-          "enum": [
-            "off",
-            "latest",
-            "declared",
-            "resolved"
-          ],
-          "enumDescriptions": [
-            "Disable clickable links",
-            "Link to package page (latest version)",
-            "Use raw version from package.json (preserves ^1.0.0, latest, etc.)",
-            "Resolve to actual matching version via API (^18.0.0 → 18.2.0)"
-          ],
-          "default": "declared",
-          "description": "Enable clickable links for package names"
-        },
-        "npmx.ignore.upgrade": {
-          "scope": "resource",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "default": [],
-          "markdownDescription": "Ignore list for upgrade diagnostics (\"name\" or \"name@version\"). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics)"
-        },
-        "npmx.ignore.deprecation": {
-          "scope": "resource",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "default": [],
-          "markdownDescription": "Ignore list for deprecation diagnostics (\"name\" or \"name@version\"). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics)"
-        },
-        "npmx.ignore.replacement": {
-          "scope": "resource",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "default": [],
-          "markdownDescription": "Ignore list for replacement diagnostics (\"name\" only). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics)"
-        },
-        "npmx.ignore.vulnerability": {
-          "scope": "resource",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "default": [],
-          "markdownDescription": "Ignore list for vulnerability diagnostics (\"name\" or \"name@version\"). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics)"
-        }
-      }
-    },
-    "commands": [
-      {
-        "command": "npmx.openInBrowser",
-        "title": "Open npmx.dev in external browser",
-        "category": "npmx"
-      },
-      {
-        "command": "npmx.openFileInNpmx",
-        "title": "Open file on npmx.dev",
-        "category": "npmx"
-      }
-    ],
-    "menus": {
-      "editor/context": [
-        {
-          "command": "npmx.openFileInNpmx",
-          "when": "resourceScheme == file && resourcePath =~ /[\\/]node_modules[\\/]/"
-        }
-      ],
-      "editor/title": [
-        {
-          "command": "npmx.openFileInNpmx",
-          "when": "resourceScheme == file && resourcePath =~ /[\\/]node_modules[\\/]/"
-        }
-      ],
-      "explorer/context": [
-        {
-          "command": "npmx.openFileInNpmx",
-          "when": "resourceScheme == file && resourcePath =~ /[\\/]node_modules[\\/]/ && !explorerResourceIsFolder"
-        }
-      ],
-      "commandPalette": [
-        {
-          "command": "npmx.openFileInNpmx",
-          "when": "resourceScheme == file && resourcePath =~ /[\\/]node_modules[\\/]/"
-        }
-      ]
-    }
-  },
   "scripts": {
-    "dev": "tsdown --watch",
-    "build": "tsdown",
-    "postinstall": "npm run update",
-    "update": "vscode-ext-gen --scope npmx --output ./shared/meta.ts",
     "check": "npm run lint:fix && npm run typecheck",
     "test": "vitest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsgo -b --noEmit",
-    "vscode:prepublish": "npm run build",
-    "publish": "npx @vscode/vsce publish --no-dependencies",
-    "package": "npx @vscode/vsce package --no-dependencies",
-    "release": "npx bumpp"
+    "release": "npx bumpp -r"
   },
   "nano-staged": {
     "*": "eslint --fix"
@@ -217,29 +32,17 @@
   "devDependencies": {
     "@types/node": "catalog:dev",
     "@types/semver": "catalog:dev",
-    "@types/vscode": "1.101.0",
     "@typescript/native-preview": "catalog:dev",
     "@vida0905/eslint-config": "catalog:dev",
     "eslint": "catalog:dev",
-    "fast-npm-meta": "catalog:inline",
     "husky": "catalog:dev",
     "jest-mock-vscode": "catalog:test",
-    "jsonc-parser": "catalog:inline",
     "module-replacements": "catalog:test",
     "msw": "catalog:test",
     "nano-staged": "catalog:dev",
-    "ocache": "catalog:inline",
-    "ofetch": "catalog:inline",
-    "pathe": "catalog:inline",
-    "perfect-debounce": "catalog:inline",
-    "reactive-vscode": "catalog:inline",
-    "semver": "catalog:inline",
     "tsdown": "catalog:dev",
     "vite": "catalog:dev",
     "vite-tsconfig-paths": "catalog:test",
-    "vitest": "catalog:test",
-    "vscode-ext-gen": "catalog:dev",
-    "vscode-find-up": "catalog:inline",
-    "yaml": "catalog:inline"
+    "vitest": "catalog:test"
   }
 }

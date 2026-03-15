@@ -8,6 +8,9 @@ export default defineConfig({
     // so explicitly specifying a fixed entry point here.
     'jsonc-parser': resolve('./node_modules/jsonc-parser/lib/esm/main.js'),
   },
+  copy: [
+    '../../res',
+  ],
   deps: {
     neverBundle: ['vscode'],
     /// keep-sorted

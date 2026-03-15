@@ -1,6 +1,9 @@
 shellEmulator: true
 trustPolicy: no-downgrade
 
+packages:
+  - extensions/*
+
 catalogs:
   dev:
     '@types/node': ^25.5.0

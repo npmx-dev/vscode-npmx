@@ -8,7 +8,7 @@ Thank you for your interest in contributing! ❤️ This document provides guide
 
 ## Goals
 
-The goal of [vscode-npmx](https://marketplace.visualstudio.com/items?itemName=npmx-dev.vscode-npmx) is to build a useful extension around [npmx.dev](https://npmx.dev), making it easier for developers to manage npm packages within VS Code.
+The goal of this project is to build useful editor extensions around [npmx.dev](https://npmx.dev), making it easier for developers to manage npm packages within their editors. Currently, the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=npmx-dev.vscode-npmx) is the primary package.
 
 ## Table of Contents
 
@@ -62,44 +62,52 @@ The goal of [vscode-npmx](https://marketplace.visualstudio.com/items?itemName=np
 ### Available commands
 
 ```bash
-# Development
+# Development (run from extensions/vscode/)
 pnpm dev              # Start development server
 pnpm build            # Production build
-pnpm package          # Save extension as vsix file to root
+pnpm package          # Save extension as vsix file
 
-# Code Quality
+# Code Quality (run from root)
 pnpm lint             # Run linter (ESLint)
 pnpm lint:fix         # Auto-fix lint issues
 pnpm typecheck        # TypeScript type checking (tsgo)
 
-# Testing
+# Testing (run from root)
 pnpm test             # Run tests
 ```
 
 ### Project structure
 
+This project is organized as a monorepo using pnpm workspaces:
+
 ```
+extensions/
+└── vscode/             # VS Code extension
+    ├── src/            # Extension source code
+    │   ├── api/        # API clients (package, replacement, vulnerability)
+    │   ├── commands/   # Command handlers (vscode API only, no reactive-vscode)
+    │   ├── composables/ # Composables (reactive-vscode hooks)
+    │   ├── core/       # Core logic
+    │   │   ├── extractors/ # Extractors (JSON, YAML)
+    │   │   └── workspace.ts # Workspace context resolution
+    │   ├── providers/  # Providers
+    │   │   ├── code-actions/ # Code action providers (quick fixes)
+    │   │   ├── completion-item/ # Completion providers (version autocomplete)
+    │   │   ├── diagnostics/ # Diagnostic providers
+    │   │   ├── document-link/ # Document link providers (package links)
+    │   │   └── hover/  # Hover providers
+    │   ├── types/      # TypeScript types
+    │   ├── utils/      # Utility functions
+    │   ├── index.ts    # Extension entry point
+    │   └── state.ts    # State management
+    ├── package.json
+    └── tsdown.config.ts
+shared/                 # Shared code across packages
+├── constants.ts
+├── meta.ts             # Auto-generated extension metadata
+└── types.ts
 playground/             # Playground for testing
 res/                    # Assets (e.g. marketplace icon)
-src/                    # Extension source code
-├── commands/           # Command handlers (vscode API only, no reactive-vscode)
-├── composables/        # Composables (reactive-vscode hooks)
-├── core/               # Core logic
-│   ├── extractors/     # Extractors (JSON, YAML)
-│   └── workspace.ts    # Workspace context resolution
-├── providers/          # Providers
-│   ├── code-actions/   # Code action providers (quick fixes)
-│   ├── completion-item/ # Completion providers (version autocomplete)
-│   ├── diagnostics/    # Diagnostic providers
-│   ├── document-link/  # Document link providers (package links)
-│   └── hover/          # Hover providers
-├── types/              # TypeScript types
-├── utils/              # Utility functions
-│   └── api/            # API clients (package, replacement, vulnerability)
-├── constants.ts        # Constants
-├── generated-meta.ts   # Auto-generated extension metadata
-├── state.ts            # State management
-└── index.ts            # Extension entry point
 tests/                  # Tests
 ├── __setup__/          # Test setup and utilities
 ├── code-actions/       # Code action tests
@@ -110,7 +118,7 @@ tests/                  # Tests
 
 ### Key concepts
 
-- **Extractor** &ndash; Parses a supported file (`package.json`, `pnpm-workspace.yaml`, `.yarnrc.yml`) and extracts dependency information with AST ranges. Each file format has its own extractor in `src/core/extractors/`.
+- **Extractor** &ndash; Parses a supported file (`package.json`, `pnpm-workspace.yaml`, `.yarnrc.yml`) and extracts dependency information with AST ranges. Each file format has its own extractor in `extensions/vscode/src/core/extractors/`.
 - **WorkspaceContext** &ndash; Holds per-workspace-folder state: detected package manager, resolved catalogs, and memoized dependency info. Created lazily and invalidated when workspace-level files change.
 - **ResolvedDependencyInfo** &ndash; A dependency with its protocol resolved (e.g., `catalog:` → actual version, `npm:alias@version` → underlying package). Providers consume resolved dependencies instead of raw AST data.
 - **Provider** &ndash; VS Code language feature (hover, completion, diagnostics, etc.) that operates on resolved dependencies.

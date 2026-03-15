@@ -26,9 +26,11 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       - name: Generate .vsix file
+        working-directory: extensions/vscode
         run: pnpm package
 
       - name: Publish Extension
+        working-directory: extensions/vscode
         run: npx vsxpub --no-dependencies
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
