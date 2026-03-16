@@ -35,6 +35,7 @@
   - Dist tag warnings when a dependency uses a mutable version tag instead of a pinned version
   - Engine mismatch warnings when dependency engine requirements conflict with the current package
   - Upgrade hints when a newer version is available
+- **Catalog Resolution** &ndash; Inline decoration showing the resolved version spec for catalog dependencies in `package.json`.
 - **Code Actions**
   - Quick fix actions for diagnostics with ignore list support (workspace or user settings)
 - **Commands**

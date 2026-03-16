@@ -4,10 +4,6 @@
 
 <h1 align="center">npmx Extensions</h1>
 
-<p align="center">
-  Editor extensions for <a href="https://npmx.dev">npmx.dev</a>
-</p>
-
 > [!NOTE]
 > 🚧 **Preview Version** - These extensions are under active development. Some features and configurations may change.
 
@@ -29,6 +25,7 @@
   - Dist tag warnings when a dependency uses a mutable version tag instead of a pinned version
   - Engine mismatch warnings when dependency engine requirements conflict with the current package
   - Upgrade hints when a newer version is available
+- **Catalog Resolution** &ndash; Inline decoration showing the resolved version spec for catalog dependencies in `package.json`.
 - **Code Actions**
   - Quick fix actions for diagnostics with ignore list support (workspace or user settings)
 - **Commands**
