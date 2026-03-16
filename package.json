@@ -19,6 +19,8 @@
     "url": "https://github.com/npmx-dev/vscode-npmx/issues"
   },
   "scripts": {
+    "dev": "pnpm -r dev",
+    "build": "pnpm -r build",
     "check": "npm run lint:fix && npm run typecheck",
     "test": "vitest",
     "lint": "eslint .",

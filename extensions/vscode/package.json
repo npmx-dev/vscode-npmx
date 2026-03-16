@@ -14,7 +14,8 @@
   "homepage": "https://docs.npmx.dev/guide/vscode-extension",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/npmx-dev/vscode-npmx.git"
+    "url": "git+https://github.com/npmx-dev/vscode-npmx.git",
+    "directory": "extensions/vscode"
   },
   "bugs": {
     "url": "https://github.com/npmx-dev/vscode-npmx/issues"
