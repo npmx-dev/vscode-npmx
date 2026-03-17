@@ -1,5 +1,5 @@
-import type { ResolvedDependencyInfo } from '#core/workspace'
-import { formatPackageId } from './package'
+import type { DependencyInfo } from '#core/workspace'
+import { formatPackageId } from 'npmx-language-core/utils'
 
 const RANGE_PREFIXES = ['>=', '<=', '=', '>', '<']
 
@@ -29,7 +29,7 @@ function getVersionRangePrefix(v: string): string {
 
 const PROTOCOL_PATTERN = /^[a-z]+:/
 
-export function formatUpgradeVersion(dep: ResolvedDependencyInfo, target: string): string {
+export function formatUpgradeVersion(dep: DependencyInfo, target: string): string {
   const { rawName, rawSpec, resolvedName, resolvedSpec, protocol } = dep
 
   const isAlias = resolvedName !== rawName

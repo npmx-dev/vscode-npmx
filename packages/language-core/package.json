@@ -14,7 +14,7 @@
     "./constants": "./dist/constants.js",
     "./extractors": "./dist/extractors/index.js",
     "./types": "./dist/types.js",
-    "./utils": "./dist/utils.js",
+    "./utils": "./dist/utils/index.js",
     "./package.json": "./package.json"
   },
   "files": [

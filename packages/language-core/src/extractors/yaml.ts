@@ -1,5 +1,5 @@
 import type { Pair, Scalar, YAMLMap, Node as YamlNode } from 'yaml'
-import type { BaseExtractor, DependencyInfo, OffsetRange, WorkspaceCatalogExtractor, WorkspaceCatalogInfo } from '../types'
+import type { BaseExtractor, ExtractedDependencyInfo, OffsetRange, WorkspaceCatalogExtractor, WorkspaceCatalogInfo } from '../types'
 import { isMap, isPair, isScalar, parseDocument } from 'yaml'
 import { normalizeCatalogName } from '../utils'
 
@@ -64,11 +64,11 @@ export class YamlExtractor implements WorkspaceCatalogExtractor, BaseExtractor<Y
     return false
   }
 
-  getDependenciesInfo(root: YamlNode): DependencyInfo[] {
+  getDependenciesInfo(root: YamlNode): ExtractedDependencyInfo[] {
     if (!isMap(root))
       return []
 
-    const result: DependencyInfo[] = []
+    const result: ExtractedDependencyInfo[] = []
 
     this.#traverseCatalogs(root, (item, meta) => {
       result.push({

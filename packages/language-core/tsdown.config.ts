@@ -12,7 +12,7 @@ export default defineConfig({
     'src/constants.ts',
     'src/extractors/index.ts',
     'src/types.ts',
-    'src/utils.ts',
+    'src/utils/index.ts',
   ],
   platform: 'neutral',
   exports: true,

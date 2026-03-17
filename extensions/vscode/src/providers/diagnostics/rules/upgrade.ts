@@ -1,5 +1,5 @@
 import type { PackageInfo } from '#api/package'
-import type { ResolvedDependencyInfo } from '#core/workspace'
+import type { DependencyInfo } from '#core/workspace'
 import type { OffsetRange } from 'npmx-language-core/types'
 import type { DiagnosticRule, RangeDiagnosticInfo } from '..'
 import { config } from '#state'
@@ -11,7 +11,7 @@ import lte from 'semver/functions/lte'
 import prerelease from 'semver/functions/prerelease'
 import { DiagnosticSeverity, Uri } from 'vscode'
 
-export function resolveUpgrade(dep: ResolvedDependencyInfo, pkg: PackageInfo, resolvedVersion: string, ignoreList = config.ignore.upgrade) {
+export function resolveUpgrade(dep: DependencyInfo, pkg: PackageInfo, resolvedVersion: string, ignoreList = config.ignore.upgrade) {
   const { distTags } = pkg
   if (Object.hasOwn(distTags, dep.resolvedSpec))
     return

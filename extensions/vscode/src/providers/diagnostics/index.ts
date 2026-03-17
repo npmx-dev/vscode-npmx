@@ -1,4 +1,4 @@
-import type { ResolvedDependencyInfo } from '#core/workspace'
+import type { DependencyInfo } from '#core/workspace'
 import type { OffsetRange } from 'npmx-language-core/types'
 import type { Awaitable } from 'reactive-vscode'
 import type { Diagnostic, TextDocument, Uri } from 'vscode'
@@ -20,8 +20,8 @@ import { checkVulnerability } from './rules/vulnerability'
 
 export interface DiagnosticContext {
   uri: Uri
-  dep: ResolvedDependencyInfo
-  pkg: NonNullable<Awaited<ReturnType<ResolvedDependencyInfo['packageInfo']>>>
+  dep: DependencyInfo
+  pkg: NonNullable<Awaited<ReturnType<DependencyInfo['packageInfo']>>>
 }
 
 export interface RangeDiagnosticInfo extends Omit<Diagnostic, 'range' | 'source'> {
@@ -102,7 +102,7 @@ export function useDiagnostics() {
       }
     }
 
-    const collect = async (dep: ResolvedDependencyInfo) => {
+    const collect = async (dep: DependencyInfo) => {
       try {
         const pkg = await dep.packageInfo()
         if (!pkg || isStale(document, targetVersion))

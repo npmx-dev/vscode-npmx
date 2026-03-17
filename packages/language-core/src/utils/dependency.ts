@@ -1,13 +1,8 @@
-import type { ResolvedDependencyInfo } from '#core/workspace'
-import type { CatalogsInfo } from 'npmx-language-core/types'
-import { isJsrNpmPackage, jsrNpmToJsrName, parsePackageId } from '#utils/package'
-import { normalizeCatalogName } from 'npmx-language-core/utils'
+import type { CatalogsInfo, ResolvedDependencyInfo } from '../types'
+import { normalizeCatalogName } from './catalog'
+import { isJsrNpmPackage, jsrNpmToJsrName, parsePackageId } from './package'
 
-interface FinalResolution extends Pick<ResolvedDependencyInfo, 'resolvedName' | 'resolvedSpec' | 'resolvedProtocol'> {
-}
-
-interface DependencySpecResolution extends FinalResolution, Pick<ResolvedDependencyInfo, 'protocol' | 'categoryName'> {
-}
+type FinalResolution = Pick<ResolvedDependencyInfo, 'resolvedName' | 'resolvedSpec' | 'resolvedProtocol'>
 
 const GIT_PATTERN = /^(?:git\+|git:\/\/|github:|gitlab:|bitbucket:|ssh:\/\/git@)/i
 const HTTP_PATTERN = /^https?:/i
@@ -105,7 +100,7 @@ function resolveEffectiveSpec(rawName: string, rawSpec: string, catalogs?: Catal
   }
 }
 
-export function resolveDependencySpec(rawName: string, rawSpec: string, catalogs: CatalogsInfo = {}): DependencySpecResolution {
+export function resolveDependencySpec(rawName: string, rawSpec: string, catalogs: CatalogsInfo = {}): ResolvedDependencyInfo {
   const spec = rawSpec.trim()
   const effective = resolveEffectiveSpec(rawName, rawSpec, catalogs)
 

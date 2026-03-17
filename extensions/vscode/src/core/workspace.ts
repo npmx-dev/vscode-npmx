@@ -1,32 +1,34 @@
 import type { PackageInfo } from '#api/package'
 import type { PackageManager } from '#shared/types'
-import type { CatalogsInfo, DependencyInfo, DependencyProtocol, PackageManifestInfo, WorkspaceCatalogInfo } from 'npmx-language-core/types'
+import type {
+  CatalogsInfo,
+  ExtractedDependencyInfo,
+  PackageManifestInfo,
+  ResolvedDependencyInfo,
+  WorkspaceCatalogInfo,
+} from 'npmx-language-core/types'
 import type { CacheOptions } from 'ocache'
 import type { WorkspaceFolder } from 'vscode'
 import { getPackageInfo } from '#api/package'
 import { logger } from '#state'
 import { isOffsetInRange } from '#utils/ast'
-import { resolveDependencySpec } from '#utils/dependency'
 import { getDocumentText, isPackageManifestPath, isWorkspaceFilePath } from '#utils/file'
 import { resolveExactVersion } from '#utils/package'
 import { lazyInit } from '#utils/shared'
 import { PNPM_WORKSPACE_BASENAME, YARN_WORKSPACE_BASENAME } from 'npmx-language-core/constants'
 import { getExtractor } from 'npmx-language-core/extractors'
+import { resolveDependencySpec } from 'npmx-language-core/utils'
 import { defineCachedFunction } from 'ocache'
 import { commands, Uri, window, workspace } from 'vscode'
 import { accessOk } from 'vscode-find-up'
 
-export interface ResolvedDependencyInfo extends DependencyInfo {
-  protocol: DependencyProtocol
-  resolvedName: string
-  resolvedSpec: string
-  resolvedProtocol: DependencyProtocol
+export interface DependencyInfo extends ExtractedDependencyInfo, ResolvedDependencyInfo {
   packageInfo: () => Promise<PackageInfo | null>
   resolvedVersion: () => Promise<string | null>
 }
 
-type WithResolvedDependencyInfo<T> = Omit<T, 'dependencies'> & {
-  dependencies: ResolvedDependencyInfo[]
+type WithDependencyInfo<T> = Omit<T, 'dependencies'> & {
+  dependencies: DependencyInfo[]
 }
 
 export const workspaceFileMapping: Record<Exclude<PackageManager, 'npm'>, string> = {
@@ -99,7 +101,7 @@ class WorkspaceContext {
     return this.#catalogs!.promise
   }
 
-  #createResolvedDependencyInfo(dependency: DependencyInfo, catalogs?: CatalogsInfo): ResolvedDependencyInfo {
+  #createResolvedDependencyInfo(dependency: ExtractedDependencyInfo, catalogs?: CatalogsInfo): DependencyInfo {
     const resolution = resolveDependencySpec(dependency.rawName, dependency.rawSpec, catalogs)
 
     const packageInfo = lazyInit(
@@ -127,7 +129,7 @@ class WorkspaceContext {
   }
 
   loadPackageManifestInfo = defineCachedFunction<
-    WithResolvedDependencyInfo<PackageManifestInfo> | undefined,
+    WithDependencyInfo<PackageManifestInfo> | undefined,
     [Uri]
   >(async (uri) => {
     const path = uri.path
@@ -155,7 +157,7 @@ class WorkspaceContext {
   }, this.#cacheOptions)
 
   loadWorkspaceCatalogInfo = defineCachedFunction<
-    WithResolvedDependencyInfo<WorkspaceCatalogInfo> | undefined,
+    WithDependencyInfo<WorkspaceCatalogInfo> | undefined,
     [Uri]
   >(async (uri) => {
     const path = uri.path
@@ -209,7 +211,7 @@ export async function getWorkspaceContext(uri: Uri) {
   return await getWorkspaceContextByFolder(folder)
 }
 
-export async function getResolvedDependencies(uri: Uri): Promise<ResolvedDependencyInfo[] | undefined> {
+export async function getResolvedDependencies(uri: Uri): Promise<DependencyInfo[] | undefined> {
   const ctx = await getWorkspaceContext(uri)
   if (!ctx)
     return
@@ -221,7 +223,7 @@ export async function getResolvedDependencies(uri: Uri): Promise<ResolvedDepende
   )?.dependencies
 }
 
-export async function getResolvedDependencyByOffset(uri: Uri, offset: number): Promise<ResolvedDependencyInfo | undefined> {
+export async function getResolvedDependencyByOffset(uri: Uri, offset: number): Promise<DependencyInfo | undefined> {
   const dependencies = await getResolvedDependencies(uri)
 
   return dependencies?.find((dependency) => isOffsetInRange(offset, dependency.nameRange) || isOffsetInRange(offset, dependency.specRange))

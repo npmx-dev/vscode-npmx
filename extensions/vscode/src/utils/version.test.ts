@@ -1,4 +1,4 @@
-import type { ResolvedDependencyInfo } from '#core/workspace'
+import type { DependencyInfo } from '#core/workspace'
 import { describe, expect, it } from 'vitest'
 import { formatUpgradeVersion } from './version'
 
@@ -19,7 +19,7 @@ describe('formatUpgradeVersion', () => {
     [['^1.0.0', 'npm:foo@^1.0.0', 'my-foo'], '2.0.0', 'npm:foo@^2.0.0'],
   ])('should preserve $0', ([resolvedSpec, rawSpec = resolvedSpec, rawName = 'foo', protocol = 'npm'], target, expected) => {
     expect(
-      formatUpgradeVersion({ protocol, rawName, rawSpec, resolvedName: 'foo', resolvedSpec } as ResolvedDependencyInfo, target),
+      formatUpgradeVersion({ protocol, rawName, rawSpec, resolvedName: 'foo', resolvedSpec } as DependencyInfo, target),
     ).toBe(expected)
   })
 })

@@ -1,6 +1,6 @@
 import type { PackageInfo } from '#api/package'
 import { describe, expect, it } from 'vitest'
-import { encodePackageName, isJsrNpmPackage, jsrNpmToJsrName, parsePackageId, resolveExactVersion } from './package'
+import { encodePackageName, resolveExactVersion } from './package'
 
 describe('encodePackageName', () => {
   it('should encode regular package name', () => {
@@ -9,48 +9,6 @@ describe('encodePackageName', () => {
 
   it('should encode scoped package name', () => {
     expect(encodePackageName('@vue/core')).toBe('@vue%2Fcore')
-  })
-})
-
-describe('isJsrNpmPackage', () => {
-  it('should detect @jsr/ scoped packages', () => {
-    expect(isJsrNpmPackage('@jsr/luca__cases')).toBe(true)
-    expect(isJsrNpmPackage('@jsr/std__path')).toBe(true)
-  })
-
-  it('should not detect non-jsr packages', () => {
-    expect(isJsrNpmPackage('lodash')).toBe(false)
-    expect(isJsrNpmPackage('@types/node')).toBe(false)
-  })
-})
-
-describe('jsrNpmToJsrName', () => {
-  it('should convert @jsr/ npm name to JSR name', () => {
-    expect(jsrNpmToJsrName('@jsr/luca__cases')).toBe('@luca/cases')
-    expect(jsrNpmToJsrName('@jsr/std__path')).toBe('@std/path')
-  })
-})
-
-describe('parsePackageId', () => {
-  it('should parse package id with version', () => {
-    expect(parsePackageId('lodash@4.17.21')).toEqual({
-      name: 'lodash',
-      version: '4.17.21',
-    })
-  })
-
-  it('should parse scoped package id with version', () => {
-    expect(parsePackageId('@babel/core@7.0.0')).toEqual({
-      name: '@babel/core',
-      version: '7.0.0',
-    })
-  })
-
-  it('should keep package name when version is missing', () => {
-    expect(parsePackageId('@babel/core')).toEqual({
-      name: '@babel/core',
-      version: null,
-    })
   })
 })
 

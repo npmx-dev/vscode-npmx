@@ -18,7 +18,7 @@ export type DependencyCategory
     | 'catalog'
     | 'catalogs'
 
-export interface DependencyInfo {
+export interface ExtractedDependencyInfo {
   category: DependencyCategory
   categoryName?: string
   rawName: string
@@ -27,13 +27,21 @@ export interface DependencyInfo {
   specRange: OffsetRange
 }
 
-interface DependenciesInfo {
-  dependencies: DependencyInfo[]
+export interface ResolvedDependencyInfo {
+  protocol: DependencyProtocol
+  categoryName?: string
+  resolvedName: string
+  resolvedSpec: string
+  resolvedProtocol: string
+}
+
+interface HasDependenciesInfo {
+  dependencies: ExtractedDependencyInfo[]
 }
 
 export type Engines = Record<string, string>
 
-export interface PackageManifestInfo extends DependenciesInfo {
+export interface PackageManifestInfo extends HasDependenciesInfo {
   name?: string
   version?: string
   packageManager?: string
@@ -42,13 +50,13 @@ export interface PackageManifestInfo extends DependenciesInfo {
 
 export type CatalogsInfo = Record<string, Record<string, string>>
 
-export interface WorkspaceCatalogInfo extends DependenciesInfo {
+export interface WorkspaceCatalogInfo extends HasDependenciesInfo {
   catalogs?: CatalogsInfo
 }
 
 export interface BaseExtractor<T = unknown> {
   parse: (text: string) => T | null | undefined
-  getDependenciesInfo: (root: T) => DependencyInfo[]
+  getDependenciesInfo: (root: T) => ExtractedDependencyInfo[]
 }
 
 export interface PackageManifestExtractor {

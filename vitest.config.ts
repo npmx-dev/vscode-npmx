@@ -5,6 +5,7 @@ export default defineConfig({
     include: ['**/*.test.ts'],
     projects: [
       'extensions/*',
+      'packages/*',
     ],
   },
 })

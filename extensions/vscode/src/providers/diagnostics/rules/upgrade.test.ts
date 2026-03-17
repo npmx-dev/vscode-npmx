@@ -1,5 +1,5 @@
 import type { PackageInfo } from '#api/package'
-import type { ResolvedDependencyInfo } from '#core/workspace'
+import type { DependencyInfo } from '#core/workspace'
 import { describe, expect, it } from 'vitest'
 import { createContext } from './__tests__/utils'
 import { resolveUpgrade } from './upgrade'
@@ -16,7 +16,7 @@ const versionsMeta: Record<string, object> = {
   '3.0.0-alpha.5': {},
 }
 
-async function createOptions(version: string): Promise<[ResolvedDependencyInfo, PackageInfo, string]> {
+async function createOptions(version: string): Promise<[DependencyInfo, PackageInfo, string]> {
   const ctx = createContext({ name: 'vite', version, distTags, versionsMeta })
   return [ctx.dep, ctx.pkg, (await ctx.dep.resolvedVersion())!]
 }

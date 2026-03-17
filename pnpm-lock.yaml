@@ -174,7 +174,7 @@ importers:
         version: 2.8.2
 
   packages/language-core:
-    dependencies:
+    devDependencies:
       jsonc-parser:
         specifier: catalog:inline
         version: 3.3.1

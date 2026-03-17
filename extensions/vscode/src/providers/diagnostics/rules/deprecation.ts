@@ -2,7 +2,7 @@ import type { DiagnosticRule } from '..'
 import { config } from '#state'
 import { checkIgnored } from '#utils/ignore'
 import { npmxPackageUrl } from '#utils/links'
-import { formatPackageId } from '#utils/package'
+import { formatPackageId } from 'npmx-language-core/utils'
 import { DiagnosticSeverity, DiagnosticTag, Uri } from 'vscode'
 
 export const checkDeprecation: DiagnosticRule = async ({ dep, pkg }) => {

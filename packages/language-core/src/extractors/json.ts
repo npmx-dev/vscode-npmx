@@ -1,5 +1,5 @@
 import type { Node as JsonNode } from 'jsonc-parser'
-import type { BaseExtractor, DependencyCategory, DependencyInfo, Engines, OffsetRange, PackageManifestExtractor, PackageManifestInfo } from '../types'
+import type { BaseExtractor, DependencyCategory, Engines, ExtractedDependencyInfo, OffsetRange, PackageManifestExtractor, PackageManifestInfo } from '../types'
 import { findNodeAtLocation, parseTree } from 'jsonc-parser'
 
 const DEPENDENCY_SECTIONS: DependencyCategory[] = [
@@ -21,7 +21,7 @@ export class JsonExtractor implements PackageManifestExtractor, BaseExtractor<Js
     return [node.offset + 1, node.offset + node.length - 1]
   }
 
-  #parseDependencyNode(node: JsonNode, category: DependencyCategory): DependencyInfo | undefined {
+  #parseDependencyNode(node: JsonNode, category: DependencyCategory): ExtractedDependencyInfo | undefined {
     if (!node.children?.length)
       return
 
@@ -63,7 +63,7 @@ export class JsonExtractor implements PackageManifestExtractor, BaseExtractor<Js
   }
 
   getDependenciesInfo(root: JsonNode) {
-    const result: DependencyInfo[] = []
+    const result: ExtractedDependencyInfo[] = []
 
     DEPENDENCY_SECTIONS.forEach((section) => {
       const node = findNodeAtLocation(root, [section])

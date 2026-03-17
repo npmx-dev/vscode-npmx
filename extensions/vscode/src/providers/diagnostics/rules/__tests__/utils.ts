@@ -1,8 +1,8 @@
 import type { PackageInfo } from '#api/package'
 import type { Engines } from 'fast-npm-meta'
 import type { DiagnosticContext } from '../..'
-import { resolveDependencySpec } from '#utils/dependency'
 import { resolveExactVersion } from '#utils/package'
+import { resolveDependencySpec } from 'npmx-language-core/utils'
 import { Uri } from 'vscode'
 
 interface CreateContextOptions {
