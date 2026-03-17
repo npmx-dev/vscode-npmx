@@ -9,6 +9,7 @@ export default defineConfig({
   },
   /// keep-sorted
   entry: [
+    'src/constants.ts',
     'src/extractors/index.ts',
     'src/types.ts',
     'src/utils.ts',
@@ -17,4 +18,12 @@ export default defineConfig({
   exports: true,
   dts: true,
   minify: 'dce-only',
+  deps: {
+    /// keep-sorted
+    onlyBundle: [
+      'jsonc-parser',
+      'pathe',
+      'yaml',
+    ],
+  },
 })

@@ -1,6 +1,6 @@
 import type { ModuleReplacement } from 'module-replacements'
-import { CACHE_MAX_AGE_ONE_DAY, NPMX_DEV_API } from '#shared/constants'
 import { logger } from '#state'
+import { CACHE_MAX_AGE_ONE_DAY, NPMX_DEV_API } from '#utils/constants'
 import { encodePackageName } from '#utils/package'
 import { defineCachedFunction } from 'ocache'
 import { ofetch } from 'ofetch'

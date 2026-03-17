@@ -1,5 +1,5 @@
-import { PACKAGE_JSON_BASENAME, SUPPORTED_DOCUMENT_PATTERN } from '#shared/constants'
 import { config } from '#state'
+import { PACKAGE_JSON_PATTERN, SUPPORTED_DOCUMENT_PATTERN } from '#utils/constants'
 import { watchEffect } from 'reactive-vscode'
 import { languages } from 'vscode'
 import { CatalogCompletionItemProvider } from './catalog'
@@ -21,7 +21,7 @@ export function useCompletionItem() {
 
   watchEffect((onCleanup) => {
     const disposable = languages.registerCompletionItemProvider(
-      { pattern: `**/${PACKAGE_JSON_BASENAME}` },
+      { pattern: PACKAGE_JSON_PATTERN },
       new CatalogCompletionItemProvider(),
       ...CatalogCompletionItemProvider.triggers,
     )

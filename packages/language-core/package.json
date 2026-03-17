@@ -11,6 +11,7 @@
   },
   "sideEffects": false,
   "exports": {
+    "./constants": "./dist/constants.js",
     "./extractors": "./dist/extractors/index.js",
     "./types": "./dist/types.js",
     "./utils": "./dist/utils.js",

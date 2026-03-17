@@ -1,6 +1,5 @@
-import type { Engines } from 'fast-npm-meta'
 import type { Node as JsonNode } from 'jsonc-parser'
-import type { BaseExtractor, DependencyCategory, DependencyInfo, OffsetRange, PackageManifestExtractor, PackageManifestInfo } from '../types'
+import type { BaseExtractor, DependencyCategory, DependencyInfo, Engines, OffsetRange, PackageManifestExtractor, PackageManifestInfo } from '../types'
 import { findNodeAtLocation, parseTree } from 'jsonc-parser'
 
 const DEPENDENCY_SECTIONS: DependencyCategory[] = [

@@ -1,5 +1,5 @@
-import { SUPPORTED_DOCUMENT_PATTERN } from '#shared/constants'
 import { config, internalCommands } from '#state'
+import { SUPPORTED_DOCUMENT_PATTERN } from '#utils/constants'
 import { computed, useCommand, watch } from 'reactive-vscode'
 import { CodeActionKind, languages } from 'vscode'
 import { addToIgnore } from '../../commands/add-to-ignore'

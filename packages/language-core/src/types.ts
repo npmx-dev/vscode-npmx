@@ -1,5 +1,3 @@
-import type { Engines } from 'fast-npm-meta'
-
 export type OffsetRange = [start: number, end: number]
 
 export type DependencyProtocol
@@ -11,8 +9,6 @@ export type DependencyProtocol
     | 'file'
     | 'http'
     | null
-
-export type CatalogsInfo = Record<string, Record<string, string>>
 
 export type DependencyCategory
   = | 'dependencies'
@@ -35,6 +31,8 @@ interface DependenciesInfo {
   dependencies: DependencyInfo[]
 }
 
+export type Engines = Record<string, string>
+
 export interface PackageManifestInfo extends DependenciesInfo {
   name?: string
   version?: string
@@ -42,8 +40,10 @@ export interface PackageManifestInfo extends DependenciesInfo {
   engines?: Engines
 }
 
+export type CatalogsInfo = Record<string, Record<string, string>>
+
 export interface WorkspaceCatalogInfo extends DependenciesInfo {
-  catalogs?: Record<string, Record<string, string>>
+  catalogs?: CatalogsInfo
 }
 
 export interface BaseExtractor<T = unknown> {

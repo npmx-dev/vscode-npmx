@@ -175,9 +175,6 @@ importers:
 
   packages/language-core:
     dependencies:
-      fast-npm-meta:
-        specifier: catalog:inline
-        version: 1.4.2
       jsonc-parser:
         specifier: catalog:inline
         version: 3.3.1

@@ -1,7 +1,7 @@
 import type { MaybeError, PackageVersionsInfoWithMetadata } from 'fast-npm-meta'
-import { CACHE_MAX_AGE_ONE_DAY } from '#shared/constants'
 import { logger } from '#state'
 import { createBatchRunner } from '#utils/batch'
+import { CACHE_MAX_AGE_ONE_DAY } from '#utils/constants'
 import { getVersionsBatch } from 'fast-npm-meta'
 import { defineCachedFunction } from 'ocache'
 

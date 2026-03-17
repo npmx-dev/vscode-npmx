@@ -1,4 +1,4 @@
-import { NPMX_DEV_API } from '#shared/constants'
+import { NPMX_DEV_API } from '#utils/constants'
 import { all } from 'module-replacements'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'

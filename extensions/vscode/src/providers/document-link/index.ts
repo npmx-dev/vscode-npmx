@@ -1,5 +1,5 @@
-import { SUPPORTED_DOCUMENT_PATTERN } from '#shared/constants'
 import { config } from '#state'
+import { SUPPORTED_DOCUMENT_PATTERN } from '#utils/constants'
 import { watchEffect } from 'reactive-vscode'
 import { languages } from 'vscode'
 import { NpmxDocumentLinkProvider } from './npmx'

@@ -1,7 +1,7 @@
-import { PACKAGE_JSON_BASENAME } from '#shared/constants'
 import { logger } from '#state'
 import { readPackageManifest } from '#utils/file'
 import { npmxFileUrl } from '#utils/links'
+import { PACKAGE_JSON_BASENAME } from 'npmx-language-core/constants'
 import { env, Uri, window } from 'vscode'
 import { findUp } from 'vscode-find-up'
 
