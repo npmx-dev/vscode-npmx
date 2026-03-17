@@ -206,7 +206,6 @@
   "devDependencies": {
     "@types/vscode": "1.101.0",
     "fast-npm-meta": "catalog:inline",
-    "jsonc-parser": "catalog:inline",
     "npmx-language-core": "workspace:*",
     "ocache": "catalog:inline",
     "ofetch": "catalog:inline",
@@ -215,7 +214,6 @@
     "reactive-vscode": "catalog:inline",
     "semver": "catalog:inline",
     "vscode-ext-gen": "catalog:dev",
-    "vscode-find-up": "catalog:inline",
-    "yaml": "catalog:inline"
+    "vscode-find-up": "catalog:inline"
   }
 }
