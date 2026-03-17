@@ -17,6 +17,9 @@ jobs:
         with:
           no-frozen-lockfile: true
 
+      - name: Build
+        run: pnpm build
+
       - name: Fix
         run: pnpm run lint:fix
 

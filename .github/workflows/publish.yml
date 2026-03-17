@@ -19,11 +19,8 @@ jobs:
         with:
           fetch-all: true
 
-      - name: Generate Github Changelog
-        run: npx changelogithub
-        continue-on-error: true
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Build
+        run: pnpm build
 
       - name: Generate .vsix file
         working-directory: extensions/vscode
@@ -36,3 +33,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VSCE_PAT: ${{secrets.VSCE_PAT}}
           OVSX_PAT: ${{secrets.OVSX_PAT}}
+
+      - name: Generate Github Changelog
+        run: npx changelogithub
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

@@ -198,10 +198,10 @@
   "scripts": {
     "dev": "tsdown --watch",
     "build": "tsdown",
-    "postinstall": "npm run update",
     "update": "vscode-ext-gen --scope npmx --output ../../shared/meta.ts",
     "vscode:prepublish": "npm run build",
-    "package": "npx @vscode/vsce package --no-dependencies"
+    "package": "npx @vscode/vsce package --no-dependencies",
+    "prepare": "npm run update"
   },
   "devDependencies": {
     "@types/vscode": "1.101.0",
