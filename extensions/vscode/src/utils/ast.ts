@@ -1,4 +1,4 @@
-import type { OffsetRange } from '#types/extractor'
+import type { OffsetRange } from 'npmx-language-core/types'
 import type { TextDocument } from 'vscode'
 import { Range } from 'vscode'
 

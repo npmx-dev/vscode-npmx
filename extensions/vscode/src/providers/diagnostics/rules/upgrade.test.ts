@@ -1,5 +1,5 @@
 import type { PackageInfo } from '#api/package'
-import type { ResolvedDependencyInfo } from '#types/context'
+import type { ResolvedDependencyInfo } from '#core/workspace'
 import { describe, expect, it } from 'vitest'
 import { createContext } from './__tests__/utils'
 import { resolveUpgrade } from './upgrade'

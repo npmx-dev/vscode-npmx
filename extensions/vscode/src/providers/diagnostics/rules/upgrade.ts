@@ -1,6 +1,6 @@
 import type { PackageInfo } from '#api/package'
-import type { ResolvedDependencyInfo } from '#types/context'
-import type { OffsetRange } from '#types/extractor'
+import type { ResolvedDependencyInfo } from '#core/workspace'
+import type { OffsetRange } from 'npmx-language-core/types'
 import type { DiagnosticRule, RangeDiagnosticInfo } from '..'
 import { config } from '#state'
 import { checkIgnored } from '#utils/ignore'

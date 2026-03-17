@@ -1,7 +1,7 @@
 import type { DefinitionProvider, Position, TextDocument } from 'vscode'
 import { getResolvedDependencyByOffset, getWorkspaceContext } from '#core/workspace'
 import { offsetRangeToRange } from '#utils/ast'
-import { normalizeCatalogName } from '#utils/dependency'
+import { normalizeCatalogName } from 'npmx-language-core/utils'
 import { Location, workspace } from 'vscode'
 
 export class CatalogDefinitionProvider implements DefinitionProvider {

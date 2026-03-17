@@ -1,4 +1,4 @@
-import type { ResolvedDependencyInfo } from '#types/context'
+import type { ResolvedDependencyInfo } from '#core/workspace'
 import { describe, expect, it } from 'vitest'
 import { formatUpgradeVersion } from './version'
 

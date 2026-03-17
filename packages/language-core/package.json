@@ -1,0 +1,36 @@
+{
+  "name": "npmx-language-core",
+  "type": "module",
+  "version": "0.7.0",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/npmx-dev/vscode-npmx.git",
+    "directory": "packages/language-core"
+  },
+  "sideEffects": false,
+  "exports": {
+    "./extractors": "./dist/extractors/index.js",
+    "./types": "./dist/types.js",
+    "./utils": "./dist/utils.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "dev": "tsdown --watch",
+    "build": "tsdown"
+  },
+  "devDependencies": {
+    "jsonc-parser": "catalog:inline",
+    "pathe": "catalog:inline",
+    "yaml": "catalog:inline"
+  },
+  "inlinedDependencies": {
+    "jsonc-parser": "3.3.1",
+    "yaml": "2.8.2",
+    "pathe": "2.0.3"
+  }
+}

@@ -1,4 +1,4 @@
-import type { ResolvedDependencyInfo } from '#types/context'
+import type { ResolvedDependencyInfo } from '#core/workspace'
 import { formatPackageId } from './package'
 
 const RANGE_PREFIXES = ['>=', '<=', '=', '>', '<']

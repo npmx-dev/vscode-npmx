@@ -1,6 +1,6 @@
+import type { PackageInfo } from '#api/package'
 import type { PackageManager } from '#shared/types'
-import type { CatalogsInfo, ResolvedDependencyInfo } from '#types/context'
-import type { DependencyInfo, PackageManifestInfo, WorkspaceCatalogInfo } from '#types/extractor'
+import type { CatalogsInfo, DependencyInfo, DependencyProtocol, PackageManifestInfo, WorkspaceCatalogInfo } from 'npmx-language-core/types'
 import type { CacheOptions } from 'ocache'
 import type { WorkspaceFolder } from 'vscode'
 import { getPackageInfo } from '#api/package'
@@ -11,10 +11,19 @@ import { resolveDependencySpec } from '#utils/dependency'
 import { getDocumentText, isPackageManifestPath, isWorkspaceFilePath } from '#utils/file'
 import { resolveExactVersion } from '#utils/package'
 import { lazyInit } from '#utils/shared'
+import { getExtractor } from 'npmx-language-core/extractors'
 import { defineCachedFunction } from 'ocache'
 import { commands, Uri, window, workspace } from 'vscode'
 import { accessOk } from 'vscode-find-up'
-import { getExtractor } from './extractors'
+
+export interface ResolvedDependencyInfo extends DependencyInfo {
+  protocol: DependencyProtocol
+  resolvedName: string
+  resolvedSpec: string
+  resolvedProtocol: DependencyProtocol
+  packageInfo: () => Promise<PackageInfo | null>
+  resolvedVersion: () => Promise<string | null>
+}
 
 type WithResolvedDependencyInfo<T> = Omit<T, 'dependencies'> & {
   dependencies: ResolvedDependencyInfo[]

@@ -1,14 +1,18 @@
 import type { Engines } from 'fast-npm-meta'
 
-export type {
-  Node as JsonNode,
-} from 'jsonc-parser'
-
-export type {
-  Node as YamlNode,
-} from 'yaml'
-
 export type OffsetRange = [start: number, end: number]
+
+export type DependencyProtocol
+  = | 'npm'
+    | 'jsr'
+    | 'workspace'
+    | 'catalog'
+    | 'git'
+    | 'file'
+    | 'http'
+    | null
+
+export type CatalogsInfo = Record<string, Record<string, string>>
 
 export type DependencyCategory
   = | 'dependencies'
@@ -42,7 +46,7 @@ export interface WorkspaceCatalogInfo extends DependenciesInfo {
   catalogs?: Record<string, Record<string, string>>
 }
 
-export interface BaseExtractor<T = any> {
+export interface BaseExtractor<T = unknown> {
   parse: (text: string) => T | null | undefined
   getDependenciesInfo: (root: T) => DependencyInfo[]
 }

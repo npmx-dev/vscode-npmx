@@ -1,6 +1,7 @@
 {
   "references": [
-    { "path": "./extensions/vscode/tsconfig.json" }
+    { "path": "./extensions/vscode/tsconfig.json" },
+    { "path": "./packages/language-core/tsconfig.json" }
   ],
   "files": []
 }

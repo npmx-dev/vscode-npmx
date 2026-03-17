@@ -1,5 +1,5 @@
-import type { ResolvedDependencyInfo } from '#types/context'
-import type { OffsetRange } from '#types/extractor'
+import type { ResolvedDependencyInfo } from '#core/workspace'
+import type { OffsetRange } from 'npmx-language-core/types'
 import type { Awaitable } from 'reactive-vscode'
 import type { Diagnostic, TextDocument, Uri } from 'vscode'
 import { getResolvedDependencies } from '#core/workspace'

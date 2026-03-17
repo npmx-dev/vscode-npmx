@@ -3,6 +3,7 @@ trustPolicy: no-downgrade
 
 packages:
   - extensions/*
+  - packages/*
 
 catalogs:
   dev:

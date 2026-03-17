@@ -1,7 +1,7 @@
-import type { BaseExtractor, DependencyInfo, OffsetRange, WorkspaceCatalogExtractor, WorkspaceCatalogInfo, YamlNode } from '#types/extractor'
-import type { Pair, Scalar, YAMLMap } from 'yaml'
-import { normalizeCatalogName } from '#utils/dependency'
+import type { Pair, Scalar, YAMLMap, Node as YamlNode } from 'yaml'
+import type { BaseExtractor, DependencyInfo, OffsetRange, WorkspaceCatalogExtractor, WorkspaceCatalogInfo } from '../types'
 import { isMap, isPair, isScalar, parseDocument } from 'yaml'
+import { normalizeCatalogName } from '../utils'
 
 const CATALOG_SECTION = 'catalog'
 const CATALOGS_SECTION = 'catalogs'
