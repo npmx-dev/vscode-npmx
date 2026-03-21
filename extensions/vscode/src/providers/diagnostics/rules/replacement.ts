@@ -1,8 +1,8 @@
 import type { ModuleReplacement } from 'module-replacements'
 import type { DiagnosticRule } from '..'
-import { getReplacement } from '#api/replacement'
 import { config } from '#state'
-import { checkIgnored } from '#utils/ignore'
+import { getReplacement } from 'npmx-language-core/api/replacement'
+import { checkIgnored } from 'npmx-language-core/utils'
 import { DiagnosticSeverity, Uri } from 'vscode'
 
 function getMdnUrl(path: string): string {

@@ -205,11 +205,8 @@
   },
   "devDependencies": {
     "@types/vscode": "1.101.0",
-    "fast-npm-meta": "catalog:inline",
     "npmx-language-core": "workspace:*",
     "ocache": "catalog:inline",
-    "ofetch": "catalog:inline",
-    "pathe": "catalog:inline",
     "perfect-debounce": "catalog:inline",
     "reactive-vscode": "catalog:inline",
     "semver": "catalog:inline",

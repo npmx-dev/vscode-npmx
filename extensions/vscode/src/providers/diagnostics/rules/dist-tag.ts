@@ -1,5 +1,5 @@
 import type { DiagnosticRule } from '..'
-import { npmxPackageUrl } from '#utils/links'
+import { npmxPackageUrl } from 'npmx-language-core/links'
 import { DiagnosticSeverity, Uri } from 'vscode'
 
 export const checkDistTag: DiagnosticRule = async ({ dep, pkg }) => {

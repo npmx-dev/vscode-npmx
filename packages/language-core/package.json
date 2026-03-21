@@ -11,8 +11,12 @@
   },
   "sideEffects": false,
   "exports": {
+    "./api/package": "./dist/api/package.js",
+    "./api/replacement": "./dist/api/replacement.js",
+    "./api/vulnerability": "./dist/api/vulnerability.js",
     "./constants": "./dist/constants.js",
     "./extractors": "./dist/extractors/index.js",
+    "./links": "./dist/links.js",
     "./types": "./dist/types.js",
     "./utils": "./dist/utils/index.js",
     "./package.json": "./package.json"
@@ -24,12 +28,21 @@
     "dev": "tsdown --watch",
     "build": "tsdown"
   },
+  "dependencies": {
+    "ocache": "catalog:inline",
+    "ofetch": "catalog:inline",
+    "semver": "catalog:inline"
+  },
   "devDependencies": {
+    "fast-npm-meta": "catalog:inline",
     "jsonc-parser": "catalog:inline",
+    "module-replacements": "catalog:test",
     "pathe": "catalog:inline",
     "yaml": "catalog:inline"
   },
   "inlinedDependencies": {
+    "fast-npm-meta": "1.4.2",
+    "module-replacements": "2.11.0",
     "jsonc-parser": "3.3.1",
     "yaml": "2.8.2",
     "pathe": "2.0.3"

@@ -1,9 +1,8 @@
 import type { DependencyInfo } from '#core/workspace'
 import type { Position, TextDocument } from 'vscode'
 import { getResolvedDependencies, getResolvedDependencyByOffset } from '#core/workspace'
-import { isSupportedDependencyDocument } from '#utils/file'
 import { PACKAGE_JSON_BASENAME } from 'npmx-language-core/constants'
-import { getImportSpecifierInLine } from 'npmx-language-core/utils'
+import { getImportSpecifierInLine, isDependencyFile } from 'npmx-language-core/utils'
 import { findUp } from 'vscode-find-up'
 
 export async function resolveHoverDependency(
@@ -12,7 +11,7 @@ export async function resolveHoverDependency(
 ): Promise<DependencyInfo | undefined> {
   const offset = document.offsetAt(position)
 
-  if (isSupportedDependencyDocument(document))
+  if (isDependencyFile(document.uri.path))
     return await getResolvedDependencyByOffset(document.uri, offset)
 
   if (document.uri.scheme !== 'file')

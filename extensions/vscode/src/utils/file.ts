@@ -1,44 +1,10 @@
 import type { PackageManifestInfo } from 'npmx-language-core/types'
-import type { TextDocument, Uri } from 'vscode'
-import { PACKAGE_JSON_BASENAME, PNPM_WORKSPACE_BASENAME, YARN_WORKSPACE_BASENAME } from 'npmx-language-core/constants'
-import { basename } from 'pathe'
+import type { Uri } from 'vscode'
 import { workspace } from 'vscode'
 
 export async function getDocumentText(uri: Uri) {
   const document = await workspace.openTextDocument(uri)
   return document.getText()
-}
-
-const SUPPORTED_BASENAMES = new Set([
-  PACKAGE_JSON_BASENAME,
-  PNPM_WORKSPACE_BASENAME,
-  YARN_WORKSPACE_BASENAME,
-])
-
-export function isSupportedDependencyDocument(documentOrUri: TextDocument | Uri): boolean {
-  const path = 'uri' in documentOrUri ? documentOrUri.uri.path : documentOrUri.path
-  return SUPPORTED_BASENAMES.has(basename(path))
-}
-
-export function isPackageManifestPath(path: string): path is `${string}/${typeof PACKAGE_JSON_BASENAME}` {
-  return path.endsWith(`/${PACKAGE_JSON_BASENAME}`)
-}
-
-export function isWorkspaceFilePath(path: string): path is `${string}/${typeof PNPM_WORKSPACE_BASENAME}` | `${string}/${typeof YARN_WORKSPACE_BASENAME}` {
-  return path.endsWith(`/${PNPM_WORKSPACE_BASENAME}`)
-    || path.endsWith(`/${YARN_WORKSPACE_BASENAME}`)
-}
-
-export function isRootPackageJson(uri: Uri): boolean {
-  const folder = workspace.getWorkspaceFolder(uri)
-  if (!folder)
-    return false
-
-  return uri.path === `${folder.uri.path}/${PACKAGE_JSON_BASENAME}`
-}
-
-export function isWorkspaceLevelFile(uri: Uri): boolean {
-  return isWorkspaceFilePath(uri.path) || isRootPackageJson(uri)
 }
 
 /**

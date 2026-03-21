@@ -1,3 +1,5 @@
+import type { Engines } from 'fast-npm-meta'
+
 export type OffsetRange = [start: number, end: number]
 
 export type DependencyProtocol
@@ -39,7 +41,7 @@ interface HasDependenciesInfo {
   dependencies: ExtractedDependencyInfo[]
 }
 
-export type Engines = Record<string, string>
+export { Engines }
 
 export interface PackageManifestInfo extends HasDependenciesInfo {
   name?: string

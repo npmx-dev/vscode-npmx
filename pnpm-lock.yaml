@@ -136,21 +136,12 @@ importers:
       '@types/vscode':
         specifier: 1.101.0
         version: 1.101.0
-      fast-npm-meta:
-        specifier: catalog:inline
-        version: 1.4.2
       npmx-language-core:
         specifier: workspace:*
         version: link:../../packages/language-core
       ocache:
         specifier: catalog:inline
         version: 0.1.2
-      ofetch:
-        specifier: catalog:inline
-        version: 2.0.0-alpha.3
-      pathe:
-        specifier: catalog:inline
-        version: 2.0.3
       perfect-debounce:
         specifier: catalog:inline
         version: 2.1.0
@@ -168,10 +159,26 @@ importers:
         version: 0.1.1(@types/vscode@1.101.0)
 
   packages/language-core:
+    dependencies:
+      ocache:
+        specifier: catalog:inline
+        version: 0.1.2
+      ofetch:
+        specifier: catalog:inline
+        version: 2.0.0-alpha.3
+      semver:
+        specifier: catalog:inline
+        version: 7.7.4
     devDependencies:
+      fast-npm-meta:
+        specifier: catalog:inline
+        version: 1.4.2
       jsonc-parser:
         specifier: catalog:inline
         version: 3.3.1
+      module-replacements:
+        specifier: catalog:test
+        version: 2.11.0
       pathe:
         specifier: catalog:inline
         version: 2.0.3

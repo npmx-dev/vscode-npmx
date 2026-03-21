@@ -1,5 +1,5 @@
-import type { PackageInfo } from '#api/package'
 import type { PackageManager } from '#shared/types'
+import type { PackageInfo } from 'npmx-language-core/api/package'
 import type {
   CatalogsInfo,
   ExtractedDependencyInfo,
@@ -9,15 +9,13 @@ import type {
 } from 'npmx-language-core/types'
 import type { CacheOptions } from 'ocache'
 import type { WorkspaceFolder } from 'vscode'
-import { getPackageInfo } from '#api/package'
 import { logger } from '#state'
 import { isOffsetInRange } from '#utils/ast'
-import { getDocumentText, isPackageManifestPath, isWorkspaceFilePath } from '#utils/file'
-import { resolveExactVersion } from '#utils/package'
-import { lazyInit } from '#utils/shared'
+import { getDocumentText } from '#utils/file'
+import { getPackageInfo } from 'npmx-language-core/api/package'
 import { PNPM_WORKSPACE_BASENAME, YARN_WORKSPACE_BASENAME } from 'npmx-language-core/constants'
 import { getExtractor } from 'npmx-language-core/extractors'
-import { resolveDependencySpec } from 'npmx-language-core/utils'
+import { isPackageManifest, isWorkspaceFile, lazyInit, resolveDependencySpec, resolveExactVersion } from 'npmx-language-core/utils'
 import { defineCachedFunction } from 'ocache'
 import { commands, Uri, window, workspace } from 'vscode'
 import { accessOk } from 'vscode-find-up'
@@ -133,7 +131,7 @@ class WorkspaceContext {
     [Uri]
   >(async (uri) => {
     const path = uri.path
-    if (!isPackageManifestPath(path))
+    if (!isPackageManifest(path))
       return
 
     logger.info(`[workspace-context] load package manifest info: ${path}`)
@@ -161,7 +159,7 @@ class WorkspaceContext {
     [Uri]
   >(async (uri) => {
     const path = uri.path
-    if (!isWorkspaceFilePath(path))
+    if (!isWorkspaceFile(path))
       return
     logger.info(`[workspace-context] load workspace catalog info: ${path}`)
 
@@ -217,7 +215,7 @@ export async function getResolvedDependencies(uri: Uri): Promise<DependencyInfo[
     return
 
   return (
-    isPackageManifestPath(uri.path)
+    isPackageManifest(uri.path)
       ? await ctx.loadPackageManifestInfo(uri)
       : await ctx.loadWorkspaceCatalogInfo(uri)
   )?.dependencies

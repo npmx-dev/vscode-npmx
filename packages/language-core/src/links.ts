@@ -1,4 +1,4 @@
-import { NPMX_DEV } from '#utils/constants'
+import { NPMX_DEV } from './constants'
 
 const SPACES = /\s+/g
 

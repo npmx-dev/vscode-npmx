@@ -1,8 +1,7 @@
 import type { DiagnosticRule } from '..'
 import { config } from '#state'
-import { checkIgnored } from '#utils/ignore'
-import { npmxPackageUrl } from '#utils/links'
-import { formatPackageId } from 'npmx-language-core/utils'
+import { npmxPackageUrl } from 'npmx-language-core/links'
+import { checkIgnored, formatPackageId } from 'npmx-language-core/utils'
 import { DiagnosticSeverity, DiagnosticTag, Uri } from 'vscode'
 
 export const checkDeprecation: DiagnosticRule = async ({ dep, pkg }) => {

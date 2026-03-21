@@ -1,4 +1,4 @@
-import { formatPackageId, parsePackageId } from 'npmx-language-core/utils'
+import { formatPackageId, parsePackageId } from './package'
 
 export function checkIgnored(options: {
   ignoreList: string[]

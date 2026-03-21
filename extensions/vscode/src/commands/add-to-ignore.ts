@@ -1,6 +1,6 @@
 import type { ConfigurationTarget } from 'vscode'
 import { scopedConfigs } from '#shared/meta'
-import { checkIgnored } from '#utils/ignore'
+import { checkIgnored } from 'npmx-language-core/utils'
 import { workspace } from 'vscode'
 
 export async function addToIgnore(scope: string, name: string, target: ConfigurationTarget) {

@@ -7,7 +7,7 @@ import { displayName } from '#shared/meta'
 import { config, logger } from '#state'
 import { offsetRangeToRange } from '#utils/ast'
 import { SUPPORTED_DOCUMENT_PATTERN } from '#utils/constants'
-import { isSupportedDependencyDocument } from '#utils/file'
+import { isDependencyFile } from 'npmx-language-core/utils'
 import { debounce } from 'perfect-debounce'
 import { computed, nextTick, useActiveTextEditor, useDisposable, useDocumentText, useFileSystemWatcher, watch } from 'reactive-vscode'
 import { languages, TabInputText, window, workspace } from 'vscode'
@@ -127,7 +127,7 @@ export function useDiagnostics() {
       return
 
     const document = activeEditor.value.document
-    if (!isSupportedDependencyDocument(document))
+    if (!isDependencyFile(document.uri.path))
       return
 
     collectDiagnostics(document)

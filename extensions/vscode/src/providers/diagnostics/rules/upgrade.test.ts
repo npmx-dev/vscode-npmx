@@ -1,5 +1,5 @@
-import type { PackageInfo } from '#api/package'
 import type { DependencyInfo } from '#core/workspace'
+import type { PackageInfo } from 'npmx-language-core/api/package'
 import { describe, expect, it } from 'vitest'
 import { createContext } from './__tests__/utils'
 import { resolveUpgrade } from './upgrade'

@@ -1,5 +1,5 @@
 import type { HoverProvider, Position, TextDocument } from 'vscode'
-import { jsrPackageUrl, npmxDocsUrl, npmxPackageUrl } from '#utils/links'
+import { jsrPackageUrl, npmxDocsUrl, npmxPackageUrl } from 'npmx-language-core/links'
 import { Hover, MarkdownString } from 'vscode'
 import { resolveHoverDependency } from './resolve'
 

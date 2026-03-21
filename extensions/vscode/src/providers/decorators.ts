@@ -2,7 +2,7 @@ import type { DecorationOptions } from 'vscode'
 import { getResolvedDependencies } from '#core/workspace'
 import { logger } from '#state'
 import { offsetRangeToRange } from '#utils/ast'
-import { isPackageManifestPath } from '#utils/file'
+import { isPackageManifest } from 'npmx-language-core/utils'
 import { useActiveTextEditor, useEditorDecorations, watch } from 'reactive-vscode'
 import { Range } from 'vscode'
 
@@ -16,7 +16,7 @@ export function useDecorators() {
     },
     async (editor) => {
       const document = editor.document
-      if (!isPackageManifestPath(document.uri.path))
+      if (!isPackageManifest(document.uri.path))
         return []
       logger.info(`[decorators] updating ${document.uri.path}`)
 

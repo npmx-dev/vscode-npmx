@@ -1,9 +1,8 @@
-import type { Engines } from 'fast-npm-meta'
+import type { Engines } from 'npmx-language-core/types'
 import type { DiagnosticRule } from '..'
 import { getWorkspaceContext } from '#core/workspace'
-import { isPackageManifestPath } from '#utils/file'
-import { npmxPackageUrl } from '#utils/links'
-import { formatPackageId } from 'npmx-language-core/utils'
+import { npmxPackageUrl } from 'npmx-language-core/links'
+import { formatPackageId, isPackageManifest } from 'npmx-language-core/utils'
 import Range from 'semver/classes/range'
 import intersects from 'semver/ranges/intersects'
 import subset from 'semver/ranges/subset'
@@ -49,7 +48,7 @@ export function resolveEngineMismatches(
 }
 
 export const checkEngineMismatch: DiagnosticRule = async ({ uri, dep, pkg }) => {
-  if (!isPackageManifestPath(uri.path))
+  if (!isPackageManifest(uri.path))
     return
   if (dep.category !== 'dependencies')
     return

@@ -9,8 +9,10 @@ export default defineConfig({
   },
   /// keep-sorted
   entry: [
+    'src/api/*',
     'src/constants.ts',
     'src/extractors/index.ts',
+    'src/links.ts',
     'src/types.ts',
     'src/utils/index.ts',
   ],
@@ -21,7 +23,10 @@ export default defineConfig({
   deps: {
     /// keep-sorted
     onlyBundle: [
+      'fast-npm-meta',
       'jsonc-parser',
+      'module-replacements',
+      'ofetch',
       'pathe',
       'yaml',
     ],

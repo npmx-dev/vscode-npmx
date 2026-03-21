@@ -9,11 +9,9 @@ export default defineConfig({
     neverBundle: ['vscode'],
     /// keep-sorted
     onlyBundle: [
-      'fast-npm-meta',
       'ocache',
       'ofetch',
       'ohash',
-      'pathe',
       'perfect-debounce',
       'semver',
       'vscode-find-up',

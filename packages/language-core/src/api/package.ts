@@ -1,9 +1,8 @@
 import type { MaybeError, PackageVersionsInfoWithMetadata } from 'fast-npm-meta'
-import { logger } from '#state'
-import { createBatchRunner } from '#utils/batch'
-import { CACHE_MAX_AGE_ONE_DAY } from '#utils/constants'
 import { getVersionsBatch } from 'fast-npm-meta'
 import { defineCachedFunction } from 'ocache'
+import { CACHE_MAX_AGE_ONE_DAY } from '../constants'
+import { createBatchRunner } from '../utils/batch'
 
 const BATCH_SIZE = 20
 
@@ -11,10 +10,8 @@ export interface PackageInfo extends PackageVersionsInfoWithMetadata {
   versionToTag: Map<string, string>
 }
 
-function parsePackageInfo(name: string, pkg: MaybeError<PackageVersionsInfoWithMetadata>) {
+function parsePackageInfo(pkg: MaybeError<PackageVersionsInfoWithMetadata>) {
   if ('error' in pkg) {
-    logger.warn(`[package] Fetching error(${name}): ${JSON.stringify(pkg)}`)
-
     // Return null to trigger a cache hit
     if (pkg.status === 404)
       return null
@@ -35,15 +32,10 @@ function parsePackageInfo(name: string, pkg: MaybeError<PackageVersionsInfoWithM
 const getPackageInfoBatch = createBatchRunner<string, PackageInfo | null>({
   maxSize: BATCH_SIZE,
   runBatch: async (names) => {
-    const logName = names.join(', ')
-    logger.info(`[package] Fetching ${logName}`)
-
     const list = await getVersionsBatch(names, {
       metadata: true,
       throw: false,
     })
-
-    logger.info(`[package] Fetched ${logName}`)
 
     const values = new Map<string, PackageInfo | null>()
     const errors = new Map<string, unknown>()
@@ -56,7 +48,7 @@ const getPackageInfoBatch = createBatchRunner<string, PackageInfo | null>({
       }
 
       try {
-        values.set(name, parsePackageInfo(name, item))
+        values.set(name, parsePackageInfo(item))
       } catch (error) {
         errors.set(name, error)
       }
