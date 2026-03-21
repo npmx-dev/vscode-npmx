@@ -58,7 +58,7 @@ export const checkEngineMismatch: DiagnosticRule = async ({ uri, dep, pkg }) => 
     return
 
   const ctx = await getWorkspaceContext(uri)
-  const engines = (await ctx?.loadPackageManifestInfo(uri))?.engines
+  const engines = (await ctx?.loadPackageManifestInfo(uri.path))?.engines
 
   if (!engines)
     return

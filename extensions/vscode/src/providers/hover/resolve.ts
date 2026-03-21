@@ -1,4 +1,4 @@
-import type { DependencyInfo } from '#core/workspace'
+import type { DependencyInfo } from 'npmx-language-core/workspace'
 import type { Position, TextDocument } from 'vscode'
 import { getResolvedDependencies, getResolvedDependencyByOffset } from '#core/workspace'
 import { PACKAGE_JSON_BASENAME } from 'npmx-language-core/constants'

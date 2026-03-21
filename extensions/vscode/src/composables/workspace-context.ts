@@ -22,11 +22,10 @@ export function useWorkspaceContext() {
     if (!ctx)
       return
 
-    await ctx.invalidateDependencyInfo(uri)
+    await ctx.invalidateDependencyInfo(uri.path)
     logger.info(`[workspace-context] invalidate dependencies cache: ${uri.path}`)
     if (reload) {
-      const folderPath = ctx!.folder.uri.path
-      const isRoot = uri.path === `${folderPath}/${PACKAGE_JSON_BASENAME}`
+      const isRoot = uri.path === `${ctx.rootPath}/${PACKAGE_JSON_BASENAME}`
       if (isRoot || isWorkspaceFile(uri.path))
         await ctx.loadWorkspace()
     }

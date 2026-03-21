@@ -1,6 +1,6 @@
-import type { DependencyInfo } from '#core/workspace'
 import type { PackageInfo } from 'npmx-language-core/api/package'
 import type { OffsetRange } from 'npmx-language-core/types'
+import type { DependencyInfo } from 'npmx-language-core/workspace'
 import type { DiagnosticRule, RangeDiagnosticInfo } from '..'
 import { config } from '#state'
 import { formatUpgradeVersion } from '#utils/version'

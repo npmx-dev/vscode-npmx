@@ -19,6 +19,7 @@
     "./links": "./dist/links.js",
     "./types": "./dist/types.js",
     "./utils": "./dist/utils/index.js",
+    "./workspace": "./dist/workspace.js",
     "./package.json": "./package.json"
   },
   "files": [
@@ -41,10 +42,10 @@
     "yaml": "catalog:inline"
   },
   "inlinedDependencies": {
-    "fast-npm-meta": "1.4.2",
     "module-replacements": "2.11.0",
     "jsonc-parser": "3.3.1",
     "yaml": "2.8.2",
+    "fast-npm-meta": "1.4.2",
     "pathe": "2.0.3"
   }
 }

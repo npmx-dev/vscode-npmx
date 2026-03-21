@@ -1,4 +1,4 @@
-import type { DependencyInfo } from '#core/workspace'
+import type { DependencyInfo } from 'npmx-language-core/workspace'
 import { formatPackageId } from 'npmx-language-core/utils'
 
 const RANGE_PREFIXES = ['>=', '<=', '=', '>', '<']

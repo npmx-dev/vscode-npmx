@@ -15,6 +15,7 @@ export default defineConfig({
     'src/links.ts',
     'src/types.ts',
     'src/utils/index.ts',
+    'src/workspace.ts',
   ],
   platform: 'neutral',
   exports: true,

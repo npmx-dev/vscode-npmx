@@ -1,183 +1,32 @@
-import type { PackageManager } from '#shared/types'
-import type { PackageInfo } from 'npmx-language-core/api/package'
-import type {
-  CatalogsInfo,
-  ExtractedDependencyInfo,
-  PackageManifestInfo,
-  ResolvedDependencyInfo,
-  WorkspaceCatalogInfo,
-} from 'npmx-language-core/types'
-import type { CacheOptions } from 'ocache'
-import type { WorkspaceFolder } from 'vscode'
+import type { DependencyInfo, WorkspaceAdapter } from 'npmx-language-core/workspace'
 import { logger } from '#state'
 import { isOffsetInRange } from '#utils/ast'
 import { getDocumentText } from '#utils/file'
-import { getPackageInfo } from 'npmx-language-core/api/package'
-import { PNPM_WORKSPACE_BASENAME, YARN_WORKSPACE_BASENAME } from 'npmx-language-core/constants'
-import { getExtractor } from 'npmx-language-core/extractors'
-import { isPackageManifest, isWorkspaceFile, lazyInit, resolveDependencySpec, resolveExactVersion } from 'npmx-language-core/utils'
+import { isPackageManifest } from 'npmx-language-core/utils'
+import { WorkspaceContext } from 'npmx-language-core/workspace'
 import { defineCachedFunction } from 'ocache'
 import { commands, Uri, window, workspace } from 'vscode'
 import { accessOk } from 'vscode-find-up'
 
-export interface DependencyInfo extends ExtractedDependencyInfo, ResolvedDependencyInfo {
-  packageInfo: () => Promise<PackageInfo | null>
-  resolvedVersion: () => Promise<string | null>
-}
+const vscodeAdapter: WorkspaceAdapter = {
+  async readFile(path: string): Promise<string> {
+    return getDocumentText(Uri.file(path))
+  },
 
-type WithDependencyInfo<T> = Omit<T, 'dependencies'> & {
-  dependencies: DependencyInfo[]
-}
+  async fileExists(path: string): Promise<boolean> {
+    return accessOk(Uri.file(path))
+  },
 
-export const workspaceFileMapping: Record<Exclude<PackageManager, 'npm'>, string> = {
-  pnpm: PNPM_WORKSPACE_BASENAME,
-  yarn: YARN_WORKSPACE_BASENAME,
-}
-
-async function getPackageManager(uri: Uri): Promise<PackageManager> {
-  try {
-    const result = await commands.executeCommand<PackageManager>('npm.packageManager', uri)
-    return result || 'npm'
-  } catch (error) {
-    logger.error('Error getting package manager:', error)
-    window.showErrorMessage('Failed to detect package manager. Defaulting to npm.')
-    return 'npm'
-  }
-}
-
-class WorkspaceContext {
-  folder: WorkspaceFolder
-  packageManager: PackageManager = 'npm'
-  workspaceFileUri?: Uri
-  #catalogs?: PromiseWithResolvers<CatalogsInfo | undefined>
-
-  private constructor(folder: WorkspaceFolder) {
-    this.folder = folder
-  }
-
-  static async create(folder: WorkspaceFolder): Promise<WorkspaceContext> {
-    const ctx = new WorkspaceContext(folder)
-    await ctx.loadWorkspace()
-
-    return ctx
-  }
-
-  async loadWorkspace() {
-    this.#catalogs = Promise.withResolvers()
-    this.packageManager = await getPackageManager(this.folder.uri)
-
-    logger.info(`[workspace-context] detect package manager: ${this.packageManager}`)
-
-    if (this.packageManager !== 'npm') {
-      const workspaceFilename = workspaceFileMapping[this.packageManager]
-      this.workspaceFileUri = Uri.joinPath(this.folder.uri, workspaceFilename)
-      this.#catalogs.resolve(
-        await accessOk(this.workspaceFileUri)
-          ? (await this.loadWorkspaceFileInfo(this.workspaceFileUri))?.catalogs
-          : undefined,
-      )
-    } else {
-      this.#catalogs.resolve(undefined)
+  async detectPackageManager(rootPath: string): Promise<'npm' | 'pnpm' | 'yarn'> {
+    try {
+      const result = await commands.executeCommand<'npm' | 'pnpm' | 'yarn'>('npm.packageManager', Uri.file(rootPath))
+      return result || 'npm'
+    } catch (error) {
+      logger.error('Error getting package manager:', error)
+      window.showErrorMessage('Failed to detect package manager. Defaulting to npm.')
+      return 'npm'
     }
-  }
-
-  #cacheOptions: CacheOptions<any, [Uri]> = {
-    getKey: (uri) => uri.path,
-    maxAge: 0,
-    swr: false,
-    staleMaxAge: 0,
-  }
-
-  async getCatalogs(): Promise<CatalogsInfo | undefined> {
-    return this.#catalogs!.promise
-  }
-
-  #createResolvedDependencyInfo(dependency: ExtractedDependencyInfo, catalogs?: CatalogsInfo): DependencyInfo {
-    const resolution = resolveDependencySpec(dependency.rawName, dependency.rawSpec, catalogs)
-
-    const packageInfo = lazyInit(
-      async () => resolution.resolvedProtocol === 'npm'
-        ? await getPackageInfo(resolution.resolvedName) ?? null
-        : null,
-    )
-
-    return {
-      ...dependency,
-      ...resolution,
-      categoryName: dependency.categoryName ?? resolution.categoryName,
-      packageInfo,
-      resolvedVersion: lazyInit(async () => {
-        if (resolution.resolvedProtocol !== 'npm')
-          return null
-
-        const pkg = await packageInfo()
-        if (!pkg)
-          return null
-
-        return resolveExactVersion(pkg, resolution.resolvedSpec)
-      }),
-    }
-  }
-
-  loadPackageManifestInfo = defineCachedFunction<
-    WithDependencyInfo<PackageManifestInfo> | undefined,
-    [Uri]
-  >(async (uri) => {
-    const path = uri.path
-    if (!isPackageManifest(path))
-      return
-
-    logger.info(`[workspace-context] load package manifest info: ${path}`)
-
-    const extractor = getExtractor(path)
-    if (!extractor)
-      return
-
-    const [info, catalogs] = await Promise.all([
-      getDocumentText(uri).then((text) => extractor.getPackageManifestInfo(text)),
-      this.getCatalogs(),
-    ])
-
-    if (!info)
-      return
-
-    return {
-      ...info,
-      dependencies: info.dependencies.map((dep) => this.#createResolvedDependencyInfo(dep, catalogs)),
-    }
-  }, this.#cacheOptions)
-
-  loadWorkspaceFileInfo = defineCachedFunction<
-    WithDependencyInfo<WorkspaceCatalogInfo> | undefined,
-    [Uri]
-  >(async (uri) => {
-    const path = uri.path
-    if (!isWorkspaceFile(path))
-      return
-    logger.info(`[workspace-context] load workspace catalog info: ${path}`)
-
-    const extractor = getExtractor(path)
-    if (!extractor)
-      return
-
-    const text = await getDocumentText(uri)
-    const info = extractor.getWorkspaceCatalogInfo(text)
-
-    if (!info)
-      return
-
-    return {
-      ...info,
-      dependencies: info.dependencies.map((dep) => this.#createResolvedDependencyInfo(dep)),
-    }
-  }, this.#cacheOptions)
-
-  async invalidateDependencyInfo(uri: Uri) {
-    if (isPackageManifest(uri.path))
-      await this.loadPackageManifestInfo.invalidate(uri)
-    else if (isWorkspaceFile(uri.path))
-      await this.loadWorkspaceFileInfo.invalidate(uri)
-  }
+  },
 }
 
 export const getWorkspaceContext = defineCachedFunction<
@@ -189,7 +38,7 @@ export const getWorkspaceContext = defineCachedFunction<
     return
 
   logger.info(`[workspace-context] built ${folder.uri.path}`)
-  return await WorkspaceContext.create(folder)
+  return await WorkspaceContext.create(folder.uri.path, vscodeAdapter)
 }, {
   name: 'workspace-context',
   getKey: (uri) => workspace.getWorkspaceFolder(uri)?.uri.path ?? '',
@@ -205,8 +54,8 @@ export async function getResolvedDependencies(uri: Uri): Promise<DependencyInfo[
 
   return (
     isPackageManifest(uri.path)
-      ? await ctx.loadPackageManifestInfo(uri)
-      : await ctx.loadWorkspaceFileInfo(uri)
+      ? await ctx.loadPackageManifestInfo(uri.path)
+      : await ctx.loadWorkspaceFileInfo(uri.path)
   )?.dependencies
 }
 
