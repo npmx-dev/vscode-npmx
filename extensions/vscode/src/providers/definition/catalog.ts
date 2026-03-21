@@ -2,7 +2,7 @@ import type { DefinitionProvider, Position, TextDocument } from 'vscode'
 import { getResolvedDependencyByOffset, getWorkspaceContext } from '#core/workspace'
 import { offsetRangeToRange } from '#utils/ast'
 import { normalizeCatalogName } from 'npmx-language-core/utils'
-import { Location, Uri, workspace } from 'vscode'
+import { Location, workspace } from 'vscode'
 
 export class CatalogDefinitionProvider implements DefinitionProvider {
   async provideDefinition(document: TextDocument, position: Position) {
@@ -28,7 +28,7 @@ export class CatalogDefinitionProvider implements DefinitionProvider {
     if (!target)
       return
 
-    const workspaceFileUri = Uri.file(ctx.workspaceFilePath)
+    const workspaceFileUri = document.uri.with({ path: ctx.workspaceFilePath })
     const workspaceDocument = await workspace.openTextDocument(workspaceFileUri)
 
     return new Location(

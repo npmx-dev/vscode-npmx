@@ -1,32 +1,37 @@
 import type { DependencyInfo, WorkspaceAdapter } from 'npmx-language-core/workspace'
+import type { Uri } from 'vscode'
 import { logger } from '#state'
 import { isOffsetInRange } from '#utils/ast'
 import { getDocumentText } from '#utils/file'
 import { isPackageManifest } from 'npmx-language-core/utils'
 import { WorkspaceContext } from 'npmx-language-core/workspace'
 import { defineCachedFunction } from 'ocache'
-import { commands, Uri, window, workspace } from 'vscode'
+import { commands, window, workspace } from 'vscode'
 import { accessOk } from 'vscode-find-up'
 
-const vscodeAdapter: WorkspaceAdapter = {
-  async readFile(path: string): Promise<string> {
-    return getDocumentText(Uri.file(path))
-  },
+function createVscodeAdapter(baseUri: Uri): WorkspaceAdapter {
+  const toUri = (path: string) => baseUri.with({ path })
 
-  async fileExists(path: string): Promise<boolean> {
-    return accessOk(Uri.file(path))
-  },
+  return {
+    async readFile(path: string): Promise<string> {
+      return getDocumentText(toUri(path))
+    },
 
-  async detectPackageManager(rootPath: string): Promise<'npm' | 'pnpm' | 'yarn'> {
-    try {
-      const result = await commands.executeCommand<'npm' | 'pnpm' | 'yarn'>('npm.packageManager', Uri.file(rootPath))
-      return result || 'npm'
-    } catch (error) {
-      logger.error('Error getting package manager:', error)
-      window.showErrorMessage('Failed to detect package manager. Defaulting to npm.')
-      return 'npm'
-    }
-  },
+    async fileExists(path: string): Promise<boolean> {
+      return accessOk(toUri(path))
+    },
+
+    async detectPackageManager(rootPath: string): Promise<'npm' | 'pnpm' | 'yarn'> {
+      try {
+        const result = await commands.executeCommand<'npm' | 'pnpm' | 'yarn'>('npm.packageManager', toUri(rootPath))
+        return result || 'npm'
+      } catch (error) {
+        logger.error('Error getting package manager:', error)
+        window.showErrorMessage('Failed to detect package manager. Defaulting to npm.')
+        return 'npm'
+      }
+    },
+  }
 }
 
 export const getWorkspaceContext = defineCachedFunction<
@@ -38,7 +43,7 @@ export const getWorkspaceContext = defineCachedFunction<
     return
 
   logger.info(`[workspace-context] built ${folder.uri.path}`)
-  return await WorkspaceContext.create(folder.uri.path, vscodeAdapter)
+  return await WorkspaceContext.create(folder.uri.path, createVscodeAdapter(folder.uri))
 }, {
   name: 'workspace-context',
   getKey: (uri) => workspace.getWorkspaceFolder(uri)?.uri.path ?? '',
