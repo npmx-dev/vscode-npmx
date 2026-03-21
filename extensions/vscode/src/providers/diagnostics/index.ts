@@ -127,6 +127,8 @@ export function useDiagnostics() {
       return
 
     const document = activeEditor.value.document
+    if (document.uri.scheme !== 'file')
+      return
     if (!isDependencyFile(document.uri.path))
       return
 

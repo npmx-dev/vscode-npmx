@@ -9,13 +9,13 @@ export async function resolveHoverDependency(
   document: TextDocument,
   position: Position,
 ): Promise<DependencyInfo | undefined> {
+  if (document.uri.scheme !== 'file')
+    return
+
   const offset = document.offsetAt(position)
 
   if (isDependencyFile(document.uri.path))
     return await getResolvedDependencyByOffset(document.uri, offset)
-
-  if (document.uri.scheme !== 'file')
-    return
 
   const wordRange = document.getWordRangeAtPosition(position)
   if (!wordRange)
