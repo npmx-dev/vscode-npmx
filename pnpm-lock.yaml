@@ -44,8 +44,8 @@ catalogs:
       specifier: ^3.3.1
       version: 3.3.1
     ocache:
-      specifier: ^0.1.2
-      version: 0.1.2
+      specifier: ^0.1.4
+      version: 0.1.4
     ofetch:
       specifier: ^2.0.0-alpha.3
       version: 2.0.0-alpha.3
@@ -141,7 +141,7 @@ importers:
         version: link:../../packages/language-core
       ocache:
         specifier: catalog:inline
-        version: 0.1.2
+        version: 0.1.4
       perfect-debounce:
         specifier: catalog:inline
         version: 2.1.0
@@ -162,7 +162,7 @@ importers:
     dependencies:
       ocache:
         specifier: catalog:inline
-        version: 0.1.2
+        version: 0.1.4
       ofetch:
         specifier: catalog:inline
         version: 2.0.0-alpha.3
@@ -1872,8 +1872,8 @@ packages:
   obug@2.1.1:
     resolution: {integrity: sha512-uTqF9MuPraAQ+IsnPf366RG4cP9RtUi7MLO1N3KEc+wb0a6yKpeL0lmk2IB1jY5KHPAlTc6T/JRdC/YqxHNwkQ==}
 
-  ocache@0.1.2:
-    resolution: {integrity: sha512-lI34wjM7cahEdrq2I5obbF7MEdE97vULf6vNj6ZCzwEadzyXO1w7QOl2qzzG4IL8cyO7wDtXPj9CqW/aG3mn7g==}
+  ocache@0.1.4:
+    resolution: {integrity: sha512-e7geNdWjxSnvsSgvLuPvgKgu7ubM10ZmTPOgpr7mz2BXYtvjMKTiLhjFi/gWU8chkuP6hNkZBsa9LzOusyaqkQ==}
 
   ofetch@2.0.0-alpha.3:
     resolution: {integrity: sha512-zpYTCs2byOuft65vI3z43Dd6iSdFbOZZLb9/d21aCpx2rGastVU9dOCv0lu4ykc1Ur1anAYjDi3SUvR0vq50JA==}
@@ -4199,7 +4199,7 @@ snapshots:
 
   obug@2.1.1: {}
 
-  ocache@0.1.2:
+  ocache@0.1.4:
     dependencies:
       ohash: 2.0.11
 

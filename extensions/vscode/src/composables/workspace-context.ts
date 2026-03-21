@@ -1,5 +1,5 @@
 import type { Uri } from 'vscode'
-import { deleteWorkspaceContextCache, getWorkspaceContext } from '#core/workspace'
+import { getWorkspaceContext } from '#core/workspace'
 import { logger } from '#state'
 import { SUPPORTED_DOCUMENT_PATTERN } from '#utils/constants'
 import { PACKAGE_JSON_BASENAME } from 'npmx-language-core/constants'
@@ -9,8 +9,8 @@ import { window, workspace } from 'vscode'
 
 export function useWorkspaceContext() {
   useDisposable(workspace.onDidChangeWorkspaceFolders(({ removed }) => {
-    removed.forEach((folder) => {
-      deleteWorkspaceContextCache(folder)
+    removed.forEach(async (folder) => {
+      await getWorkspaceContext.invalidate(folder.uri)
       logger.info(`[workspace-context] delete workspace folder cache: ${folder.uri.path}`)
     })
   }))
@@ -23,7 +23,7 @@ export function useWorkspaceContext() {
     if (!ctx)
       return
 
-    ctx.invalidateDependencyInfo(uri)
+    await ctx.invalidateDependencyInfo(uri)
     logger.info(`[workspace-context] invalidate dependencies cache: ${uri.path}`)
     if (reload) {
       const folderPath = ctx!.folder.uri.path

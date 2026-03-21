@@ -15,11 +15,11 @@ export class CatalogDefinitionProvider implements DefinitionProvider {
     if (!ctx?.workspaceFileUri)
       return
 
-    const catalogInfo = await ctx.loadWorkspaceCatalogInfo(ctx.workspaceFileUri)
-    if (!catalogInfo)
+    const dependencies = (await ctx.loadWorkspaceFileInfo(ctx.workspaceFileUri))?.dependencies
+    if (!dependencies)
       return
 
-    const target = catalogInfo.dependencies.find(
+    const target = dependencies.find(
       (dep) =>
         dep.rawName === info.resolvedName
         && dep.categoryName != null && info.categoryName != null

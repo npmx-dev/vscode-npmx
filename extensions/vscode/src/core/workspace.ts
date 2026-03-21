@@ -50,7 +50,6 @@ class WorkspaceContext {
   packageManager: PackageManager = 'npm'
   workspaceFileUri?: Uri
   #catalogs?: PromiseWithResolvers<CatalogsInfo | undefined>
-  #invalidatedPaths = new Set<string>()
 
   private constructor(folder: WorkspaceFolder) {
     this.folder = folder
@@ -74,7 +73,7 @@ class WorkspaceContext {
       this.workspaceFileUri = Uri.joinPath(this.folder.uri, workspaceFilename)
       this.#catalogs.resolve(
         await accessOk(this.workspaceFileUri)
-          ? (await this.loadWorkspaceCatalogInfo(this.workspaceFileUri))?.catalogs
+          ? (await this.loadWorkspaceFileInfo(this.workspaceFileUri))?.catalogs
           : undefined,
       )
     } else {
@@ -87,12 +86,6 @@ class WorkspaceContext {
     maxAge: 0,
     swr: false,
     staleMaxAge: 0,
-    shouldInvalidateCache: (uri) => this.#invalidatedPaths.delete(uri.path),
-  }
-
-  invalidateDependencyInfo(uri: Uri) {
-    const path = uri.path
-    this.#invalidatedPaths.add(path)
   }
 
   async getCatalogs(): Promise<CatalogsInfo | undefined> {
@@ -154,7 +147,7 @@ class WorkspaceContext {
     }
   }, this.#cacheOptions)
 
-  loadWorkspaceCatalogInfo = defineCachedFunction<
+  loadWorkspaceFileInfo = defineCachedFunction<
     WithDependencyInfo<WorkspaceCatalogInfo> | undefined,
     [Uri]
   >(async (uri) => {
@@ -178,36 +171,32 @@ class WorkspaceContext {
       dependencies: info.dependencies.map((dep) => this.#createResolvedDependencyInfo(dep)),
     }
   }, this.#cacheOptions)
+
+  async invalidateDependencyInfo(uri: Uri) {
+    if (isPackageManifest(uri.path))
+      await this.loadPackageManifestInfo.invalidate(uri)
+    else if (isWorkspaceFile(uri.path))
+      await this.loadWorkspaceFileInfo.invalidate(uri)
+  }
 }
 
-const invalidatedFolderPaths = new Set<string>()
-
-const getWorkspaceContextByFolder = defineCachedFunction<
+export const getWorkspaceContext = defineCachedFunction<
   WorkspaceContext | undefined,
-  [WorkspaceFolder]
-> (async (folder) => {
-  logger.info(`[workspace-context] built ${folder.uri.path}`)
-  return await WorkspaceContext.create(folder)
-}, {
-  name: 'workspace-context',
-  getKey: (folder) => folder.uri.path,
-  swr: false,
-  maxAge: 0,
-  staleMaxAge: 0,
-  shouldInvalidateCache: (folder) => invalidatedFolderPaths.delete(folder.uri.path),
-})
-
-export function deleteWorkspaceContextCache(folder: WorkspaceFolder) {
-  invalidatedFolderPaths.add(folder.uri.path)
-}
-
-export async function getWorkspaceContext(uri: Uri) {
+  [Uri]
+>(async (uri) => {
   const folder = workspace.getWorkspaceFolder(uri)
   if (!folder)
     return
 
-  return await getWorkspaceContextByFolder(folder)
-}
+  logger.info(`[workspace-context] built ${folder.uri.path}`)
+  return await WorkspaceContext.create(folder)
+}, {
+  name: 'workspace-context',
+  getKey: (uri) => workspace.getWorkspaceFolder(uri)?.uri.path ?? '',
+  swr: false,
+  maxAge: 0,
+  staleMaxAge: 0,
+})
 
 export async function getResolvedDependencies(uri: Uri): Promise<DependencyInfo[] | undefined> {
   const ctx = await getWorkspaceContext(uri)
@@ -217,7 +206,7 @@ export async function getResolvedDependencies(uri: Uri): Promise<DependencyInfo[
   return (
     isPackageManifest(uri.path)
       ? await ctx.loadPackageManifestInfo(uri)
-      : await ctx.loadWorkspaceCatalogInfo(uri)
+      : await ctx.loadWorkspaceFileInfo(uri)
   )?.dependencies
 }
 
