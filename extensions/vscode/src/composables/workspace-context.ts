@@ -9,9 +9,8 @@ import { window, workspace } from 'vscode'
 
 export function useWorkspaceContext() {
   useDisposable(workspace.onDidChangeWorkspaceFolders(({ removed }) => {
-    removed.forEach(async (folder) => {
-      await getWorkspaceContext.invalidate(folder.uri)
-      logger.info(`[workspace-context] delete workspace folder cache: ${folder.uri.path}`)
+    removed.forEach((folder) => {
+      getWorkspaceContext.invalidate(folder.uri)
     })
   }))
 
