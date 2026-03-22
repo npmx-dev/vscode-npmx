@@ -1,5 +1,6 @@
 import { useWorkspaceContext } from '#composables/workspace-context'
 import { commands, displayName, version } from '#shared/meta'
+// TODO: Uncomment when language server integration is ready
 // import { createLabsInfo } from '@volar/vscode'
 import { defineExtension, useCommands } from 'reactive-vscode'
 // import { Uri } from 'vscode'
@@ -18,6 +19,7 @@ import { logger } from './state'
 export const { activate, deactivate } = defineExtension((_ctx) => {
   logger.info(`${displayName} Activated, v${version}`)
 
+  // TODO: Uncomment when language server integration is ready
   // const volarLabs = createLabsInfo()
 
   // const serverPath = Uri.joinPath(ctx.extensionUri, './dist/server/bin/index.js').fsPath

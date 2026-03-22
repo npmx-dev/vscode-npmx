@@ -5,7 +5,7 @@ import { SUPPORTED_DOCUMENT_PATTERN } from '#utils/constants'
 import { middleware } from '@volar/vscode'
 import { LanguageClient, TransportKind } from '@volar/vscode/node'
 
-const HOVER_LANGUAGES = [
+const SUPPORTED_LANGUAGES = [
   'javascript',
   'typescript',
   'javascriptreact',
@@ -36,7 +36,7 @@ export function launch(serverPath: string) {
       middleware,
       documentSelector: [
         { scheme: 'file', pattern: SUPPORTED_DOCUMENT_PATTERN },
-        ...HOVER_LANGUAGES.map((language) => ({ scheme: 'file', language } satisfies DocumentFilter)),
+        ...SUPPORTED_LANGUAGES.map((language) => ({ scheme: 'file', language } satisfies DocumentFilter)),
       ],
       markdown: {
         isTrusted: true,
