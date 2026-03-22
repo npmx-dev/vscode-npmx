@@ -28,6 +28,10 @@ catalogs:
     semver: ^7.7.4
     vscode-find-up: ^0.1.1
     yaml: ^2.8.2
+  lsp:
+    '@volar/language-server': ^2.4.28
+    '@volar/language-service': ^2.4.28
+    '@volar/vscode': ^2.4.28
   test:
     jest-mock-vscode: ^4.12.0
     module-replacements: ^2.11.0

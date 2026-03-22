@@ -205,7 +205,9 @@
   },
   "devDependencies": {
     "@types/vscode": "1.101.0",
+    "@volar/vscode": "catalog:lsp",
     "npmx-language-core": "workspace:*",
+    "npmx-language-server": "workspace:*",
     "ocache": "catalog:inline",
     "perfect-debounce": "catalog:inline",
     "reactive-vscode": "catalog:inline",

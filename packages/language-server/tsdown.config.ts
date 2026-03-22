@@ -1,37 +1,26 @@
 import { createRequire } from 'node:module'
 import { defineConfig } from 'tsdown'
 
-/// keep-sorted
 export default defineConfig({
-  copy: [
-    '../../res',
-    { from: 'node_modules/npmx-language-server/bin/**', to: 'dist/server/bin' },
-    { from: 'node_modules/npmx-language-server/dist/**', to: 'dist/server/dist' },
+  entry: [
+    'src/index.ts',
   ],
+  platform: 'node',
+  exports: true,
+  format: 'cjs',
+  checks: {
+    // @volar/language-server@2.4.28
+    eval: false,
+  },
+  minify: 'dce-only',
   deps: {
-    neverBundle: ['vscode'],
-    /// keep-sorted
     onlyBundle: [
-      'balanced-match',
-      'brace-expansion',
-      'minimatch',
-      'ocache',
-      'ofetch',
-      'ohash',
+      /^vscode-/,
+      /^@volar\//,
+      'request-light',
       'path-browserify',
-      'perfect-debounce',
-      'semver',
-      'typescript',
-      'vscode-find-up',
-      /@volar/,
-      /reactive-vscode/,
-      /vscode-/,
     ],
   },
-  dts: false,
-  format: 'cjs',
-  minify: 'dce-only',
-  platform: 'neutral',
   plugins: [
     {
       name: 'umd-to-esm',

@@ -1,0 +1,27 @@
+{
+  "name": "npmx-language-service",
+  "type": "module",
+  "version": "0.7.0",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/npmx-dev/vscode-npmx.git",
+    "directory": "packages/language-service"
+  },
+  "sideEffects": false,
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "dev": "tsdown --watch",
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "@volar/language-service": "catalog:lsp"
+  }
+}

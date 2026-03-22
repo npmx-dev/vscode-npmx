@@ -1,0 +1,49 @@
+{
+  "name": "npmx-language-server",
+  "type": "module",
+  "version": "0.7.0",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/npmx-dev/vscode-npmx.git",
+    "directory": "packages/language-server"
+  },
+  "sideEffects": true,
+  "exports": {
+    ".": "./dist/index.cjs",
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.cjs",
+  "bin": {
+    "npmx-language-server": "./bin/index.js"
+  },
+  "files": [
+    "bin/**/*",
+    "dist/**/*"
+  ],
+  "scripts": {
+    "dev": "tsdown --watch",
+    "build": "tsdown"
+  },
+  "devDependencies": {
+    "@volar/language-server": "catalog:lsp",
+    "npmx-language-core": "workspace:*",
+    "npmx-language-service": "workspace:*"
+  },
+  "inlinedDependencies": {
+    "vscode-languageserver": "9.0.1",
+    "vscode-jsonrpc": "8.2.0",
+    "vscode-languageserver-types": "3.17.5",
+    "vscode-languageserver-protocol": "3.17.5",
+    "@volar/source-map": "2.4.28",
+    "@volar/language-core": "2.4.28",
+    "vscode-uri": "3.1.0",
+    "@volar/language-service": "2.4.28",
+    "vscode-languageserver-textdocument": "1.0.12",
+    "request-light": "0.7.0",
+    "@volar/language-server": "2.4.28",
+    "path-browserify": "1.0.1",
+    "@volar/typescript": "2.4.28"
+  }
+}
