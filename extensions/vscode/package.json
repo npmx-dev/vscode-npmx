@@ -26,8 +26,8 @@
   "categories": [
     "Other"
   ],
-  "main": "./dist/index.js",
-  "browser": "./dist/index.js",
+  "main": "./dist/index.cjs",
+  "browser": "./dist/index.cjs",
   "extensionKind": [
     "workspace"
   ],

@@ -17,8 +17,6 @@ import { useHover } from './providers/hover'
 import { logger } from './state'
 
 export const { activate, deactivate } = defineExtension((_ctx) => {
-  logger.info(`${displayName} Activated, v${version}`)
-
   // TODO: Uncomment when language server integration is ready
   // const volarLabs = createLabsInfo()
 
@@ -40,4 +38,6 @@ export const { activate, deactivate } = defineExtension((_ctx) => {
     [commands.openInBrowser]: openInBrowser,
     [commands.openFileInNpmx]: openFileInNpmx,
   })
+
+  logger.info(`${displayName} Activated, v${version}`)
 })

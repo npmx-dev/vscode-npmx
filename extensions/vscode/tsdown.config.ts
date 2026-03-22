@@ -1,5 +1,5 @@
-import { createRequire } from 'node:module'
 import { defineConfig } from 'tsdown'
+import { umdToEsm } from '../../plugins/umd-to-esm.ts'
 
 /// keep-sorted
 export default defineConfig({
@@ -32,20 +32,5 @@ export default defineConfig({
   format: 'cjs',
   minify: 'dce-only',
   platform: 'neutral',
-  plugins: [
-    {
-      name: 'umd-to-esm',
-      resolveId: {
-        filter: {
-          id: /^(vscode-.*-languageservice|vscode-languageserver-types)$/,
-        },
-        handler(source, importer) {
-          const require = createRequire(importer!)
-          const pathUmdMay = require.resolve(source)
-          const pathEsm = pathUmdMay.replace('/umd/', '/esm/')
-          return { id: pathEsm }
-        },
-      },
-    },
-  ],
+  plugins: [umdToEsm()],
 })

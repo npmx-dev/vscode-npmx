@@ -47,7 +47,6 @@ export function launch(serverPath: string) {
   )
 
   client.start()
-  client.info('[language-client] started')
 
   return client
 }
