@@ -5,8 +5,8 @@ import { defineConfig } from 'tsdown'
 export default defineConfig({
   copy: [
     '../../res',
-    { from: 'node_modules/npmx-language-server/bin/**', to: 'dist/server/bin' },
-    { from: 'node_modules/npmx-language-server/dist/**', to: 'dist/server/dist' },
+    // { from: 'node_modules/npmx-language-server/bin/**', to: 'dist/server/bin' },
+    // { from: 'node_modules/npmx-language-server/dist/**', to: 'dist/server/dist' },
   ],
   deps: {
     neverBundle: ['vscode'],
