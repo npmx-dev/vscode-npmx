@@ -1,10 +1,11 @@
 /* eslint-disable ts/no-namespace */
-import type { PackageManager } from 'npmx-language-core/workspace'
+
+export const GET_PACKAGE_MANAGER_METHOD = 'npmx/getPackageManager'
 
 export namespace GetPackageManagerRequest {
   export interface ParamsType {
     uri: string
   }
-  export type ResponseType = PackageManager
+  export type ResponseType = 'npm' | 'pnpm' | 'yarn'
   export type ErrorType = never
 }

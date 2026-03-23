@@ -1,8 +1,9 @@
+import type { GetPackageManagerRequest } from '#shared/protocol'
 import type { Connection, LanguageServer } from '@volar/language-server'
 import type { DependencyInfo, WorkspaceAdapter } from 'npmx-language-core/workspace'
 import type { IWorkspaceState } from 'npmx-language-service/types'
-import type { GetPackageManagerRequest } from './protocol'
 import { access, readFile } from 'node:fs/promises'
+import { GET_PACKAGE_MANAGER_METHOD } from '#shared/protocol'
 import { RequestType } from '@volar/language-server'
 import { PACKAGE_JSON_BASENAME } from 'npmx-language-core/constants'
 import { isDependencyFile, isPackageManifest, isWorkspaceFile } from 'npmx-language-core/utils'
@@ -14,7 +15,7 @@ const getPackageManagerRequestType = new RequestType<
   GetPackageManagerRequest.ParamsType,
   GetPackageManagerRequest.ResponseType,
   GetPackageManagerRequest.ErrorType
->('npmx/getPackageManager')
+>(GET_PACKAGE_MANAGER_METHOD)
 
 function createLanguageServerAdapter(folderUri: URI, connection: Connection): WorkspaceAdapter {
   return {
@@ -34,7 +35,7 @@ function createLanguageServerAdapter(folderUri: URI, connection: Connection): Wo
     async detectPackageManager(): Promise<'npm' | 'pnpm' | 'yarn'> {
       try {
         const result = await connection.sendRequest(getPackageManagerRequestType, {
-          uri: folderUri.path,
+          uri: folderUri.toString(),
         })
         return result || 'npm'
       } catch {
