@@ -21,7 +21,7 @@ export const { activate, deactivate } = defineExtension((_ctx) => {
   // const volarLabs = createLabsInfo()
 
   // const serverPath = Uri.joinPath(ctx.extensionUri, './dist/server/bin/index.js').fsPath
-  // const client = launch(serverPath)
+  // const { client } = launch(serverPath)
   // volarLabs.addLanguageClient(client)
 
   useWorkspaceContext()

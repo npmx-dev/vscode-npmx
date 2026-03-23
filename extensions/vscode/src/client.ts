@@ -46,7 +46,5 @@ export function launch(serverPath: string) {
     },
   )
 
-  client.start()
-
-  return client
+  return { client, ready: client.start() }
 }
