@@ -3,4 +3,5 @@ import type { DependencyInfo, WorkspaceContext } from 'npmx-language-core/worksp
 export interface IWorkspaceState {
   getWorkspaceContext: (uri: string) => Promise<WorkspaceContext | undefined>
   getResolvedDependencies: (uri: string) => Promise<DependencyInfo[] | undefined>
+  getResolvedDependenciesForContainingPackage: (uri: string) => Promise<DependencyInfo[] | undefined>
 }

@@ -2,11 +2,10 @@ import type { GetPackageManagerRequest } from '#shared/protocol'
 import type { DocumentFilter } from '@volar/vscode'
 import { displayName, extensionId } from '#shared/meta'
 import { GET_PACKAGE_MANAGER_METHOD } from '#shared/protocol'
-import { logger } from '#state'
 import { SUPPORTED_DOCUMENT_PATTERN } from '#utils/constants'
 import { middleware } from '@volar/vscode'
 import { LanguageClient, TransportKind } from '@volar/vscode/node'
-import { commands, Uri } from 'vscode'
+import { commands, Hover, MarkdownString, Uri } from 'vscode'
 
 const SUPPORTED_LANGUAGES = [
   'javascript',
@@ -19,6 +18,10 @@ const SUPPORTED_LANGUAGES = [
   'mdx',
   'html',
 ] as const
+
+function transformMarkdownString(md: string) {
+  return new MarkdownString(md, true)
+}
 
 export function launch(serverPath: string) {
   const client = new LanguageClient(
@@ -36,7 +39,28 @@ export function launch(serverPath: string) {
       },
     },
     {
-      middleware,
+      middleware: {
+        ...middleware,
+        provideHover: async (document, position, token, next) => {
+          const hover = await next(document, position, token)
+          if (!hover)
+            return
+
+          const contents = hover.contents.map((c) => {
+            if (typeof c === 'string') {
+              return transformMarkdownString(c)
+            }
+
+            if ('value' in c) {
+              return transformMarkdownString(c.value)
+            }
+
+            return c
+          })
+
+          return new Hover(contents, hover.range)
+        },
+      },
       documentSelector: [
         { scheme: 'file', pattern: SUPPORTED_DOCUMENT_PATTERN },
         ...SUPPORTED_LANGUAGES.map((language) => ({ scheme: 'file', language } satisfies DocumentFilter)),
@@ -45,7 +69,11 @@ export function launch(serverPath: string) {
         isTrusted: true,
         supportHtml: true,
       },
-      outputChannel: logger.logger.value!,
+      synchronize: {
+        configurationSection: [displayName],
+      },
+      diagnosticCollectionName: displayName,
+      outputChannelName: `${displayName} Language Server`,
     },
   )
 

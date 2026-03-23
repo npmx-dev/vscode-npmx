@@ -149,6 +149,22 @@ export class WorkspaceState implements IWorkspaceState {
         : await ctx.loadWorkspaceFileInfo(uri.path)
     )?.dependencies
   }
+
+  async getResolvedDependenciesForContainingPackage(uriString: string): Promise<DependencyInfo[] | undefined> {
+    const ctx = await this.getWorkspaceContext(uriString)
+    if (!ctx)
+      return
+
+    const uri = URI.parse(uriString)
+    if (uri.scheme !== 'file')
+      return
+
+    const manifestPath = await ctx.findNearestPackageManifestPath(uri.path)
+    if (!manifestPath)
+      return
+
+    return (await ctx.loadPackageManifestInfo(manifestPath))?.dependencies
+  }
 }
 
 export function createWorkspaceState(connection: Connection, server: LanguageServer) {

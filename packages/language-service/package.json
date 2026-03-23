@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@volar/language-service": "catalog:lsp",
-    "npmx-language-core": "workspace:*"
+    "npmx-language-core": "workspace:*",
+    "vscode-uri": "catalog:lsp"
   }
 }

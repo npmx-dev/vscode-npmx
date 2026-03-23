@@ -8,8 +8,9 @@ import type {
   WorkspaceCatalogInfo,
 } from './types'
 import { defineCachedFunction } from 'ocache'
+import { dirname, join } from 'pathe'
 import { getPackageInfo } from './api/package'
-import { PNPM_WORKSPACE_BASENAME, YARN_WORKSPACE_BASENAME } from './constants'
+import { PACKAGE_JSON_BASENAME, PNPM_WORKSPACE_BASENAME, YARN_WORKSPACE_BASENAME } from './constants'
 import { getExtractor } from './extractors'
 import { isPackageManifest, isWorkspaceFile, lazyInit, resolveDependencySpec, resolveExactVersion } from './utils'
 
@@ -161,6 +162,24 @@ export class WorkspaceContext {
       dependencies: info.dependencies.map((dep) => createResolvedDependencyInfo(dep)),
     }
   }, this.#cacheOptions)
+
+  async findNearestPackageManifestPath(path: string): Promise<string | undefined> {
+    let dir = dirname(path)
+
+    while (dir === this.rootPath || dir.startsWith(`${this.rootPath}/`)) {
+      const manifestPath = join(dir, PACKAGE_JSON_BASENAME)
+      if (await this.adapter.fileExists(manifestPath))
+        return manifestPath
+
+      if (dir === this.rootPath)
+        break
+
+      const parent = dirname(dir)
+      if (parent === dir)
+        break
+      dir = parent
+    }
+  }
 
   async invalidateDependencyInfo(path: string) {
     if (isPackageManifest(path))

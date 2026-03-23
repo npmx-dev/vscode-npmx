@@ -10,8 +10,8 @@ const ABSOLUTE_IMPORT_PATTERN = /^\//
 const PROTOCOL_IMPORT_PATTERN = /^[a-z][a-z\d+.-]*:/i
 const STATEMENT_SUFFIX_PATTERN = /^\s*(?:;.*)?$/
 const CALL_SUFFIX_PATTERN = /^\s*\)/
-const FROM_IMPORT_PREFIX_PATTERN = /(?:\b|\s+)from\s+$/
-const BARE_IMPORT_PREFIX_PATTERN = /(?:\b|\s+)import\s+$/
+const FROM_IMPORT_PREFIX_PATTERN = /(?:\b|\s+)from\s*(?:\n|$)/
+const BARE_IMPORT_PREFIX_PATTERN = /(?:\b|\s+)import\s*(?:\n|$)/
 const DYNAMIC_IMPORT_PREFIX_PATTERN = /(?:\b|\{|\s+)import\s*\(\s*$/
 const REQUIRE_PREFIX_PATTERN = /(?:\b|\s+)require\s*\(\s*$/
 

@@ -231,6 +231,9 @@ importers:
       npmx-language-core:
         specifier: workspace:*
         version: link:../language-core
+      vscode-uri:
+        specifier: catalog:lsp
+        version: 3.1.0
 
 packages:
 
