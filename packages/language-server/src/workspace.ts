@@ -4,7 +4,8 @@ import type { IWorkspaceState } from 'npmx-language-service/types'
 import type { GetPackageManagerRequest } from './protocol'
 import { access, readFile } from 'node:fs/promises'
 import { RequestType } from '@volar/language-server'
-import { isPackageManifest } from 'npmx-language-core/utils'
+import { PACKAGE_JSON_BASENAME } from 'npmx-language-core/constants'
+import { isDependencyFile, isPackageManifest, isWorkspaceFile } from 'npmx-language-core/utils'
 import { WorkspaceContext } from 'npmx-language-core/workspace'
 import { defineCachedFunction } from 'ocache'
 import { URI } from 'vscode-uri'
@@ -50,7 +51,45 @@ export class WorkspaceState implements IWorkspaceState {
   constructor(connection: Connection, server: LanguageServer) {
     this.#connection = connection
     this.#server = server
+    this.#registerEventListeners()
   }
+
+  #registerEventListeners() {
+    this.#server.workspaceFolders.onDidChange(({ removed }) => {
+      for (const folder of removed) {
+        const folderUri = URI.parse(folder.uri)
+        this.#cachedFolderPaths.delete(folderUri.path)
+        this.#getWorkspaceContextByFolder.invalidate(folderUri)
+      }
+    })
+
+    this.#server.fileWatcher.onDidChangeWatchedFiles(({ changes }) => {
+      for (const change of changes) {
+        const uri = URI.parse(change.uri)
+        if (isDependencyFile(uri.path))
+          this.#invalidateDependencyCacheByUri(uri)
+      }
+    })
+  }
+
+  async #invalidateDependencyCacheByUri(uri: URI) {
+    const folderUri = this.#getWorkspaceFolderUri(uri.toString())
+    if (!folderUri || !this.#cachedFolderPaths.has(folderUri.path))
+      return
+
+    const ctx = await this.#getWorkspaceContextByFolder(folderUri)
+    if (!ctx)
+      return
+
+    await ctx.invalidateDependencyInfo(uri.path)
+    this.#connection.console.info(`[workspace-context] invalidate dependencies cache: ${uri.path}`)
+
+    const isRoot = uri.path === `${ctx.rootPath}/${PACKAGE_JSON_BASENAME}`
+    if (isRoot || isWorkspaceFile(uri.path))
+      await ctx.loadWorkspace()
+  }
+
+  #cachedFolderPaths = new Set<string>()
 
   #getWorkspaceContextByFolder = defineCachedFunction<
     WorkspaceContext | undefined,
@@ -58,6 +97,7 @@ export class WorkspaceState implements IWorkspaceState {
   >(
     async (folderUri) => {
       this.#connection.console.info(`[workspace-context] built ${folderUri.path}`)
+      this.#cachedFolderPaths.add(folderUri.path)
 
       return await WorkspaceContext.create(
         folderUri.path,
@@ -67,9 +107,6 @@ export class WorkspaceState implements IWorkspaceState {
     {
       name: 'workspace-context',
       getKey: (folderUri) => folderUri.path,
-      swr: false,
-      maxAge: 0,
-      staleMaxAge: 0,
     },
   )
 
