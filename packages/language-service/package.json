@@ -12,6 +12,7 @@
   "sideEffects": false,
   "exports": {
     ".": "./dist/index.mjs",
+    "./types": "./dist/types.mjs",
     "./package.json": "./package.json"
   },
   "files": [
@@ -22,6 +23,7 @@
     "build": "tsdown"
   },
   "dependencies": {
-    "@volar/language-service": "catalog:lsp"
+    "@volar/language-service": "catalog:lsp",
+    "npmx-language-core": "workspace:*"
   }
 }

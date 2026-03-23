@@ -1,10 +1,13 @@
 import { createConnection, createServer, createSimpleProject } from '@volar/language-server/node'
 import { createNpmxLanguageServicePlugins } from 'npmx-language-service'
 import { name, version } from '../package.json' with { type: 'json' }
+import { createWorkspaceState } from './workspace'
 
 export function startServer() {
   const connection = createConnection()
   const server = createServer(connection)
+
+  const workspaceState = createWorkspaceState(connection, server)
 
   connection.listen()
 
@@ -16,7 +19,7 @@ export function startServer() {
     ...server.initialize(
       params,
       createSimpleProject([]),
-      createNpmxLanguageServicePlugins(),
+      createNpmxLanguageServicePlugins(workspaceState),
     ),
   }))
   connection.onInitialized(() => {

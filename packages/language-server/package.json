@@ -29,7 +29,9 @@
   "devDependencies": {
     "@volar/language-server": "catalog:lsp",
     "npmx-language-core": "workspace:*",
-    "npmx-language-service": "workspace:*"
+    "npmx-language-service": "workspace:*",
+    "ocache": "catalog:inline",
+    "vscode-uri": "catalog:lsp"
   },
   "inlinedDependencies": {
     "vscode-languageserver": "9.0.1",
@@ -44,6 +46,9 @@
     "request-light": "0.7.0",
     "@volar/language-server": "2.4.28",
     "path-browserify": "1.0.1",
-    "@volar/typescript": "2.4.28"
+    "@volar/typescript": "2.4.28",
+    "semver": "7.7.4",
+    "ohash": "2.0.11",
+    "ocache": "0.1.4"
   }
 }

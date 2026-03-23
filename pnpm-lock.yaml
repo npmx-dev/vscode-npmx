@@ -77,6 +77,9 @@ catalogs:
     '@volar/vscode':
       specifier: ^2.4.28
       version: 2.4.28
+    vscode-uri:
+      specifier: ^3.1.0
+      version: 3.1.0
   test:
     jest-mock-vscode:
       specifier: ^4.12.0
@@ -213,12 +216,21 @@ importers:
       npmx-language-service:
         specifier: workspace:*
         version: link:../language-service
+      ocache:
+        specifier: catalog:inline
+        version: 0.1.4
+      vscode-uri:
+        specifier: catalog:lsp
+        version: 3.1.0
 
   packages/language-service:
     dependencies:
       '@volar/language-service':
         specifier: catalog:lsp
         version: 2.4.28
+      npmx-language-core:
+        specifier: workspace:*
+        version: link:../language-core
 
 packages:
 

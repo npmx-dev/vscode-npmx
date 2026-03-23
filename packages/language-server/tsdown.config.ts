@@ -2,9 +2,7 @@ import { defineConfig } from 'tsdown'
 import { umdToEsm } from '../../plugins/umd-to-esm.ts'
 
 export default defineConfig({
-  entry: [
-    'src/index.ts',
-  ],
+  entry: 'src/index.ts',
   platform: 'node',
   exports: true,
   format: 'cjs',
@@ -19,7 +17,11 @@ export default defineConfig({
       /^@volar\//,
       'request-light',
       'path-browserify',
+      'semver',
+      'ohash',
+      'ocache',
     ],
   },
   plugins: [umdToEsm()],
-})
+},
+)
