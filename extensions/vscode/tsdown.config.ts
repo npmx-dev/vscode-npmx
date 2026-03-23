@@ -5,9 +5,8 @@ import { umdToEsm } from '../../plugins/umd-to-esm.ts'
 export default defineConfig({
   copy: [
     '../../res',
-    // TODO: Enable when language server integration is ready
-    // { from: 'node_modules/npmx-language-server/bin/**', to: 'dist/server/bin' },
-    // { from: 'node_modules/npmx-language-server/dist/**', to: 'dist/server/dist' },
+    { from: 'node_modules/npmx-language-server/bin/**', to: 'dist/server/bin' },
+    { from: 'node_modules/npmx-language-server/dist/**', to: 'dist/server/dist' },
   ],
   deps: {
     neverBundle: ['vscode'],
