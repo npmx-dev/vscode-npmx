@@ -2,10 +2,9 @@ import type { Hover, LanguageServicePlugin, LanguageServicePluginInstance } from
 import type { DependencyInfo } from 'npmx-language-core/workspace'
 import type { IWorkspaceState } from '../types'
 import { jsrPackageUrl, npmxDocsUrl, npmxPackageUrl } from 'npmx-language-core/links'
-import { isDependencyFile } from 'npmx-language-core/utils'
+import { getImportSpecifierAtOffset, isDependencyFile } from 'npmx-language-core/utils'
 import { URI } from 'vscode-uri'
 import { getConfig } from '../config'
-import { getImportSpecifierAtOffset } from 'npmx-language-core/utils'
 import { getResolvedDependencyByOffset } from '../utils/range'
 
 export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
