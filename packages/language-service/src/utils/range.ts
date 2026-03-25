@@ -5,7 +5,7 @@ function isOffsetInRange(offset: number, [start, end]: OffsetRange): boolean {
   return offset >= start && offset <= end
 }
 
-export function getResolvedDependencyByOffset(
+export function getResolvedDependencyAtOffset(
   dependencies: DependencyInfo[],
   offset: number,
 ): DependencyInfo | undefined {
