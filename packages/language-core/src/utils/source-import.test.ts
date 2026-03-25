@@ -87,6 +87,24 @@ describe('getImportSpecifier', () => {
 
     expect(getImportSpecifier(text, getLastRange(text, 'ofetch'))).toBeUndefined()
   })
+
+  it.each([
+    [`import foo from 'lodash'\r\n`, 'lodash', 'lodash'],
+    [`import 'lodash/fp'\r\n`, 'lodash', 'lodash/fp'],
+  ])('should extract from CRLF line endings (%s)', (text, packageName, specifier) => {
+    expect(getImportSpecifier(text, getRange(text, packageName))).toEqual({
+      specifier,
+      packageName,
+    })
+  })
+
+  it('should extract from require with CRLF', () => {
+    const text = `const react = require('react')\r\n`
+    expect(getImportSpecifier(text, getLastRange(text, 'react'))).toEqual({
+      specifier: 'react',
+      packageName: 'react',
+    })
+  })
 })
 
 describe('getImportSpecifierAtOffset', () => {

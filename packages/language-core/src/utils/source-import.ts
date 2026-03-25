@@ -9,10 +9,10 @@ const WORD_CHAR = /[\w-]/
 const RELATIVE_IMPORT_PATTERN = /^\.{1,2}(?:\/|$)/
 const ABSOLUTE_IMPORT_PATTERN = /^\//
 const PROTOCOL_IMPORT_PATTERN = /^[a-z][a-z\d+.-]*:/i
-const STATEMENT_SUFFIX_PATTERN = /^[ \t]*(?:;[^\n]*)?(?:\n|$)/
+const STATEMENT_SUFFIX_PATTERN = /^[ \t]*(?:;[^\r\n]*)?(?:\r?\n|$)/
 const CALL_SUFFIX_PATTERN = /^\s*\)/
-const FROM_IMPORT_PREFIX_PATTERN = /(?:\b|\s+)from\s*(?:\n|$)/
-const BARE_IMPORT_PREFIX_PATTERN = /(?:\b|\s+)import\s*(?:\n|$)/
+const FROM_IMPORT_PREFIX_PATTERN = /(?:\b|\s+)from\s+/
+const BARE_IMPORT_PREFIX_PATTERN = /(?:\b|\s+)import\s+/
 const DYNAMIC_IMPORT_PREFIX_PATTERN = /(?:\b|\{|\s+)import\s*\(\s*$/
 const REQUIRE_PREFIX_PATTERN = /(?:\b|\s+)require\s*\(\s*$/
 
@@ -54,9 +54,14 @@ function findStatementStart(text: string, offset: number): number {
     if (lineStart === -1)
       return 0
 
-    const firstChar = text[lineStart + 1]
+    const lineStartPos = lineStart + 1
+    let firstChar = text[lineStartPos]
+
+    if (firstChar === '\r' && text[lineStartPos + 1] === '\n')
+      firstChar = text[lineStartPos + 2]
+
     if (firstChar !== undefined && firstChar !== ' ' && firstChar !== '\t' && firstChar !== '\n' && firstChar !== '\r')
-      return lineStart + 1
+      return lineStartPos
 
     pos = lineStart
   }
@@ -71,6 +76,13 @@ function findStatementEnd(text: string, offset: number): number {
       if (next === undefined || next === '\n' || next === '\r')
         return i + 1
       if (char === ';')
+        return i + 1
+    }
+    if (char === '\r') {
+      const next = text[i + 1]
+      if (next === '\n')
+        return i + 2
+      if (next === undefined || next === '\r')
         return i + 1
     }
     if (char === ')')
