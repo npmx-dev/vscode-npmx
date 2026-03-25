@@ -130,10 +130,13 @@ describe('getImportSpecifierAtOffset', () => {
   })
 
   it.each([
-    [`import foo from './utils'`, './utils'],
+    [`import foo from './utils'`, 'utils'],
     [`import foo from 'node:fs'`, 'node:fs'],
     ['const lodash = someValue', 'lodash'],
-    [`import fetch from \n 'ofetch'\n\nconst string = 'ofetch'`, 'string'],
+    [`import fetch from 
+ 'ofetch'
+
+const string = 'ofetch'`, 'ofetch'],
   ])('should return undefined for %s', (text, target) => {
     expect(getImportSpecifierAtOffset(text, text.lastIndexOf(target) + 1)).toBeUndefined()
   })
