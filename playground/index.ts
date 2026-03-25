@@ -1,4 +1,4 @@
-import fetch from 
+import ofetch from 
  'ofetch'
 import fetch2
  from 

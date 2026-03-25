@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getImportSpecifierInLine } from './source-import'
+import { getImportSpecifier, getImportSpecifierAtOffset, getWordRangeAtOffset } from './source-import'
 
 function getRange(text: string, target: string, fromIndex = 0): [number, number] {
   const index = text.indexOf(target, fromIndex)
@@ -17,47 +17,101 @@ function getLastRange(text: string, target: string): [number, number] {
   return [index, index + target.length]
 }
 
-describe('getImportSpecifierInLine', () => {
+describe('getWordRangeAtOffset', () => {
   it.each([
-    ['import foo from \'lodash\'', 'lodash', 'lodash', 0],
-    ['import \'vite/client\'', 'vite', 'vite/client', 0],
-    ['export * from \'@scope/pkg/subpath\'', '@scope/pkg', '@scope/pkg/subpath', 0],
-    ['await import(\'zod\')', 'zod', 'zod', 0],
-  ])('should extract import specifier from %s', (text, packageName, specifier, fromIndex) => {
-    expect(getImportSpecifierInLine(text, getRange(text, packageName, fromIndex))).toEqual({
+    [`import foo from 'lodash'`, 'foo', [7, 10]],
+    [`const lodash = require('lodash')`, 'lodash', [6, 12]],
+    ['lodash import', 'lodash', [0, 6]],
+    ['import lodash', 'lodash', [7, 13]],
+    [`import {\n  foo,\n} from\n  'lodash'`, 'lodash', [26, 32]],
+  ])('should return range for %s targeting %s', (text, target, expected) => {
+    expect(getWordRangeAtOffset(text, text.indexOf(target) + 1)).toEqual(expected)
+  })
+
+  it('should return undefined for non-word character', () => {
+    expect(getWordRangeAtOffset(`import foo from 'lodash'`, 6)).toBeUndefined()
+  })
+})
+
+describe('getImportSpecifier', () => {
+  it.each([
+    [`import foo from 'lodash'`, 'lodash', 'lodash'],
+    [`import 'vite/client'`, 'vite', 'vite/client'],
+    [`export * from '@scope/pkg/subpath'`, '@scope/pkg', '@scope/pkg/subpath'],
+    [`await import('zod')`, 'zod', 'zod'],
+    [`import {\n  foo,\n  bar,\n} from 'lodash'`, 'lodash', 'lodash'],
+    [`await import(\n  'zod'\n)`, 'zod', 'zod'],
+    [`import { foo }\nfrom 'lodash'`, 'lodash', 'lodash'],
+    [`import {\n  foo,\n} from\n  'lodash'`, 'lodash', 'lodash'],
+  ])('should extract from %s', (text, packageName, specifier) => {
+    expect(getImportSpecifier(text, getRange(text, packageName))).toEqual({
       specifier,
       packageName,
     })
   })
 
-  it('should extract import specifier from require call', () => {
-    const text = 'const react = require(\'react\')'
-
-    expect(getImportSpecifierInLine(text, getLastRange(text, 'react'))).toEqual({
-      specifier: 'react',
-      packageName: 'react',
+  it.each([
+    [`const react = require('react')`, 'react'],
+    [`const x = require(\n  'react'\n)`, 'react'],
+    [`const lodash =\n  require('lodash')`, 'lodash'],
+  ])('should extract from require in %s', (text, packageName) => {
+    expect(getImportSpecifier(text, getLastRange(text, packageName))).toEqual({
+      specifier: packageName,
+      packageName,
     })
   })
 
   it.each([
-    ['import foo from \'./local\'', 'local'],
-    ['import foo from \'../local\'', 'local'],
-    ['import foo from \'/abs\'', 'abs'],
-    ['import foo from \'node:fs\'', 'fs'],
-    ['import foo from \'https://example.com/mod.ts\'', 'example'],
-  ])('should ignore unsupported specifier in %s', (text, target) => {
-    expect(getImportSpecifierInLine(text, getRange(text, target))).toBeUndefined()
+    [`import foo from './local'`, 'local'],
+    [`import foo from '../local'`, 'local'],
+    [`import foo from '/abs'`, 'abs'],
+    [`import foo from 'node:fs'`, 'fs'],
+    [`import foo from 'https://example.com/mod.ts'`, 'example'],
+    ['const lodash = someValue', 'lodash'],
+    [`'lodash'`, 'lodash'],
+  ])('should return undefined for %s', (text, target) => {
+    expect(getImportSpecifier(text, getRange(text, target))).toBeUndefined()
   })
 
-  it('should return undefined outside import syntax', () => {
-    const text = 'const lodash = someValue'
+  it('should extract import in full document', () => {
+    const text = `import fetch from \n 'ofetch'\n\nconst string = 'ofetch'`
 
-    expect(getImportSpecifierInLine(text, getRange(text, 'lodash'))).toBeUndefined()
+    expect(getImportSpecifier(text, getRange(text, 'ofetch'))).toEqual({
+      specifier: 'ofetch',
+      packageName: 'ofetch',
+    })
   })
 
-  it('should return undefined when the current line does not contain the import context', () => {
-    const text = '\'lodash\''
+  it('should not match a plain string that follows a multi-line import', () => {
+    const text = `import fetch from \n 'ofetch'\n\nconst string = 'ofetch'`
 
-    expect(getImportSpecifierInLine(text, getRange(text, 'lodash'))).toBeUndefined()
+    expect(getImportSpecifier(text, getLastRange(text, 'ofetch'))).toBeUndefined()
+  })
+})
+
+describe('getImportSpecifierAtOffset', () => {
+  it.each([
+    [`import foo from 'lodash'`, 'lodash', 'lodash', 'lodash'],
+    [`import 'lodash/fp'`, 'lodash', 'lodash/fp', 'lodash'],
+    [`import { foo } from 'lodash'`, 'lodash', 'lodash', 'lodash'],
+    [`const pkg = await import('lodash')`, 'lodash', 'lodash', 'lodash'],
+    [`import foo from '@babel/core'`, '@babel', '@babel/core', '@babel/core'],
+    [`import {\n  foo,\n} from\n  'lodash'`, 'lodash', 'lodash', 'lodash'],
+    [`import fetch from \n 'ofetch'\n\nconst string = 'ofetch'`, 'ofetch', 'ofetch', 'ofetch'],
+  ])('should extract from %s', (text, target, specifier, packageName) => {
+    expect(getImportSpecifierAtOffset(text, text.indexOf(target) + 1)).toEqual({ specifier, packageName })
+  })
+
+  it.each([
+    [`import foo from './utils'`, './utils'],
+    [`import foo from 'node:fs'`, 'node:fs'],
+    ['const lodash = someValue', 'lodash'],
+    [`import fetch from \n 'ofetch'\n\nconst string = 'ofetch'`, 'string'],
+  ])('should return undefined for %s', (text, target) => {
+    expect(getImportSpecifierAtOffset(text, text.lastIndexOf(target) + 1)).toBeUndefined()
+  })
+
+  it('should return undefined when not on a word', () => {
+    expect(getImportSpecifierAtOffset(`import foo from 'lodash'`, 16)).toBeUndefined()
   })
 })

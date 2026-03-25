@@ -5,7 +5,7 @@ import { jsrPackageUrl, npmxDocsUrl, npmxPackageUrl } from 'npmx-language-core/l
 import { isDependencyFile } from 'npmx-language-core/utils'
 import { URI } from 'vscode-uri'
 import { getConfig } from '../config'
-import { extractImportSpecifier } from '../utils/import-resolution'
+import { getImportSpecifierAtOffset } from 'npmx-language-core/utils'
 import { getResolvedDependencyByOffset } from '../utils/range'
 
 export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
@@ -85,7 +85,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
             return renderHover(dep)
           } else {
             const text = document.getText()
-            const specifier = extractImportSpecifier(text, offset)
+            const specifier = getImportSpecifierAtOffset(text, offset)
             if (!specifier)
               return
 
