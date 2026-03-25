@@ -31,6 +31,15 @@ describe('getWordRangeAtOffset', () => {
   it('should return undefined for non-word character', () => {
     expect(getWordRangeAtOffset(`import foo from 'lodash'`, 6)).toBeUndefined()
   })
+
+  it.each([
+    [`import foo from '@babel/core'`, '@', [17, 28]],
+    [`import foo from '@babel/core'`, 'babel', [17, 28]],
+    [`import 'lodash/fp'`, '/', [8, 17]],
+    [`import 'lodash/fp'`, 'lodash', [8, 17]],
+  ])('should include special chars in package name (%s at %s)', (text, target, expected) => {
+    expect(getWordRangeAtOffset(text, text.indexOf(target) + 1)).toEqual(expected)
+  })
 })
 
 describe('getImportSpecifier', () => {

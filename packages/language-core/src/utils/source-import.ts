@@ -5,7 +5,7 @@ export interface ImportSpecifierHit {
   packageName: string
 }
 
-const WORD_CHAR = /[\w-]/
+const WORD_CHAR = /[@/\w.-]/
 const RELATIVE_IMPORT_PATTERN = /^\.{1,2}(?:\/|$)/
 const ABSOLUTE_IMPORT_PATTERN = /^\//
 const PROTOCOL_IMPORT_PATTERN = /^[a-z][a-z\d+.-]*:/i
