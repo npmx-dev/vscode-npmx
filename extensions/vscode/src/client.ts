@@ -47,13 +47,12 @@ export function launch(serverPath: string) {
             return
 
           const contents = hover.contents.map((c) => {
-            if (typeof c === 'string') {
+            if (c instanceof MarkdownString)
+              return c
+            if (typeof c === 'string')
               return transformMarkdownString(c)
-            }
-
-            if ('value' in c) {
+            if ('value' in c)
               return transformMarkdownString(c.value)
-            }
 
             return c
           })
