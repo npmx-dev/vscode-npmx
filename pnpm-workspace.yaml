@@ -27,7 +27,7 @@ catalogs:
     reactive-vscode: ^1.0.0-beta.2
     semver: ^7.7.4
     vscode-find-up: ^0.1.1
-    yaml: ^2.8.2
+    yaml: ^2.8.3
   lsp:
     '@volar/language-server': ^2.4.28
     '@volar/language-service': ^2.4.28
