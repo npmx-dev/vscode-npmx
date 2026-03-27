@@ -9,7 +9,6 @@ import { openInBrowser } from './commands/open-in-browser'
 import { useCodeActions } from './providers/code-actions'
 import { useCompletionItem } from './providers/completion-item'
 import { useDecorators } from './providers/decorators'
-import { useDefinition } from './providers/definition'
 import { useDiagnostics } from './providers/diagnostics'
 import { useDocumentLink } from './providers/document-link'
 import { logger } from './state'
@@ -28,7 +27,6 @@ export const { activate, deactivate } = defineExtension((ctx) => {
   useDecorators()
   useCodeActions()
   useDocumentLink()
-  useDefinition()
 
   useCommands({
     [commands.openInBrowser]: openInBrowser,

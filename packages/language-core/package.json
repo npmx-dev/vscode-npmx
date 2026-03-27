@@ -42,10 +42,10 @@
     "yaml": "catalog:inline"
   },
   "inlinedDependencies": {
-    "module-replacements": "2.11.0",
-    "jsonc-parser": "3.3.1",
-    "yaml": "2.8.2",
     "fast-npm-meta": "1.4.2",
-    "pathe": "2.0.3"
+    "jsonc-parser": "3.3.1",
+    "module-replacements": "2.11.0",
+    "pathe": "2.0.3",
+    "yaml": "2.8.3"
   }
 }
