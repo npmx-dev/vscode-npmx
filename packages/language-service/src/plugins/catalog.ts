@@ -1,14 +1,14 @@
 import type { CompletionItemKind, CompletionList, LanguageServicePlugin, LanguageServicePluginInstance, LocationLink } from '@volar/language-service'
 import type { DependencyInfo } from 'npmx-language-core/workspace'
 import type { IWorkspaceState } from '../types'
-import { isDependencyFile, normalizeCatalogName } from 'npmx-language-core/utils'
+import { isPackageManifest, normalizeCatalogName } from 'npmx-language-core/utils'
 import { URI } from 'vscode-uri'
 import { getResolvedDependencyAtOffset } from '../utils/range'
 
 export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
   function getDependencyFileUri(documentUri: string): URI | undefined {
     const uri = URI.parse(documentUri)
-    if (uri.scheme !== 'file' || !isDependencyFile(uri.path))
+    if (uri.scheme !== 'file' || !isPackageManifest(uri.path))
       return
 
     return uri
