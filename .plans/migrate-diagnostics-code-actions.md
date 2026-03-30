@@ -44,6 +44,7 @@ Code actions **depend on diagnostic codes and message formats** — they must st
 - **From**: `extensions/vscode/src/utils/version.ts`
 - **To**: `packages/language-service/src/utils/version.ts`
 - Pure logic, no vscode deps. Re-export or update imports in extension side.
+- Move `extensions/vscode/src/utils/version.test.ts` alongside → `packages/language-service/src/utils/version.test.ts`
 
 ### 2. Create `packages/language-service/src/plugins/diagnostics.ts`
 
@@ -56,7 +57,9 @@ Single plugin providing both `provideDiagnostics` and `provideCodeActions` — t
 - Use `getConfig(context, 'npmx.diagnostics.*')` for per-rule enablement
 - Use `getConfig(context, 'npmx.ignore.*')` instead of `#state` config
 - Use `workspaceState.getWorkspaceContext()` for engine-mismatch (already on `IWorkspaceState`)
-- Only run on dependency files (`isDependencyFile`)
+- **Scope rules:**
+  - Most rules: use `isDependencyFile` (matches `package.json`, `pnpm-workspace.yaml`, `.yarnrc.yml`)
+  - `engine-mismatch`: use `isPackageManifest` (matches any `package.json` — needed to exclude workspace config files like `pnpm-workspace.yaml`)
 
 **Code actions side:**
 - Implement `provideCodeActions(document, range, context, token)`
@@ -65,6 +68,8 @@ Single plugin providing both `provideDiagnostics` and `provideCodeActions` — t
 - Ignore actions → `CodeAction` with `command` field (command name + args)
   - Command name: `npmx.addToIgnore` (handled by VS Code client side)
   - Args: `[code, packageId, "workspace" | "global"]` (use strings instead of `ConfigurationTarget` enum)
+
+> **Note:** LSP pull-model `provideDiagnostics` requires returning all diagnostics at once, losing the current progressive/streaming behavior (fire-and-forget per dep). All diagnostics will block until the slowest package resolves. This latency tradeoff is acceptable for now.
 
 **Capabilities:**
 ```ts
@@ -89,7 +94,14 @@ export function createNpmxLanguageServicePlugins(workspace: IWorkspaceState): La
 
 ### 4. Handle commands on VS Code client side
 
-- Register `npmx.addToIgnore` command handler on the language client (in `client.ts` or keep existing command)
+- Re-register `npmx.addToIgnore` command in `extensions/vscode/src/index.ts` (currently registered inside `useCodeActions()` which will be deleted)
+- Update `add-to-ignore.ts` to accept string target (`"workspace" | "global"`) and map to `ConfigurationTarget` enum:
+  ```ts
+  const targetMap: Record<string, ConfigurationTarget> = {
+    workspace: ConfigurationTarget.Workspace,
+    global: ConfigurationTarget.Global,
+  }
+  ```
 - The language server sends `workspace/executeCommand` → client handles `addToIgnore`
 
 ### 5. Clean up extension side
