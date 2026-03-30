@@ -20,6 +20,7 @@ export default defineConfig({
       'semver',
       'ohash',
       'ocache',
+      'ofetch',
     ],
   },
   plugins: [umdToEsm()],

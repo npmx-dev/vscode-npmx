@@ -1,17 +1,15 @@
+import type { DiagnosticSeverity } from '@volar/language-service'
 import type { PackageInfo } from 'npmx-language-core/api/package'
-import type { OffsetRange } from 'npmx-language-core/types'
 import type { DependencyInfo } from 'npmx-language-core/workspace'
-import type { DiagnosticRule, RangeDiagnosticInfo } from '..'
-import { config } from '#state'
-import { formatUpgradeVersion } from '#utils/version'
+import type { RangeDiagnosticInfo } from '../types'
 import { npmxPackageUrl } from 'npmx-language-core/links'
 import { checkIgnored } from 'npmx-language-core/utils'
 import gt from 'semver/functions/gt'
 import lte from 'semver/functions/lte'
 import prerelease from 'semver/functions/prerelease'
-import { DiagnosticSeverity, Uri } from 'vscode'
+import { formatUpgradeVersion } from '../../../utils/version'
 
-export function resolveUpgrade(dep: DependencyInfo, pkg: PackageInfo, resolvedVersion: string, ignoreList = config.ignore.upgrade) {
+export function resolveUpgrade(dep: DependencyInfo, pkg: PackageInfo, resolvedVersion: string, ignoreList: string[]) {
   const { distTags } = pkg
   if (Object.hasOwn(distTags, dep.resolvedSpec))
     return
@@ -46,26 +44,21 @@ export function resolveUpgrade(dep: DependencyInfo, pkg: PackageInfo, resolvedVe
   }
 }
 
-function createUpgradeDiagnostic(range: OffsetRange, name: string, targetVersion: string): RangeDiagnosticInfo {
-  return {
-    range,
-    severity: DiagnosticSeverity.Hint,
-    message: `"${name}" can be upgraded to ${targetVersion}.`,
-    code: {
-      value: 'upgrade',
-      target: Uri.parse(npmxPackageUrl(name, targetVersion)),
-    },
-  }
-}
-
-export const checkUpgrade: DiagnosticRule = async ({ dep, pkg }) => {
+export async function checkUpgrade(ctx: { dep: DependencyInfo, pkg: PackageInfo }, ignoreList: string[]): Promise<RangeDiagnosticInfo | undefined> {
+  const { dep, pkg } = ctx
   const resolvedVersion = await dep.resolvedVersion()
   if (!resolvedVersion)
     return
 
-  const result = resolveUpgrade(dep, pkg, resolvedVersion)
-  if (!result)
+  const targetVersion = resolveUpgrade(dep, pkg, resolvedVersion, ignoreList)
+  if (!targetVersion)
     return
 
-  return createUpgradeDiagnostic(dep.specRange, dep.resolvedName, result)
+  return {
+    range: dep.specRange,
+    severity: 4 satisfies typeof DiagnosticSeverity.Hint,
+    message: `"${dep.resolvedName}" can be upgraded to ${targetVersion}.`,
+    code: 'upgrade',
+    codeDescription: { href: npmxPackageUrl(dep.resolvedName, targetVersion) },
+  }
 }

@@ -40,6 +40,7 @@
     "@volar/source-map": "2.4.28",
     "@volar/typescript": "2.4.28",
     "ocache": "0.1.4",
+    "ofetch": "2.0.0-alpha.3",
     "ohash": "2.0.11",
     "path-browserify": "1.0.1",
     "request-light": "0.7.0",

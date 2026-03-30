@@ -25,6 +25,7 @@
   "dependencies": {
     "@volar/language-service": "catalog:lsp",
     "npmx-language-core": "workspace:*",
+    "semver": "catalog:inline",
     "vscode-uri": "catalog:lsp"
   }
 }

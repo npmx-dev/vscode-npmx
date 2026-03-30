@@ -1,4 +1,4 @@
-import type { ConfigurationTarget } from 'vscode'
+import type { ConfigurationTarget } from '#shared/constants'
 import { scopedConfigs } from '#shared/meta'
 import { checkIgnored } from 'npmx-language-core/utils'
 import { workspace } from 'vscode'

@@ -1,8 +1,6 @@
 import { createVSCodeMock } from 'jest-mock-vscode'
 import { vi } from 'vitest'
 
-import './msw'
-
 vi.mock('vscode', () => createVSCodeMock(vi))
 
 vi.mock('#state', () => ({

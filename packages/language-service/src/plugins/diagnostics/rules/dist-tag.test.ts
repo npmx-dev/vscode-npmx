@@ -7,7 +7,7 @@ describe('checkDistTag', () => {
     expect(await checkDistTag(
       createContext({ name: 'lodash', version: 'latest', distTags: { latest: '2.0.0' } }),
     )).toMatchObject({
-      code: { value: 'dist-tag' },
+      code: 'dist-tag',
     })
   })
 

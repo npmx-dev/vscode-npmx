@@ -21,24 +21,24 @@ function createDeprecationContext(version: string) {
 
 describe('checkDeprecation', () => {
   it('should flag deprecated version', async () => {
-    const result = await checkDeprecation(createDeprecationContext('1.0.0'))
+    const result = await checkDeprecation(createDeprecationContext('1.0.0'), [])
 
     expect(result).toMatchObject({
-      code: { value: 'deprecation' },
+      code: 'deprecation',
     })
     expect(result!.message).toMatchInlineSnapshot('""lodash@1.0.0" has been deprecated: old notice"')
   })
 
-  it('resolve range to the highest matching deprecated version', async () => {
-    const result = await checkDeprecation(createDeprecationContext('^1.0.0'))
+  it('should resolve range to the highest matching deprecated version', async () => {
+    const result = await checkDeprecation(createDeprecationContext('^1.0.0'), [])
 
     expect(result).toMatchObject({
-      code: { value: 'deprecation' },
+      code: 'deprecation',
     })
     expect(result!.message).toMatchInlineSnapshot('""lodash@1.2.0" has been deprecated: new notice"')
   })
 
   it('should not flag non-deprecated version', async () => {
-    expect(await checkDeprecation(createDeprecationContext('^2.0.0'))).toBeUndefined()
+    expect(await checkDeprecation(createDeprecationContext('^2.0.0'), [])).toBeUndefined()
   })
 })

@@ -1,32 +1,27 @@
-import type { DiagnosticRule } from '..'
-import { config } from '#state'
+import type { DiagnosticSeverity, DiagnosticTag } from '@volar/language-service'
+import type { DiagnosticRule } from '../types'
 import { npmxPackageUrl } from 'npmx-language-core/links'
 import { checkIgnored, formatPackageId } from 'npmx-language-core/utils'
-import { DiagnosticSeverity, DiagnosticTag, Uri } from 'vscode'
 
-export const checkDeprecation: DiagnosticRule = async ({ dep, pkg }) => {
+export const checkDeprecation: DiagnosticRule = async ({ dep, pkg }, ignoreList) => {
   const resolvedVersion = await dep.resolvedVersion()
   if (!resolvedVersion)
     return
 
   const versionInfo = pkg.versionsMeta[resolvedVersion]
-
   if (!versionInfo?.deprecated)
     return
 
   const { specRange, resolvedName, resolvedSpec } = dep
-
-  if (checkIgnored({ ignoreList: config.ignore.deprecation, name: resolvedName, version: resolvedVersion }))
+  if (checkIgnored({ ignoreList, name: resolvedName, version: resolvedVersion }))
     return
 
   return {
     range: specRange,
     message: `"${formatPackageId(resolvedName, resolvedVersion)}" has been deprecated: ${versionInfo.deprecated}`,
-    severity: DiagnosticSeverity.Error,
-    code: {
-      value: 'deprecation',
-      target: Uri.parse(npmxPackageUrl(resolvedName, resolvedSpec)),
-    },
-    tags: [DiagnosticTag.Deprecated],
+    severity: 1 satisfies typeof DiagnosticSeverity.Error,
+    code: 'deprecation',
+    codeDescription: { href: npmxPackageUrl(resolvedName, resolvedSpec) },
+    tags: [2 satisfies typeof DiagnosticTag.Deprecated],
   }
 }

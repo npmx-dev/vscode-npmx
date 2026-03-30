@@ -1,8 +1,7 @@
 import type { PackageInfo } from 'npmx-language-core/api/package'
 import type { Engines } from 'npmx-language-core/types'
-import type { DiagnosticContext } from '../..'
+import type { DiagnosticContext } from '../types'
 import { resolveDependencySpec, resolveExactVersion } from 'npmx-language-core/utils'
-import { Uri } from 'vscode'
 
 interface CreateContextOptions {
   name: string
@@ -13,15 +12,16 @@ interface CreateContextOptions {
     engines?: Engines
   }>
   engines?: Engines
+  category?: 'dependencies' | 'devDependencies' | 'peerDependencies'
 }
 
 export function createContext(options: CreateContextOptions): DiagnosticContext {
-  const { name, version, distTags = {}, versionsMeta = {} } = options
+  const { name, version, distTags = {}, versionsMeta = {}, category = 'dependencies' } = options
   const { protocol, resolvedName, resolvedSpec, resolvedProtocol } = resolveDependencySpec(name, version)
   const pkg = { distTags, versionsMeta } as PackageInfo
 
   const dep: DiagnosticContext['dep'] = {
-    category: 'dependencies',
+    category,
     rawName: name,
     rawSpec: version,
     nameRange: [0, name.length],
@@ -33,5 +33,5 @@ export function createContext(options: CreateContextOptions): DiagnosticContext 
     resolvedVersion: async () => resolveExactVersion(pkg, resolvedSpec),
     packageInfo: async () => (pkg),
   }
-  return { uri: Uri.file('package.json'), dep, pkg }
+  return { uri: 'file:///package.json', dep, pkg }
 }

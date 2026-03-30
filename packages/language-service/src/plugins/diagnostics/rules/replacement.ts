@@ -1,9 +1,9 @@
+import type { DiagnosticSeverity } from '@volar/language-service'
 import type { ModuleReplacement } from 'module-replacements'
-import type { DiagnosticRule } from '..'
-import { config } from '#state'
+import type { DependencyInfo } from 'npmx-language-core/workspace'
+import type { RangeDiagnosticInfo } from '../types'
 import { getReplacement } from 'npmx-language-core/api/replacement'
 import { checkIgnored } from 'npmx-language-core/utils'
-import { DiagnosticSeverity, Uri } from 'vscode'
 
 function getMdnUrl(path: string): string {
   return `https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/${path}`
@@ -13,11 +13,6 @@ function getReplacementsDocUrl(path: string): string {
   return `https://e18e.dev/docs/replacements/${path}.html`
 }
 
-/**
- * Keep messages in sync with npmx.dev wording.
- *
- * https://github.com/npmx-dev/npmx.dev/blob/main/app/components/PackageReplacement.vue#L8-L30
- */
 function getReplacementInfo(replacement: ModuleReplacement) {
   switch (replacement.type) {
     case 'native':
@@ -27,7 +22,7 @@ function getReplacementInfo(replacement: ModuleReplacement) {
       }
     case 'simple':
       return {
-        message: `has been flagged as redundant by the community, with the advice:\n${replacement.replacement}.`,
+        message: `has been flagged as redundant by the community, with advice:\n${replacement.replacement}.`,
       }
     case 'documented':
       return {
@@ -41,8 +36,12 @@ function getReplacementInfo(replacement: ModuleReplacement) {
   }
 }
 
-export const checkReplacement: DiagnosticRule = async ({ dep: { nameRange, resolvedName } }) => {
-  if (checkIgnored({ ignoreList: config.ignore.replacement, name: resolvedName }))
+export async function checkReplacement(
+  ctx: { dep: DependencyInfo },
+  ignoreList: string[],
+): Promise<RangeDiagnosticInfo | undefined> {
+  const { dep: { nameRange, resolvedName } } = ctx
+  if (checkIgnored({ ignoreList, name: resolvedName }))
     return
 
   const replacement = await getReplacement(resolvedName)
@@ -54,7 +53,8 @@ export const checkReplacement: DiagnosticRule = async ({ dep: { nameRange, resol
   return {
     range: nameRange,
     message: `"${resolvedName}" ${message}`,
-    severity: DiagnosticSeverity.Warning,
-    code: link ? { value: 'replacement', target: Uri.parse(link) } : 'replacement',
+    severity: 2 satisfies typeof DiagnosticSeverity.Warning,
+    code: 'replacement',
+    ...(link && { codeDescription: { href: link } }),
   }
 }

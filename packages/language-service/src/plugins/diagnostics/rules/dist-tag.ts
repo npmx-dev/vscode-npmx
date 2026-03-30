@@ -1,6 +1,6 @@
-import type { DiagnosticRule } from '..'
+import type { DiagnosticSeverity } from '@volar/language-service'
+import type { DiagnosticRule } from '../types'
 import { npmxPackageUrl } from 'npmx-language-core/links'
-import { DiagnosticSeverity, Uri } from 'vscode'
 
 export const checkDistTag: DiagnosticRule = async ({ dep, pkg }) => {
   const resolvedVersion = await dep.resolvedVersion()
@@ -16,10 +16,8 @@ export const checkDistTag: DiagnosticRule = async ({ dep, pkg }) => {
   return {
     range: dep.specRange,
     message: `"${resolvedName}" uses the "${tag}" version tag. This may lead to unexpected breaking changes. Consider pinning to a specific version.`,
-    severity: DiagnosticSeverity.Warning,
-    code: {
-      value: 'dist-tag',
-      target: Uri.parse(npmxPackageUrl(resolvedName)),
-    },
+    severity: 2 satisfies typeof DiagnosticSeverity.Warning,
+    code: 'dist-tag',
+    codeDescription: { href: npmxPackageUrl(resolvedName) },
   }
 }

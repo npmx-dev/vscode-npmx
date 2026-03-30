@@ -23,7 +23,7 @@ async function createOptions(version: string): Promise<[DependencyInfo, PackageI
 
 describe('resolveUpgrade', () => {
   it('should flag when latest is greater than current version', async () => {
-    expect(resolveUpgrade(...await createOptions('^1.0.0'))).toBe('^2.7.0')
+    expect(resolveUpgrade(...await createOptions('^1.0.0'), [])).toBe('^2.7.0')
   })
 
   it.each([
@@ -36,11 +36,11 @@ describe('resolveUpgrade', () => {
     if (!options) {
       return
     }
-    expect(resolveUpgrade(...options)).toBeUndefined()
+    expect(resolveUpgrade(...options, [])).toBeUndefined()
   })
 
   it('should flag prerelease upgrade within same pre-id', async () => {
-    expect(resolveUpgrade(...await createOptions('3.0.0-alpha.1'))).toBe('3.0.0-alpha.5')
+    expect(resolveUpgrade(...await createOptions('3.0.0-alpha.1'), [])).toBe('3.0.0-alpha.5')
   })
 
   it('should not flag when target upgrade version is ignored', async () => {
@@ -48,6 +48,6 @@ describe('resolveUpgrade', () => {
   })
 
   it('should preserve protocol prefix in targetVersion', async () => {
-    expect(resolveUpgrade(...await createOptions('npm:foo@^1.0.0'))).toBe('npm:foo@^2.7.0')
+    expect(resolveUpgrade(...await createOptions('npm:foo@^1.0.0'), [])).toBe('npm:foo@^2.7.0')
   })
 })

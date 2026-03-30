@@ -209,7 +209,6 @@
     "npmx-language-core": "workspace:*",
     "npmx-language-server": "workspace:*",
     "ocache": "catalog:inline",
-    "perfect-debounce": "catalog:inline",
     "reactive-vscode": "catalog:inline",
     "semver": "catalog:inline",
     "vscode-ext-gen": "catalog:dev",

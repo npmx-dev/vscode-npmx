@@ -231,6 +231,9 @@ importers:
       npmx-language-core:
         specifier: workspace:*
         version: link:../language-core
+      semver:
+        specifier: catalog:inline
+        version: 7.7.4
       vscode-uri:
         specifier: catalog:lsp
         version: 3.1.0
