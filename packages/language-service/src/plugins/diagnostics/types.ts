@@ -14,6 +14,4 @@ export interface RangeDiagnosticInfo extends Omit<Diagnostic, 'range'> {
   range: OffsetRange
 }
 
-type Awaitable<T> = T | Promise<T>
-
-export type DiagnosticRule = (ctx: DiagnosticContext, ignoreList: string[]) => Awaitable<RangeDiagnosticInfo | undefined>
+export type DiagnosticRule = (ctx: DiagnosticContext, ignoreList: string[]) => Promise<RangeDiagnosticInfo | undefined>
