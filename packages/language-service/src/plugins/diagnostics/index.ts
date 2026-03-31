@@ -1,6 +1,6 @@
 import type { CodeActionKind, Diagnostic, LanguageServicePlugin, LanguageServicePluginInstance } from '@volar/language-service'
 import type { IWorkspaceState } from '../../types'
-import type { DiagnosticContext, DiagnosticRule } from './types'
+import type { DiagnosticRule } from './types'
 import { displayName } from '#shared/meta'
 import { isDependencyFile } from 'npmx-language-core/utils'
 import { URI } from 'vscode-uri'
@@ -73,7 +73,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
             if (!pkg)
               return
 
-            const ctx: DiagnosticContext = { lsCtx: context, uri: document.uri, dep, pkg }
+            const ctx = { uri: document.uri, dep, pkg }
 
             const rules: ReturnType<DiagnosticRule>[] = []
             if (upgradeEnabled)

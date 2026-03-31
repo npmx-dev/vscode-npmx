@@ -1,6 +1,6 @@
 import type { PackageInfo } from 'npmx-language-core/api/package'
 import type { Engines } from 'npmx-language-core/types'
-import type { DiagnosticContext } from '../types'
+import type { DiagnosticContext } from '../../types'
 import { resolveDependencySpec, resolveExactVersion } from 'npmx-language-core/utils'
 
 interface CreateContextOptions {

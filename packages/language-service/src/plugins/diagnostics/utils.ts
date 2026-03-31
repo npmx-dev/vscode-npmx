@@ -9,9 +9,6 @@ export function offsetRangeToRange(document: { positionAt: (offset: number) => R
 }
 
 export function getDiagnosticCodeValue(diagnostic: Diagnostic): string | undefined {
-  if (typeof diagnostic.code === 'string')
-    return diagnostic.code
-
-  if (typeof diagnostic.code === 'number')
+  if (typeof diagnostic.code === 'string' || typeof diagnostic.code === 'number')
     return String(diagnostic.code)
 }

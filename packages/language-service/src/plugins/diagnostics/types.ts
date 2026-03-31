@@ -1,9 +1,8 @@
-import type { Diagnostic, LanguageServiceContext } from '@volar/language-service'
+import type { Diagnostic } from '@volar/language-service'
 import type { OffsetRange } from 'npmx-language-core/types'
 import type { DependencyInfo } from 'npmx-language-core/workspace'
 
 export interface DiagnosticContext {
-  lsCtx: LanguageServiceContext
   uri: string
   dep: DependencyInfo
   pkg: NonNullable<Awaited<ReturnType<DependencyInfo['packageInfo']>>>
