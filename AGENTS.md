@@ -8,9 +8,9 @@
 - `pnpm typecheck` — type-check with `tsgo -b --noEmit`
 
 ## Architecture
-- **Monorepo** (pnpm workspaces). Main extension: `extensions/vscode/` (VS Code extension using `reactive-vscode`). Shared code: `shared/` (constants, types, meta). Internal packages: `packages/language-service/`, `packages/language-server/` (bundled into the extension via tsdown, not standalone workspace packages).
+- **Monorepo** (pnpm workspaces). Main extension: `extensions/vscode/` (VS Code extension using `reactive-vscode`). Shared code: `shared/` (constants, types, meta). Internal packages: `packages/language-core/`, `packages/language-service/`, `packages/language-server/` (bundled into the extension via tsdown, not standalone workspace packages).
 - Extension entry: `extensions/vscode/src/index.ts`. Key dirs: `api/` (npm registry), `commands/`, `composables/`, `core/`, `providers/`, `utils/`.
-- Tests live in `extensions/vscode/tests/` using vitest + `jest-mock-vscode` + `msw` for HTTP mocking.
+- Tests live in `extensions/vscode/tests/` and `packages/*/tests/` using vitest + `jest-mock-vscode` + `msw` for HTTP mocking.
 
 ## Code Style
 - **TypeScript strict mode**, ESNext target, Bundler resolution, ESM (`"type": "module"`).
