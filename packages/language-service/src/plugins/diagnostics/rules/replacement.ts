@@ -1,7 +1,6 @@
 import type { DiagnosticSeverity } from '@volar/language-service'
 import type { ModuleReplacement } from 'module-replacements'
-import type { DependencyInfo } from 'npmx-language-core/workspace'
-import type { RangeDiagnosticInfo } from '../types'
+import type { DiagnosticRule } from '../types'
 import { getReplacement } from 'npmx-language-core/api/replacement'
 import { checkIgnored } from 'npmx-language-core/utils'
 
@@ -36,11 +35,7 @@ function getReplacementInfo(replacement: ModuleReplacement) {
   }
 }
 
-export async function checkReplacement(
-  ctx: { dep: DependencyInfo },
-  ignoreList: string[],
-): Promise<RangeDiagnosticInfo | undefined> {
-  const { dep: { nameRange, resolvedName } } = ctx
+export const checkReplacement: DiagnosticRule = async ({ dep: { nameRange, resolvedName } }, ignoreList) => {
   if (checkIgnored({ ignoreList, name: resolvedName }))
     return
 

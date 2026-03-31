@@ -1,9 +1,6 @@
 import type { DiagnosticSeverity } from '@volar/language-service'
-import type { PackageInfo } from 'npmx-language-core/api/package'
 import type { Engines } from 'npmx-language-core/types'
-import type { DependencyInfo } from 'npmx-language-core/workspace'
-import type { IWorkspaceState } from '../../../types'
-import type { RangeDiagnosticInfo } from '../types'
+import type { DiagnosticRule } from '../types'
 import { npmxPackageUrl } from 'npmx-language-core/links'
 import { formatPackageId, isPackageManifest } from 'npmx-language-core/utils'
 import SemverRange from 'semver/classes/range'
@@ -50,11 +47,7 @@ export function resolveEngineMismatches(
   return mismatches
 }
 
-export async function checkEngineMismatch(
-  ctx: { uri: string, dep: DependencyInfo, pkg: PackageInfo },
-  workspaceState: IWorkspaceState,
-): Promise<RangeDiagnosticInfo | undefined> {
-  const { uri, dep, pkg } = ctx
+export const checkEngineMismatch: DiagnosticRule = async ({ uri, dep, pkg, workspace }) => {
   const path = URI.parse(uri).path
 
   if (!isPackageManifest(path))
@@ -66,7 +59,7 @@ export async function checkEngineMismatch(
   if (!resolvedVersion)
     return
 
-  const wsCtx = await workspaceState.getWorkspaceContext(uri)
+  const wsCtx = await workspace.getWorkspaceContext(uri)
   const engines = (await wsCtx?.loadPackageManifestInfo(path))?.engines
   if (!engines)
     return

@@ -1,6 +1,6 @@
 import type { CodeActionKind, Diagnostic, LanguageServicePlugin, LanguageServicePluginInstance } from '@volar/language-service'
 import type { IWorkspaceState } from '../../types'
-import type { DiagnosticRule } from './types'
+import type { DiagnosticContext, DiagnosticRule } from './types'
 import { displayName } from '#shared/meta'
 import { isDependencyFile } from 'npmx-language-core/utils'
 import { URI } from 'vscode-uri'
@@ -73,7 +73,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
             if (!pkg)
               return
 
-            const ctx = { uri: document.uri, dep, pkg }
+            const ctx: DiagnosticContext = { uri: document.uri, dep, pkg, workspace: workspaceState }
 
             const rules: ReturnType<DiagnosticRule>[] = []
             if (upgradeEnabled)
@@ -83,7 +83,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
             if (distTagEnabled)
               rules.push(checkDistTag(ctx, []))
             if (engineMismatchEnabled)
-              rules.push(checkEngineMismatch(ctx, workspaceState))
+              rules.push(checkEngineMismatch(ctx, []))
             if (replacementEnabled)
               rules.push(checkReplacement(ctx, replacementIgnoreList))
             if (vulnerabilityEnabled)

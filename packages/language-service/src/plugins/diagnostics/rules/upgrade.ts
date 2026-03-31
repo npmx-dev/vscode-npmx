@@ -1,7 +1,7 @@
 import type { DiagnosticSeverity } from '@volar/language-service'
 import type { PackageInfo } from 'npmx-language-core/api/package'
 import type { DependencyInfo } from 'npmx-language-core/workspace'
-import type { RangeDiagnosticInfo } from '../types'
+import type { DiagnosticRule } from '../types'
 import { npmxPackageUrl } from 'npmx-language-core/links'
 import { checkIgnored } from 'npmx-language-core/utils'
 import gt from 'semver/functions/gt'
@@ -44,8 +44,7 @@ export function resolveUpgrade(dep: DependencyInfo, pkg: PackageInfo, resolvedVe
   }
 }
 
-export async function checkUpgrade(ctx: { dep: DependencyInfo, pkg: PackageInfo }, ignoreList: string[]): Promise<RangeDiagnosticInfo | undefined> {
-  const { dep, pkg } = ctx
+export const checkUpgrade: DiagnosticRule = async ({ dep, pkg }, ignoreList) => {
   const resolvedVersion = await dep.resolvedVersion()
   if (!resolvedVersion)
     return

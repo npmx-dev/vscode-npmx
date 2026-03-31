@@ -33,5 +33,5 @@ export function createContext(options: CreateContextOptions): DiagnosticContext 
     resolvedVersion: async () => resolveExactVersion(pkg, resolvedSpec),
     packageInfo: async () => (pkg),
   }
-  return { uri: 'file:///package.json', dep, pkg }
+  return { uri: 'file:///package.json', dep, pkg } as DiagnosticContext
 }
