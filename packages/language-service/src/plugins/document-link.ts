@@ -38,8 +38,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
 
             if (linkMode === 'declared') {
               targetVersion = resolvedSpec
-            }
-            else if (linkMode === 'resolved') {
+            } else if (linkMode === 'resolved') {
               targetVersion = await dep.resolvedVersion() ?? resolvedSpec
             }
 
