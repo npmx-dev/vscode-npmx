@@ -8,7 +8,6 @@ import { launch } from './client'
 import { addToIgnore } from './commands/add-to-ignore'
 import { openFileInNpmx } from './commands/open-file-in-npmx'
 import { openInBrowser } from './commands/open-in-browser'
-import { useCompletionItem } from './providers/completion-item'
 import { useDecorators } from './providers/decorators'
 import { useDocumentLink } from './providers/document-link'
 import { logger } from './state'
@@ -22,7 +21,6 @@ export const { activate, deactivate } = defineExtension((ctx) => {
 
   useWorkspaceContext()
 
-  useCompletionItem()
   useDecorators()
   useDocumentLink()
 
