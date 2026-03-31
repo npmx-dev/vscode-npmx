@@ -12,7 +12,6 @@ import { checkEngineMismatch } from './rules/engine-mismatch'
 import { checkReplacement } from './rules/replacement'
 import { checkUpgrade } from './rules/upgrade'
 import { checkVulnerability } from './rules/vulnerability'
-import { getDiagnosticCodeValue, offsetRangeToRange } from './utils'
 
 export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
   return {
@@ -94,11 +93,15 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
               if (result.status !== 'fulfilled' || !result.value)
                 continue
 
-              const { range, ...rest } = result.value
+              const { range: [start, end], ...rest } = result.value
+
               diagnostics.push({
                 source: displayName,
                 ...rest,
-                range: offsetRangeToRange(document, range),
+                range: {
+                  start: document.positionAt(start),
+                  end: document.positionAt(end),
+                },
               })
             }
           })
@@ -112,10 +115,10 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
             if (diagnostic.source !== displayName)
               return []
 
-            const code = getDiagnosticCodeValue(diagnostic)
-            if (!code)
+            if (!diagnostic.code)
               return []
 
+            const code = String(diagnostic.code)
             const strategy = strategies[code]
             if (!strategy)
               return []
