@@ -7,6 +7,12 @@ function createReplacementContext(name: string) {
 }
 
 describe('checkReplacement', () => {
+  it('should flag when replacement found', async () => {
+    expect(await checkReplacement(createReplacementContext('left-pad'), [])).toMatchObject({
+      code: 'replacement',
+    })
+  })
+
   it('should not flag when no replacement found', async () => {
     expect(await checkReplacement(createReplacementContext('vitest'), [])).toBeUndefined()
   })

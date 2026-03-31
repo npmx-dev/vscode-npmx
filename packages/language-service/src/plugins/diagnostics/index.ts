@@ -89,12 +89,12 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
             if (vulnerabilityEnabled)
               rules.push(checkVulnerability(ctx, vulnerabilityIgnoreList))
 
-            const results = await Promise.all(rules)
+            const results = await Promise.allSettled(rules)
             for (const result of results) {
-              if (!result)
+              if (result.status !== 'fulfilled' || !result.value)
                 continue
 
-              const { range, ...rest } = result
+              const { range, ...rest } = result.value
               diagnostics.push({
                 source: displayName,
                 ...rest,
@@ -103,12 +103,15 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
             }
           })
 
-          await Promise.all(tasks)
+          await Promise.allSettled(tasks)
           return diagnostics
         },
 
         provideCodeActions(document, _range, codeActionContext) {
           return codeActionContext.diagnostics.flatMap((diagnostic) => {
+            if (diagnostic.source !== displayName)
+              return []
+
             const code = getDiagnosticCodeValue(diagnostic)
             if (!code)
               return []
