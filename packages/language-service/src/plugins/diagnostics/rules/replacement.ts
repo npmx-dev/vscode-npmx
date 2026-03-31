@@ -12,6 +12,11 @@ function getReplacementsDocUrl(path: string): string {
   return `https://e18e.dev/docs/replacements/${path}.html`
 }
 
+/**
+ * Keep messages in sync with npmx.dev wording.
+ *
+ * https://github.com/npmx-dev/npmx.dev/blob/main/app/components/PackageReplacement.vue#L8-L30
+ */
 function getReplacementInfo(replacement: ModuleReplacement) {
   switch (replacement.type) {
     case 'native':
