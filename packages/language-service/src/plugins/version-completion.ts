@@ -10,7 +10,7 @@ const PRERELEASE_PATTERN = /-.+/
 
 export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
   return {
-    name: 'npmx-completion',
+    name: 'npmx-version-completion',
     capabilities: {
       completionProvider: {
         triggerCharacters: [':', '^', '~', '.'],
