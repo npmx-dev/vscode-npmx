@@ -1,6 +1,6 @@
 import type { CodeAction, CodeActionKind, Diagnostic } from '@volar/language-service'
-import { ADD_TO_IGNORE_COMMAND } from '#shared/commands'
-import { ConfigurationTarget } from '#shared/constants'
+import { ADD_TO_IGNORE_COMMAND } from 'npmx-shared/commands'
+import { ConfigurationTarget } from 'npmx-shared/constants'
 
 type MatchGroups = NonNullable<RegExpExecArray['groups']>
 

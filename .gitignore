@@ -1,7 +1,7 @@
 .DS_Store
 node_modules
 dist
-shared/meta.ts
+packages/shared/src/meta.ts
 
 # local env files
 .env.local

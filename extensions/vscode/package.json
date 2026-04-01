@@ -198,7 +198,7 @@
   "scripts": {
     "dev": "tsdown --watch",
     "build": "tsdown",
-    "update": "vscode-ext-gen --scope npmx --output ../../shared/meta.ts",
+    "update": "vscode-ext-gen --scope npmx --output ../../packages/shared/src/meta.ts",
     "vscode:prepublish": "npm run build",
     "package": "npx @vscode/vsce package --no-dependencies",
     "prepare": "npm run update"
@@ -208,6 +208,7 @@
     "@volar/vscode": "catalog:lsp",
     "npmx-language-core": "workspace:*",
     "npmx-language-server": "workspace:*",
+    "npmx-shared": "workspace:*",
     "ocache": "catalog:inline",
     "reactive-vscode": "catalog:inline",
     "semver": "catalog:inline",

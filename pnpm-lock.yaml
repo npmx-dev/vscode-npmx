@@ -155,6 +155,9 @@ importers:
       npmx-language-server:
         specifier: workspace:*
         version: link:../../packages/language-server
+      npmx-shared:
+        specifier: workspace:*
+        version: link:../../packages/shared
       ocache:
         specifier: catalog:inline
         version: 0.1.4
@@ -210,6 +213,9 @@ importers:
       npmx-language-service:
         specifier: workspace:*
         version: link:../language-service
+      npmx-shared:
+        specifier: workspace:*
+        version: link:../shared
       ocache:
         specifier: catalog:inline
         version: 0.1.4
@@ -225,12 +231,21 @@ importers:
       npmx-language-core:
         specifier: workspace:*
         version: link:../language-core
+      npmx-shared:
+        specifier: workspace:*
+        version: link:../shared
       semver:
         specifier: catalog:inline
         version: 7.7.4
       vscode-uri:
         specifier: catalog:lsp
         version: 3.1.0
+
+  packages/shared:
+    dependencies:
+      npmx-language-core:
+        specifier: workspace:*
+        version: link:../language-core
 
 packages:
 

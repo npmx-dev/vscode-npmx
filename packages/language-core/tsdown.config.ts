@@ -13,7 +13,9 @@ export default defineConfig({
     'src/workspace.ts',
   ],
   platform: 'neutral',
-  exports: true,
+  exports: {
+    packageJson: false,
+  },
   dts: true,
   minify: 'dce-only',
   deps: {

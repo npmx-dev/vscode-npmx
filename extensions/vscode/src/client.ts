@@ -1,10 +1,10 @@
-import type { GetPackageManagerRequest } from '#shared/protocol'
 import type { DocumentFilter } from '@volar/vscode'
-import { displayName, extensionId } from '#shared/meta'
-import { GET_PACKAGE_MANAGER_METHOD } from '#shared/protocol'
+import type { GetPackageManagerRequest } from 'npmx-shared/protocol'
 import { SUPPORTED_DOCUMENT_PATTERN } from '#utils/constants'
 import { middleware } from '@volar/vscode'
 import { LanguageClient, TransportKind } from '@volar/vscode/node'
+import { displayName, extensionId } from 'npmx-shared/meta'
+import { GET_PACKAGE_MANAGER_METHOD } from 'npmx-shared/protocol'
 import { commands, Hover, MarkdownString, Uri } from 'vscode'
 
 const SUPPORTED_LANGUAGES = [

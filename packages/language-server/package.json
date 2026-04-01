@@ -11,8 +11,7 @@
   },
   "sideEffects": true,
   "exports": {
-    ".": "./dist/index.cjs",
-    "./package.json": "./package.json"
+    ".": "./dist/index.cjs"
   },
   "main": "./dist/index.cjs",
   "bin": {
@@ -30,6 +29,7 @@
     "@volar/language-server": "catalog:lsp",
     "npmx-language-core": "workspace:*",
     "npmx-language-service": "workspace:*",
+    "npmx-shared": "workspace:*",
     "ocache": "catalog:inline",
     "vscode-uri": "catalog:lsp"
   },

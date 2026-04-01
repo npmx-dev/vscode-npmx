@@ -1,5 +1,5 @@
 {
-  "name": "npmx-language-service",
+  "name": "npmx-shared",
   "type": "module",
   "version": "0.7.0",
   "private": true,
@@ -7,12 +7,15 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/npmx-dev/vscode-npmx.git",
-    "directory": "packages/language-service"
+    "directory": "packages/shared"
   },
   "sideEffects": false,
   "exports": {
-    ".": "./dist/index.mjs",
-    "./types": "./dist/types.mjs"
+    "./commands": "./dist/commands.js",
+    "./constants": "./dist/constants.js",
+    "./meta": "./dist/meta.js",
+    "./protocol": "./dist/protocol.js",
+    "./types": "./dist/types.js"
   },
   "files": [
     "dist/**/*"
@@ -22,10 +25,6 @@
     "build": "tsdown"
   },
   "dependencies": {
-    "@volar/language-service": "catalog:lsp",
-    "npmx-language-core": "workspace:*",
-    "npmx-shared": "workspace:*",
-    "semver": "catalog:inline",
-    "vscode-uri": "catalog:lsp"
+    "npmx-language-core": "workspace:*"
   }
 }

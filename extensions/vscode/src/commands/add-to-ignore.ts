@@ -1,6 +1,6 @@
-import type { ConfigurationTarget } from '#shared/constants'
-import { scopedConfigs } from '#shared/meta'
+import type { ConfigurationTarget } from 'npmx-shared/constants'
 import { checkIgnored } from 'npmx-language-core/utils'
+import { scopedConfigs } from 'npmx-shared/meta'
 import { workspace } from 'vscode'
 
 export async function addToIgnore(scope: string, name: string, target: ConfigurationTarget) {

@@ -19,8 +19,7 @@
     "./links": "./dist/links.js",
     "./types": "./dist/types.js",
     "./utils": "./dist/utils/index.js",
-    "./workspace": "./dist/workspace.js",
-    "./package.json": "./package.json"
+    "./workspace": "./dist/workspace.js"
   },
   "files": [
     "dist/**/*"

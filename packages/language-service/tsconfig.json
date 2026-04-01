@@ -1,13 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tsbuildinfo",
-    "paths": {
-      "#shared/*": ["../../shared/*"]
-    }
+    "tsBuildInfoFile": "./node_modules/.tsbuildinfo"
   },
   "include": [
-    "src",
-    "../../shared"
+    "src"
   ]
 }

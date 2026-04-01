@@ -4,7 +4,9 @@ import { umdToEsm } from '../../plugins/umd-to-esm.ts'
 export default defineConfig({
   entry: 'src/index.ts',
   platform: 'node',
-  exports: true,
+  exports: {
+    packageJson: false,
+  },
   format: 'cjs',
   checks: {
     // @volar/language-server@2.4.28

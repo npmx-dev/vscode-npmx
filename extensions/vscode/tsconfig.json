@@ -3,7 +3,6 @@
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tsbuildinfo/app",
     "paths": {
-      "#shared/*": ["../../shared/*"],
       "#state": ["./src/state.ts"],
       "#api/*": ["./src/api/*"],
       "#types/*": ["./src/types/*"],
@@ -14,7 +13,6 @@
   },
   "include": [
     "src/**/*",
-    "tests/**/*",
-    "../../shared"
+    "tests/**/*"
   ]
 }

@@ -1,14 +1,10 @@
 import { defineConfig } from 'tsdown'
 
 export default defineConfig({
-  entry: [
-    'src/index.ts',
-    'src/types.ts',
-  ],
-  platform: 'node',
+  entry: 'src/**/*.ts',
+  platform: 'neutral',
   exports: {
     packageJson: false,
   },
   dts: true,
-  minify: 'dce-only',
 })
