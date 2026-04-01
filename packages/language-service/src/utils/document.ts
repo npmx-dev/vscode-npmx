@@ -10,7 +10,7 @@ export async function getDocumentByUri(context: LanguageServiceContext, uri: URI
     return context.documents.get(sourceScript.id, sourceScript.languageId, sourceScript.snapshot)
 
   const text = await context.env.fs!.readFile(uri)
-  if (!text)
+  if (text == null)
     return
 
   return TextDocument.create(uri.toString(), 'json', 0, text)
