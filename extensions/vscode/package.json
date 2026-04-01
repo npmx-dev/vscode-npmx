@@ -209,9 +209,7 @@
     "npmx-language-core": "workspace:*",
     "npmx-language-server": "workspace:*",
     "npmx-shared": "workspace:*",
-    "ocache": "catalog:inline",
     "reactive-vscode": "catalog:inline",
-    "semver": "catalog:inline",
     "vscode-ext-gen": "catalog:dev",
     "vscode-find-up": "catalog:inline"
   }

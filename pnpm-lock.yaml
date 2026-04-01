@@ -158,15 +158,9 @@ importers:
       npmx-shared:
         specifier: workspace:*
         version: link:../../packages/shared
-      ocache:
-        specifier: catalog:inline
-        version: 0.1.4
       reactive-vscode:
         specifier: catalog:inline
         version: 1.0.0-beta.2(@types/vscode@1.101.0)
-      semver:
-        specifier: catalog:inline
-        version: 7.7.4
       vscode-ext-gen:
         specifier: catalog:dev
         version: 1.6.0

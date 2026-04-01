@@ -1,4 +1,3 @@
-import { useWorkspaceContext } from '#composables/workspace-context'
 import { createLabsInfo } from '@volar/vscode'
 import { ADD_TO_IGNORE_COMMAND } from 'npmx-shared/commands'
 import { commands, displayName, version } from 'npmx-shared/meta'
@@ -18,9 +17,7 @@ export const { activate, deactivate } = defineExtension((ctx) => {
   const { client } = launch(serverPath)
   volarLabs.addLanguageClient(client)
 
-  useWorkspaceContext()
-
-  useDecorators()
+  useDecorators(client)
 
   useCommand(ADD_TO_IGNORE_COMMAND, addToIgnore)
 

@@ -6,9 +6,7 @@
       "#state": ["./src/state.ts"],
       "#api/*": ["./src/api/*"],
       "#types/*": ["./src/types/*"],
-      "#utils/*": ["./src/utils/*"],
-      "#core/*": ["./src/core/*"],
-      "#composables/*": ["./src/composables/*"]
+      "#utils/*": ["./src/utils/*"]
     }
   },
   "include": [

@@ -1,11 +1,10 @@
 import type { DocumentFilter } from '@volar/vscode'
-import type { GetPackageManagerRequest } from 'npmx-shared/protocol'
 import { SUPPORTED_DOCUMENT_PATTERN } from '#utils/constants'
+import { registerRequests } from './request'
 import { middleware } from '@volar/vscode'
 import { LanguageClient, TransportKind } from '@volar/vscode/node'
 import { displayName, extensionId } from 'npmx-shared/meta'
-import { GET_PACKAGE_MANAGER_METHOD } from 'npmx-shared/protocol'
-import { commands, Hover, MarkdownString, Uri } from 'vscode'
+import { Hover, MarkdownString } from 'vscode'
 
 const SUPPORTED_LANGUAGES = [
   'javascript',
@@ -74,17 +73,7 @@ export function launch(serverPath: string) {
     },
   )
 
-  client.onRequest(
-    GET_PACKAGE_MANAGER_METHOD,
-    async (params: GetPackageManagerRequest.ParamsType): Promise<GetPackageManagerRequest.ResponseType> => {
-      try {
-        const result = await commands.executeCommand<GetPackageManagerRequest.ResponseType>('npm.packageManager', Uri.parse(params.uri))
-        return result || 'npm'
-      } catch {
-        return 'npm'
-      }
-    },
-  )
+  registerRequests(client)
 
   return { client, ready: client.start() }
 }

@@ -1,6 +1,7 @@
 import { createConnection, createServer, createSimpleProject } from '@volar/language-server/node'
 import { createNpmxLanguageServicePlugins } from 'npmx-language-service'
 import { name, version } from '../package.json' with { type: 'json' }
+import { registerRequests } from './request'
 import { createWorkspaceState } from './workspace'
 
 export function startServer() {
@@ -28,4 +29,6 @@ export function startServer() {
     server.initialized()
   })
   connection.onShutdown(server.shutdown)
+
+  registerRequests(connection, workspaceState)
 }

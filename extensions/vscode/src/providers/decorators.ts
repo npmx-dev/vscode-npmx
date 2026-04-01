@@ -1,12 +1,13 @@
+import type { BaseLanguageClient } from '@volar/vscode'
 import type { DecorationOptions } from 'vscode'
-import { getResolvedDependencies } from '#core/workspace'
 import { logger } from '#state'
 import { offsetRangeToRange } from '#utils/ast'
+import { getResolvedDependencies } from '#utils/request'
 import { isPackageManifest } from 'npmx-language-core/utils'
 import { useActiveTextEditor, useEditorDecorations, watch } from 'reactive-vscode'
 import { Range } from 'vscode'
 
-export function useDecorators() {
+export function useDecorators(client: BaseLanguageClient) {
   const activeEditor = useActiveTextEditor()
 
   const { update } = useEditorDecorations(
@@ -20,7 +21,7 @@ export function useDecorators() {
         return []
       logger.info(`[decorators] updating ${document.uri.path}`)
 
-      const dependencies = await getResolvedDependencies(document.uri)
+      const dependencies = await getResolvedDependencies(client, document.uri)
       if (!dependencies)
         return []
 

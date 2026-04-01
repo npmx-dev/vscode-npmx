@@ -15,8 +15,6 @@ export default defineConfig({
       'balanced-match',
       'brace-expansion',
       'minimatch',
-      'ocache',
-      'ohash',
       'path-browserify',
       'semver',
       'typescript',
