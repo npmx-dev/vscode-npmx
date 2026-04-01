@@ -2,7 +2,7 @@ import type { BaseLanguageClient } from '@volar/vscode'
 import type { GetPackageManagerRequest } from 'npmx-shared/protocol'
 import { RequestType } from '@volar/vscode'
 import { GET_PACKAGE_MANAGER_METHOD } from 'npmx-shared/protocol'
-import { Uri, commands } from 'vscode'
+import { commands, Uri } from 'vscode'
 
 const getPackageManagerRequestType = new RequestType<
   GetPackageManagerRequest.ParamsType,
@@ -17,8 +17,7 @@ export function registerRequests(client: BaseLanguageClient) {
       try {
         const result = await commands.executeCommand<GetPackageManagerRequest.ResponseType>('npm.packageManager', Uri.parse(params.uri))
         return result || 'npm'
-      }
-      catch {
+      } catch {
         return 'npm'
       }
     },

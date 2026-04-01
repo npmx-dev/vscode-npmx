@@ -1,10 +1,10 @@
 import type { DocumentFilter } from '@volar/vscode'
 import { SUPPORTED_DOCUMENT_PATTERN } from '#utils/constants'
-import { registerRequests } from './request'
 import { middleware } from '@volar/vscode'
 import { LanguageClient, TransportKind } from '@volar/vscode/node'
 import { displayName, extensionId } from 'npmx-shared/meta'
 import { Hover, MarkdownString } from 'vscode'
+import { registerRequests } from './request'
 
 const SUPPORTED_LANGUAGES = [
   'javascript',
