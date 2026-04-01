@@ -61,6 +61,9 @@ catalogs:
     vscode-find-up:
       specifier: ^0.1.1
       version: 0.1.1
+    vscode-languageserver-textdocument:
+      specifier: ^1.0.12
+      version: 1.0.12
     yaml:
       specifier: ^2.8.3
       version: 2.8.3
@@ -231,6 +234,9 @@ importers:
       semver:
         specifier: catalog:inline
         version: 7.7.4
+      vscode-languageserver-textdocument:
+        specifier: catalog:inline
+        version: 1.0.12
       vscode-uri:
         specifier: catalog:lsp
         version: 3.1.0

@@ -5,7 +5,7 @@ import { jsrPackageUrl, npmxDocsUrl, npmxPackageUrl } from 'npmx-language-core/l
 import { getImportSpecifierAtOffset, isDependencyFile } from 'npmx-language-core/utils'
 import { URI } from 'vscode-uri'
 import { getConfig } from '../config'
-import { getResolvedDependencyAtOffset } from '../utils/range'
+import { getResolvedDependencyAtOffset } from '../utils/document'
 
 export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
   const SPACER = '&nbsp;'

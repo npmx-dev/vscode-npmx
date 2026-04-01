@@ -26,6 +26,7 @@
     "npmx-language-core": "workspace:*",
     "npmx-shared": "workspace:*",
     "semver": "catalog:inline",
+    "vscode-languageserver-textdocument": "catalog:inline",
     "vscode-uri": "catalog:lsp"
   }
 }

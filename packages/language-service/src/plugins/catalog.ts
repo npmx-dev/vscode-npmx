@@ -3,7 +3,7 @@ import type { DependencyInfo } from 'npmx-language-core/workspace'
 import type { IWorkspaceState } from '../types'
 import { isPackageManifest, normalizeCatalogName } from 'npmx-language-core/utils'
 import { URI } from 'vscode-uri'
-import { getResolvedDependencyAtOffset } from '../utils/range'
+import { getDocumentByUri, getResolvedDependencyAtOffset } from '../utils/document'
 
 export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
   function getDependencyFileUri(documentUri: string): URI | undefined {
@@ -103,11 +103,9 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
             return
 
           const workspaceFileUri = dependencyFileUri.with({ path: workspaceContext.workspaceFilePath })
-          const sourceScript = context.language.scripts.get(workspaceFileUri)
-          if (!sourceScript)
+          const workspaceDocument = await getDocumentByUri(context, workspaceFileUri)
+          if (!workspaceDocument)
             return
-
-          const workspaceDocument = context.documents.get(sourceScript.id, sourceScript.languageId, sourceScript.snapshot)
 
           const [targetStart, targetEnd] = targetDependency.specRange
           const originStart = document.positionAt(dependency.specRange[0])

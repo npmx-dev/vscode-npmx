@@ -3,7 +3,7 @@ import type { IWorkspaceState } from '../types'
 import { isDependencyFile } from 'npmx-language-core/utils'
 import { URI } from 'vscode-uri'
 import { getConfig } from '../config'
-import { getResolvedDependencyAtOffset } from '../utils/range'
+import { getResolvedDependencyAtOffset } from '../utils/document'
 import { formatUpgradeVersion } from '../utils/version'
 
 const PRERELEASE_PATTERN = /-.+/

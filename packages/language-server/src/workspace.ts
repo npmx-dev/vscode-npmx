@@ -17,10 +17,15 @@ const getPackageManagerRequestType = new RequestType<
   GetPackageManagerRequest.ErrorType
 >(GET_PACKAGE_MANAGER_METHOD)
 
-function createLanguageServerAdapter(folderUri: URI, connection: Connection): WorkspaceAdapter {
+function createLanguageServerAdapter(folderUri: URI, connection: Connection, server: LanguageServer): WorkspaceAdapter {
   return {
     async readFile(path: string): Promise<string> {
-      return await readFile(folderUri.with({ path }).fsPath, 'utf-8')
+      const uri = folderUri.with({ path })
+      const doc = server.documents.get(uri)
+      if (doc)
+        return doc.getText()
+
+      return await readFile(uri.fsPath, 'utf-8')
     },
 
     async fileExists(path: string): Promise<boolean> {
@@ -102,7 +107,7 @@ export class WorkspaceState implements IWorkspaceState {
 
       return await WorkspaceContext.create(
         folderUri.path,
-        createLanguageServerAdapter(folderUri, this.#connection),
+        createLanguageServerAdapter(folderUri, this.#connection, this.#server),
       )
     },
     {
