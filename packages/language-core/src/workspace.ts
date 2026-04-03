@@ -92,8 +92,7 @@ export class WorkspaceContext {
     this.packageManager = await this.adapter.detectPackageManager(this.rootPath)
 
     if (this.packageManager !== 'npm') {
-      const workspaceFilename = workspaceFileMapping[this.packageManager]
-      this.workspaceFilePath = `${this.rootPath}/${workspaceFilename}`
+      this.workspaceFilePath = join(this.rootPath, workspaceFileMapping[this.packageManager])
       this.#catalogs.resolve(
         await this.adapter.fileExists(this.workspaceFilePath)
           ? (await this.loadWorkspaceFileInfo(this.workspaceFilePath))?.catalogs

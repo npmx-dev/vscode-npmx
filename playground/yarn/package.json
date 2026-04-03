@@ -1,0 +1,18 @@
+{
+  "name": "@playground/yarn-pkg",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">16"
+  },
+  "dependencies": {
+    "@prismicio/client": "~7.21.0-canary.147e3f2",
+    "lodash": "catalog:",
+    "axios": "1.7.0"
+  },
+  "devDependencies": {
+    "ofetch": "^1.4.0",
+    "array-includes": "^3.1.8"
+  }
+}

@@ -37,10 +37,10 @@ function createLanguageServerAdapter(folderUri: URI, connection: Connection, ser
       }
     },
 
-    async detectPackageManager(): Promise<'npm' | 'pnpm' | 'yarn'> {
+    async detectPackageManager(rootPath): Promise<'npm' | 'pnpm' | 'yarn'> {
       try {
         const result = await connection.sendRequest(getPackageManagerRequestType, {
-          uri: folderUri.toString(),
+          uri: rootPath,
         })
         return result || 'npm'
       } catch {
@@ -106,13 +106,14 @@ export class WorkspaceState implements IWorkspaceState {
     [URI]
   >(
     async (folderUri) => {
-      this.#connection.console.info(`[workspace-context] built ${folderUri.path}`)
-      this.#cachedFolderPaths.add(folderUri.path)
-
-      return await WorkspaceContext.create(
+      const ctx = await WorkspaceContext.create(
         folderUri.path,
         createLanguageServerAdapter(folderUri, this.#connection, this.#server),
       )
+      this.#cachedFolderPaths.add(folderUri.path)
+
+      this.#connection.console.info(`[workspace-context] built for ${folderUri}, packageManager: ${ctx.packageManager}`)
+      return ctx
     },
     {
       name: 'workspace-context',

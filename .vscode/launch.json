@@ -12,7 +12,7 @@
         "--skip-release-notes",
         "--skip-welcome",
         "--extensionDevelopmentPath=${workspaceFolder}/extensions/vscode",
-        "${workspaceFolder}/playground"
+        "${workspaceFolder}/playground/playground.code-workspace"
       ],
       "outFiles": [
         "${workspaceFolder}/extensions/vscode/dist/**/*.js"
