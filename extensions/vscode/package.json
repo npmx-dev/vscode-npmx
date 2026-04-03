@@ -101,6 +101,11 @@
           "default": true,
           "description": "Show warnings when dependency engines mismatch with the current package"
         },
+        "npmx.versionLens.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show version lens (CodeLens) for package dependencies"
+        },
         "npmx.packageLinks": {
           "type": "string",
           "enum": [

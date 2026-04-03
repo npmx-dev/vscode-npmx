@@ -5,6 +5,7 @@ import { create as createNpmxDiagnosticsService } from './plugins/diagnostics'
 import { create as createNpmxDocumentLinkService } from './plugins/document-link'
 import { create as createNpmxHoverService } from './plugins/hover'
 import { create as createNpmxVersionCompletionService } from './plugins/version-completion'
+import { create as createNpmxVersionLensService } from './plugins/version-lens'
 
 export function createNpmxLanguageServicePlugins(workspace: IWorkspaceState): LanguageServicePlugin[] {
   return [
@@ -13,5 +14,6 @@ export function createNpmxLanguageServicePlugins(workspace: IWorkspaceState): La
     createNpmxDocumentLinkService(workspace),
     createNpmxHoverService(workspace),
     createNpmxVersionCompletionService(workspace),
+    createNpmxVersionLensService(workspace),
   ]
 }
