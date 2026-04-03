@@ -9,7 +9,7 @@
   "dependencies": {
     "@prismicio/client": "~7.21.0-canary.147e3f2",
     "lodash": "catalog:",
-    "axios": "1.7.0"
+    "axios": "1.13.5"
   },
   "devDependencies": {
     "ofetch": "^1.4.0",
