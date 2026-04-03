@@ -103,7 +103,7 @@
         },
         "npmx.versionLens.enabled": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Show version lens (CodeLens) for package dependencies"
         },
         "npmx.packageLinks": {
