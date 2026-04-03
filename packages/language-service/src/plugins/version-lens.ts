@@ -79,7 +79,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
           const lenses: CodeLens[] = []
 
           for (const dep of dependencies) {
-            if (dep.resolvedProtocol !== 'npm')
+            if (dep.resolvedProtocol !== 'npm' || dep.category === 'peerDependencies')
               continue
 
             const range = {
