@@ -104,6 +104,10 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
               }
             }
 
+            const hideWhenLatest = await getConfig(context, 'npmx.versionLens.hideWhenLatest')
+            if (hideWhenLatest)
+              continue
+
             lenses.push({ range, data: baseData })
           }
 
