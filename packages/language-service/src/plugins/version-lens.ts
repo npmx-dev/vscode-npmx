@@ -77,6 +77,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
             return []
 
           const lenses: CodeLens[] = []
+          const hideWhenLatest = await getConfig(context, 'npmx.versionLens.hideWhenLatest')
 
           for (const dep of dependencies) {
             if (dep.resolvedProtocol !== 'npm' || dep.category === 'peerDependencies')
@@ -104,7 +105,6 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
               }
             }
 
-            const hideWhenLatest = await getConfig(context, 'npmx.versionLens.hideWhenLatest')
             if (hideWhenLatest)
               continue
 
