@@ -21,7 +21,7 @@ export function umdToEsm(): Rolldown.RolldownPlugin {
         id: targets,
       },
       handler(source, importer) {
-        const require = createRequire(importer!)
+        const require = createRequire(importer ?? import.meta.url)
         const resolvedModulePath = require.resolve(source)
         const resolvedEsmPath = toEsmPath(resolvedModulePath)
         return { id: resolvedEsmPath }
