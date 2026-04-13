@@ -7,4 +7,4 @@ updates:
 
     # Ignore all dependency manifests in the `playground` directory.
     exclude-paths:
-      - '/playground/**'
+      - playground/**
