@@ -4,3 +4,7 @@ updates:
     directory: /
     schedule:
       interval: weekly
+
+    # Ignore all dependency manifests in the `playground` directory.
+    exclude-paths:
+      - '/playground/**'
