@@ -1,8 +1,9 @@
 import type { PackageInfo } from 'npmx-language-core/api/package'
 import type { DependencyInfo } from 'npmx-language-core/workspace'
+import type SemVer from 'semver/classes/semver'
 import { formatPackageId } from 'npmx-language-core/utils'
-import SemVer from 'semver/classes/semver'
 import gt from 'semver/functions/gt'
+import parse from 'semver/functions/parse'
 
 const RANGE_PREFIXES = ['>=', '<=', '=', '>', '<']
 
@@ -57,7 +58,10 @@ export interface UpgradeTier {
 }
 
 export function resolveUpgradeTiers(pkg: PackageInfo, resolvedVersion: string): UpgradeTier[] {
-  const current = new SemVer(resolvedVersion)
+  const current = parse(resolvedVersion)
+  if (!current)
+    return []
+
   const currentMajor = current.major
   const currentMinor = current.minor
 
@@ -66,8 +70,8 @@ export function resolveUpgradeTiers(pkg: PackageInfo, resolvedVersion: string): 
   let maxMajor: SemVer | undefined
 
   for (const v of Object.keys(pkg.versionsMeta)) {
-    const parsed = new SemVer(v, { loose: true })
-    if (parsed.prerelease.length > 0 || !gt(parsed, current))
+    const parsed = parse(v, { loose: true })
+    if (!parsed || parsed.prerelease.length > 0 || !gt(parsed, current))
       continue
 
     if (parsed.major === currentMajor && parsed.minor === currentMinor) {
