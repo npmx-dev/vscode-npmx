@@ -53,8 +53,8 @@ catalogs:
       specifier: ^2.0.3
       version: 2.0.3
     reactive-vscode:
-      specifier: ^1.0.0
-      version: 1.0.0
+      specifier: ^1.0.1
+      version: 1.0.1
     semver:
       specifier: ^7.7.4
       version: 7.7.4
@@ -163,7 +163,7 @@ importers:
         version: link:../../packages/shared
       reactive-vscode:
         specifier: catalog:inline
-        version: 1.0.0(@types/vscode@1.101.0)
+        version: 1.0.1(@types/vscode@1.101.0)
       vscode-ext-gen:
         specifier: catalog:dev
         version: 1.6.0
@@ -542,8 +542,8 @@ packages:
   '@quansync/fs@1.0.0':
     resolution: {integrity: sha512-4TJ3DFtlf1L5LDMaM6CanJ/0lckGNtJcMjQ1NAV6zDmA0tEHKZtxNKin8EgPaVX1YzljbxckyT2tJrpQKAtngQ==}
 
-  '@reactive-vscode/reactivity@1.0.0':
-    resolution: {integrity: sha512-mh9wIZua5yG++EBDUfgSed3sMzauKkeVv620UIJNuB9dZr6Md73za4R+w1T3yoClJq4B3OsqUAodmG6ZtPfBdw==}
+  '@reactive-vscode/reactivity@1.0.1':
+    resolution: {integrity: sha512-wP27JK/xKwuSpARPH0Aj36HwbPzZywUaUKBH0JhHMmUnueYkH9ixC+ZRokmYH845XK9Yl4pnsPJWgJKA8mpcpQ==}
 
   '@rolldown/binding-android-arm64@1.0.0-rc.12':
     resolution: {integrity: sha512-pv1y2Fv0JybcykuiiD3qBOBdz6RteYojRFY1d+b95WVuzx211CRh+ytI/+9iVyWQ6koTh5dawe4S/yRfOFjgaA==}
@@ -2024,8 +2024,8 @@ packages:
   quansync@1.0.0:
     resolution: {integrity: sha512-5xZacEEufv3HSTPQuchrvV6soaiACMFnq1H8wkVioctoH3TRha9Sz66lOxRwPK/qZj7HPiSveih9yAyh98gvqA==}
 
-  reactive-vscode@1.0.0:
-    resolution: {integrity: sha512-C2i0Hz7ksi96BjEpUQ52elor6rvSwcvFLQVVUzwkWyw/CF+XZWvrkR2HoUayuMhDlDF8AgwM/f9JCR6vgu+BAw==}
+  reactive-vscode@1.0.1:
+    resolution: {integrity: sha512-oYDPt7cOpgMemFjrFfA6a7yT1UlqaDxWkLPzm294r4LbuVyUhka7PRAzr6unQP53rzgwbC8om1qkBWd8N9QAAg==}
     peerDependencies:
       '@types/vscode': ^1.101.0
 
@@ -2806,7 +2806,7 @@ snapshots:
     dependencies:
       quansync: 1.0.0
 
-  '@reactive-vscode/reactivity@1.0.0': {}
+  '@reactive-vscode/reactivity@1.0.1': {}
 
   '@rolldown/binding-android-arm64@1.0.0-rc.12':
     optional: true
@@ -4424,9 +4424,9 @@ snapshots:
 
   quansync@1.0.0: {}
 
-  reactive-vscode@1.0.0(@types/vscode@1.101.0):
+  reactive-vscode@1.0.1(@types/vscode@1.101.0):
     dependencies:
-      '@reactive-vscode/reactivity': 1.0.0
+      '@reactive-vscode/reactivity': 1.0.1
       '@types/vscode': 1.101.0
 
   refa@0.12.1:
