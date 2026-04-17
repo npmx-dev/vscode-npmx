@@ -14,7 +14,7 @@ catalogs:
     eslint: ^10.2.0
     husky: ^9.1.7
     nano-staged: ^1.0.2
-    tsdown: ^0.21.7
+    tsdown: ^0.21.9
     vite: ^8.0.8
     vscode-ext-gen: ^1.6.0
   inline:
