@@ -9,7 +9,7 @@ catalogs:
   dev:
     '@types/node': ^25.6.0
     '@types/semver': ^7.7.1
-    '@typescript/native-preview': 7.0.0-dev.20260412.1
+    '@typescript/native-preview': 7.0.0-dev.20260417.1
     '@vida0905/eslint-config': ^2.12.0
     eslint: ^10.2.0
     husky: ^9.1.7
