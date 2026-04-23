@@ -11,7 +11,7 @@ catalogs:
     '@types/semver': ^7.7.1
     '@typescript/native-preview': 7.0.0-dev.20260412.1
     '@vida0905/eslint-config': ^2.12.0
-    eslint: ^10.2.0
+    eslint: ^10.2.1
     husky: ^9.1.7
     nano-staged: ^1.0.2
     tsdown: ^0.21.7
