@@ -1,0 +1,22 @@
+{
+  "name": "@playground/bun-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">16"
+  },
+  "dependencies": {
+    "@deno/doc": "catalog:prod",
+    "@playground/bun-utils": "workspace:*",
+    "@prismicio/client": "~7.21.0-canary.147e3f2",
+    "axios": "^1.7.0",
+    "lodash": "catalog:",
+    "semver": "catalog:"
+  },
+  "devDependencies": {
+    "array-includes": "^3.1.8",
+    "is-number": "catalog:dev",
+    "ofetch": "^1.4.0"
+  }
+}

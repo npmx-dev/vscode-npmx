@@ -1,11 +1,11 @@
 import type { Connection, LanguageServer } from '@volar/language-server'
-import type { DependencyInfo, WorkspaceAdapter } from 'npmx-language-core/workspace'
+import type { DependencyInfo, PackageManager, WorkspaceAdapter } from 'npmx-language-core/workspace'
 import type { IWorkspaceState } from 'npmx-language-service/types'
 import type { GetPackageManagerRequest } from 'npmx-shared/protocol'
 import { access, readFile } from 'node:fs/promises'
 import { RequestType } from '@volar/language-server'
 import { DEPENDENCY_FILE_GLOB, PACKAGE_JSON_BASENAME } from 'npmx-language-core/constants'
-import { isDependencyFile, isPackageManifest, isWorkspaceFile } from 'npmx-language-core/utils'
+import { isDependencyFile, isPackageManifest } from 'npmx-language-core/utils'
 import { WorkspaceContext } from 'npmx-language-core/workspace'
 import { GET_PACKAGE_MANAGER_METHOD } from 'npmx-shared/protocol'
 import { defineCachedFunction } from 'ocache'
@@ -37,7 +37,7 @@ function createLanguageServerAdapter(folderUri: URI, connection: Connection, ser
       }
     },
 
-    async detectPackageManager(rootPath): Promise<'npm' | 'pnpm' | 'yarn'> {
+    async detectPackageManager(rootPath): Promise<PackageManager> {
       try {
         const result = await connection.sendRequest(getPackageManagerRequestType, {
           uri: rootPath,
@@ -95,7 +95,7 @@ export class WorkspaceState implements IWorkspaceState {
     this.#connection.console.info(`[workspace-context] invalidate dependencies cache: ${uri.path}`)
 
     const isRoot = uri.path === `${ctx.rootPath}/${PACKAGE_JSON_BASENAME}`
-    if (isRoot || isWorkspaceFile(uri.path))
+    if (isRoot || ctx.isWorkspaceFile(uri.path))
       await ctx.loadWorkspace()
   }
 
@@ -156,11 +156,20 @@ export class WorkspaceState implements IWorkspaceState {
       return
 
     const uri = URI.parse(uriString)
-    return (
-      isPackageManifest(uri.path)
-        ? await ctx.loadPackageManifestInfo(uri.path)
-        : await ctx.loadWorkspaceFileInfo(uri.path)
-    )?.dependencies
+
+    const depPromises: Promise<DependencyInfo[]>[] = []
+    if (isPackageManifest(uri.path)) {
+      depPromises.push(ctx.loadPackageManifestInfo(uri.path).then((info) => info?.dependencies ?? []))
+    }
+    if (ctx.isWorkspaceFile(uri.path)) {
+      depPromises.push(ctx.loadWorkspaceFileInfo(uri.path).then((info) => info?.dependencies ?? []))
+    }
+
+    if (!depPromises.length)
+      return
+
+    const results = await Promise.all(depPromises)
+    return results.flat()
   }
 
   async getResolvedDependenciesForContainingPackage(uriString: string): Promise<DependencyInfo[] | undefined> {

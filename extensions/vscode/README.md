@@ -27,7 +27,7 @@
 
 - **Hover Information** &ndash; Quick links to package details and documentation on [npmx.dev](https://npmx.dev), with provenance verification status.
 - **Version Completion** &ndash; Autocomplete package versions with provenance filtering and prerelease exclusion support.
-- **Workspace-Aware Resolution** &ndash; Dependencies in `package.json`, `pnpm-workspace.yaml`, and `.yarnrc.yml` are resolved from a shared workspace context, including catalogs and workspace references.
+- **Workspace-Aware Resolution** &ndash; Dependencies in `package.json`, `pnpm-workspace.yaml`, and `.yarnrc.yml` are resolved from a shared workspace context, including npm, pnpm, yarn, and bun package managers plus root `package.json` catalogs and workspace references.
 - **Diagnostics**
   - Deprecated package warnings with deprecation messages
   - Package replacement suggestions (via [module-replacements](https://github.com/es-tooling/module-replacements))

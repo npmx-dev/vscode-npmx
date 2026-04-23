@@ -1,6 +1,17 @@
 import type { Node as JsonNode } from 'jsonc-parser'
-import type { BaseExtractor, DependencyCategory, Engines, ExtractedDependencyInfo, OffsetRange, PackageManifestExtractor, PackageManifestInfo } from '../types'
+import type {
+  BaseExtractor,
+  DependencyCategory,
+  Engines,
+  ExtractedDependencyInfo,
+  OffsetRange,
+  PackageManifestExtractor,
+  PackageManifestInfo,
+  WorkspaceCatalogExtractor,
+  WorkspaceCatalogInfo,
+} from '../types'
 import { findNodeAtLocation, parseTree } from 'jsonc-parser'
+import { normalizeCatalogName } from '../utils'
 
 const DEPENDENCY_SECTIONS: DependencyCategory[] = [
   'dependencies',
@@ -9,7 +20,22 @@ const DEPENDENCY_SECTIONS: DependencyCategory[] = [
   'optionalDependencies',
 ]
 
-export class JsonExtractor implements PackageManifestExtractor, BaseExtractor<JsonNode> {
+interface CatalogMeta {
+  category: 'catalog' | 'catalogs'
+  categoryName?: string
+}
+
+const CATALOG_NODE_PATHS: {
+  path: string[]
+  meta: CatalogMeta
+}[] = [
+  { path: ['catalog'], meta: { category: 'catalog', categoryName: '' } },
+  { path: ['catalogs'], meta: { category: 'catalogs' } },
+  { path: ['workspaces', 'catalog'], meta: { category: 'catalog', categoryName: '' } },
+  { path: ['workspaces', 'catalogs'], meta: { category: 'catalogs' } },
+]
+
+export class JsonExtractor implements PackageManifestExtractor, WorkspaceCatalogExtractor, BaseExtractor<JsonNode> {
   parse = (text: string) => parseTree(text) ?? null
 
   #getStringValue(root: JsonNode, key: string): string | undefined {
@@ -41,6 +67,40 @@ export class JsonExtractor implements PackageManifestExtractor, BaseExtractor<Js
       nameRange: this.#getStringNodeRange(nameNode),
       specRange: this.#getStringNodeRange(specNode),
     }
+  }
+
+  #parseCatalogEntries(node: JsonNode, meta: CatalogMeta): ExtractedDependencyInfo[] {
+    if (node.type !== 'object' || !node.children)
+      return []
+
+    if (meta.category === 'catalog') {
+      return node.children
+        .map((entry) => this.#parseDependencyNode(entry, meta.category))
+        .flatMap((dependency) => dependency
+          ? [{ ...dependency, categoryName: meta.categoryName }]
+          : [])
+    }
+
+    const result: ExtractedDependencyInfo[] = []
+
+    for (const catalogNode of node.children) {
+      const [nameNode, valueNode] = catalogNode.children ?? []
+      if (typeof nameNode?.value !== 'string' || valueNode?.type !== 'object' || !valueNode.children)
+        continue
+
+      for (const entry of valueNode.children) {
+        const dependency = this.#parseDependencyNode(entry, meta.category)
+        if (!dependency)
+          continue
+
+        result.push({
+          ...dependency,
+          categoryName: nameNode.value,
+        })
+      }
+    }
+
+    return result
   }
 
   #getEngines(root: JsonNode): Engines | undefined {
@@ -79,6 +139,30 @@ export class JsonExtractor implements PackageManifestExtractor, BaseExtractor<Js
     })
 
     return result
+  }
+
+  getWorkspaceCatalogInfo(text: string): WorkspaceCatalogInfo | undefined {
+    const root = this.parse(text)
+    if (!root)
+      return
+
+    const dependencies = CATALOG_NODE_PATHS.flatMap(({ path, meta }) => {
+      const node = findNodeAtLocation(root, path)
+      return node ? this.#parseCatalogEntries(node, meta) : []
+    })
+
+    const catalogs: Record<string, Record<string, string>> = {}
+
+    for (const dependency of dependencies) {
+      const categoryName = normalizeCatalogName(dependency.categoryName ?? '')
+      catalogs[categoryName] ??= {}
+      catalogs[categoryName][dependency.rawName] = dependency.rawSpec
+    }
+
+    return {
+      dependencies,
+      catalogs: Object.keys(catalogs).length > 0 ? catalogs : undefined,
+    }
   }
 
   getPackageManifestInfo(text: string): PackageManifestInfo | undefined {

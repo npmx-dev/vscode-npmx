@@ -25,7 +25,7 @@ export default defineConfig({
       'jsonc-parser',
       'module-replacements',
       'ofetch',
-      'pathe',
+      'path-browserify',
       'yaml',
     ],
   },

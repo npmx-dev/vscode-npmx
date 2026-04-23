@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.7.0",
   "private": true,
-  "packageManager": "pnpm@10.33.0",
+  "packageManager": "pnpm@10.33.1",
   "author": {
     "name": "Vida Xie",
     "email": "vida_2020@163.com",
@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@types/node": "catalog:dev",
+    "@types/path-browserify": "catalog:dev",
     "@types/semver": "catalog:dev",
     "@typescript/native-preview": "catalog:dev",
     "@vida0905/eslint-config": "catalog:dev",
