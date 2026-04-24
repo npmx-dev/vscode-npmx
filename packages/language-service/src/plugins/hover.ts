@@ -8,19 +8,21 @@ import { getConfig } from '../config'
 import { getResolvedDependencyAtOffset } from '../utils/document'
 
 export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
-  const SPACER = '&nbsp;'
-
-  async function renderHover(dep: DependencyInfo): Promise<Hover | undefined> {
+  async function renderHover(dep: DependencyInfo, useCodicons: boolean): Promise<Hover | undefined> {
     const { resolvedName, resolvedSpec, resolvedProtocol, packageInfo } = dep
 
     switch (resolvedProtocol) {
       case 'jsr': {
-        const jsrPackageLink = `[$(package)${SPACER}View on jsr.io](${jsrPackageUrl(resolvedName)})`
+        const jsrPackageLink = useCodicons
+          ? `[$(package)&nbsp;View on jsr.io](${jsrPackageUrl(resolvedName)})`
+          : `[View on jsr.io](${jsrPackageUrl(resolvedName)})`
 
         return {
           contents: {
             kind: 'markdown',
-            value: `${jsrPackageLink} | $(warning) Not on npmx`,
+            value: useCodicons
+              ? `${jsrPackageLink} | $(warning) Not on npmx.dev`
+              : `${jsrPackageLink} | Not on npmx.dev`,
           },
         } satisfies Hover
       }
@@ -30,7 +32,9 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
           return {
             contents: {
               kind: 'markdown',
-              value: '$(warning) Unable to fetch package information',
+              value: useCodicons
+                ? '$(warning) Unable to fetch package information'
+                : 'Unable to fetch package information.',
             },
           } satisfies Hover
         }
@@ -38,11 +42,17 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
         const resolvedVersion = await dep.resolvedVersion()
         let content = ''
         if (resolvedVersion && pkg.versionsMeta[resolvedVersion]?.provenance) {
-          content += `[$(verified)${SPACER}Verified provenance](${npmxPackageUrl(resolvedName, resolvedSpec)}#provenance)\n\n`
+          content += useCodicons
+            ? `[$(verified)&nbsp;Verified provenance](${npmxPackageUrl(resolvedName, resolvedSpec)}#provenance)\n\n`
+            : `[Verified provenance](${npmxPackageUrl(resolvedName, resolvedSpec)}#provenance)\n\n`
         }
 
-        const packageLink = `[$(package)${SPACER}View on npmx.dev](${npmxPackageUrl(resolvedName)})`
-        const docsLink = `[$(book)${SPACER}View docs on npmx.dev](${npmxDocsUrl(resolvedName, resolvedSpec)})`
+        const packageLink = useCodicons
+          ? `[$(package)&nbsp;View on npmx.dev](${npmxPackageUrl(resolvedName)})`
+          : `[View on npmx.dev](${npmxPackageUrl(resolvedName)})`
+        const docsLink = useCodicons
+          ? `[$(book)&nbsp;View docs on npmx.dev](${npmxDocsUrl(resolvedName, resolvedSpec)})`
+          : `[View docs on npmx.dev](${npmxDocsUrl(resolvedName, resolvedSpec)})`
 
         content += `${packageLink} | ${docsLink}`
 
@@ -66,6 +76,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
         async provideHover(document, position): Promise<Hover | undefined> {
           if (!await getConfig(context, 'npmx.hover.enabled'))
             return
+          const useCodicons = workspaceState.getEditorFlavor() === 'vscode'
 
           const uri = URI.parse(document.uri)
           if (uri.scheme !== 'file')
@@ -81,7 +92,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
             if (!dep)
               return
 
-            return renderHover(dep)
+            return renderHover(dep, useCodicons)
           } else {
             const text = document.getText()
             const specifier = getImportSpecifierAtOffset(text, offset)
@@ -95,7 +106,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
             if (!dep)
               return
 
-            return renderHover(dep)
+            return renderHover(dep, useCodicons)
           }
         },
       }

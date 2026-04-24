@@ -40,6 +40,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
         triggerCharacters: [':'],
       },
       definitionProvider: true,
+      inlayHintProvider: {},
     },
     create(context): LanguageServicePluginInstance {
       return {
@@ -126,6 +127,37 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
               end: originEnd,
             },
           }]
+        },
+
+        async provideInlayHints(document, range) {
+          if (workspaceState.getEditorFlavor() === 'vscode')
+            return
+
+          const dependencyFileUri = getDependencyFileUri(document.uri)
+          if (!dependencyFileUri)
+            return
+
+          const dependencies = await workspaceState.getResolvedDependencies(document.uri)
+          if (!dependencies)
+            return
+
+          const startOffset = document.offsetAt(range.start)
+          const endOffset = document.offsetAt(range.end)
+
+          return dependencies.flatMap((dependency) => {
+            if (dependency.protocol !== 'catalog')
+              return []
+
+            const [specStart, specEnd] = dependency.specRange
+            if (specEnd < startOffset || specStart > endOffset)
+              return []
+
+            return [{
+              position: document.positionAt(specEnd),
+              label: ` ${dependency.resolvedSpec}`,
+              paddingLeft: true,
+            }]
+          })
         },
       }
     },
