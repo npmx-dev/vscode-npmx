@@ -4,16 +4,12 @@ import type { IWorkspaceState } from 'npmx-language-service/types'
 import type { GetPackageManagerRequest } from 'npmx-shared/protocol'
 import { access, readFile } from 'node:fs/promises'
 import { RequestType } from '@volar/language-server'
-import {
-  DEPENDENCY_FILE_GLOB,
-  PACKAGE_JSON_BASENAME,
-  PNPM_WORKSPACE_BASENAME,
-  YARN_WORKSPACE_BASENAME,
-} from 'npmx-language-core/constants'
+import { DEPENDENCY_FILE_GLOB, PACKAGE_JSON_BASENAME } from 'npmx-language-core/constants'
 import { isDependencyFile, isPackageManifest } from 'npmx-language-core/utils'
 import { WorkspaceContext } from 'npmx-language-core/workspace'
 import { GET_PACKAGE_MANAGER_METHOD } from 'npmx-shared/protocol'
 import { defineCachedFunction } from 'ocache'
+import { detect } from 'package-manager-detector'
 import { URI } from 'vscode-uri'
 
 type EditorFlavor = ReturnType<IWorkspaceState['getEditorFlavor']>
@@ -24,71 +20,21 @@ const getPackageManagerRequestType = new RequestType<
   GetPackageManagerRequest.ErrorType
 >(GET_PACKAGE_MANAGER_METHOD)
 
-const PACKAGE_MANAGER_PATTERN = /^(bun|npm|pnpm|yarn)(?:@|$)/
-const PACKAGE_MANAGER_LOCKFILES: [PackageManager, string[]][] = [
-  ['bun', ['bun.lock', 'bun.lockb']],
-  ['pnpm', ['pnpm-lock.yaml']],
-  ['yarn', ['yarn.lock']],
-  ['npm', ['package-lock.json', 'npm-shrinkwrap.json']],
-]
+export async function detectPackageManagerFromProject(rootPath: string): Promise<PackageManager> {
+  const result = await detect({
+    cwd: rootPath,
+    stopDir: rootPath,
+  })
 
-function normalizePackageManager(value: string | undefined): PackageManager | undefined {
-  if (!value)
-    return
-
-  const match = PACKAGE_MANAGER_PATTERN.exec(value.trim())
-  const packageManager = match?.[1]
-  switch (packageManager) {
+  switch (result?.name) {
     case 'bun':
     case 'npm':
     case 'pnpm':
     case 'yarn':
-      return packageManager
+      return result.name
+    default:
+      return 'npm'
   }
-}
-
-function isPackageManagerManifest(value: unknown): value is { packageManager?: string } {
-  if (typeof value !== 'object' || value === null)
-    return false
-
-  return !('packageManager' in value) || typeof value.packageManager === 'string'
-}
-
-async function detectPackageManagerFromFiles(
-  rootPath: string,
-  adapter: Pick<WorkspaceAdapter, 'fileExists' | 'readFile'>,
-): Promise<PackageManager> {
-  const manifestPath = folderPath(rootPath, PACKAGE_JSON_BASENAME)
-  if (await adapter.fileExists(manifestPath)) {
-    try {
-      const parsed = JSON.parse(await adapter.readFile(manifestPath))
-      const packageManager = isPackageManagerManifest(parsed)
-        ? normalizePackageManager(parsed.packageManager)
-        : undefined
-      if (packageManager)
-        return packageManager
-    } catch {
-    }
-  }
-
-  for (const [packageManager, basenames] of PACKAGE_MANAGER_LOCKFILES) {
-    for (const basename of basenames) {
-      if (await adapter.fileExists(folderPath(rootPath, basename)))
-        return packageManager
-    }
-  }
-
-  if (await adapter.fileExists(folderPath(rootPath, PNPM_WORKSPACE_BASENAME)))
-    return 'pnpm'
-
-  if (await adapter.fileExists(folderPath(rootPath, YARN_WORKSPACE_BASENAME)))
-    return 'yarn'
-
-  return 'npm'
-}
-
-function folderPath(rootPath: string, basename: string) {
-  return `${rootPath}/${basename}`
 }
 
 function createLanguageServerAdapter(folderUri: URI, connection: Connection, server: LanguageServer): WorkspaceAdapter {
@@ -112,16 +58,16 @@ function createLanguageServerAdapter(folderUri: URI, connection: Connection, ser
     },
 
     async detectPackageManager(rootPath): Promise<PackageManager> {
-      const detected = await detectPackageManagerFromFiles(rootPath, this)
-
       try {
         const result = await connection.sendRequest(getPackageManagerRequestType, {
           uri: rootPath,
         })
-        return result || detected
+        if (result)
+          return result
       } catch {
-        return detected
       }
+
+      return await detectPackageManagerFromProject(rootPath)
     },
   }
 }

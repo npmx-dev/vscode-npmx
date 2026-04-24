@@ -1,6 +1,6 @@
 import type { WorkspaceAdapter } from './workspace'
 import { describe, expect, it } from 'vitest'
-import { detectPackageManagerFromFiles, WorkspaceContext } from './workspace'
+import { WorkspaceContext } from './workspace'
 
 describe('workspaceContext', () => {
   it('loads bun workspace catalogs from the root package.json', async () => {
@@ -173,46 +173,5 @@ describe('workspaceContext', () => {
         resolvedProtocol: 'jsr',
       },
     ])
-  })
-
-  it('detects the package manager from package.json packageManager', async () => {
-    const adapter = {
-      async readFile() {
-        return `{
-          "packageManager": "pnpm@10.0.0"
-        }`
-      },
-      async fileExists(path: string) {
-        return path === '/repo/package.json'
-      },
-    }
-
-    expect(await detectPackageManagerFromFiles('/repo', adapter)).toBe('pnpm')
-  })
-
-  it('falls back to lockfiles when packageManager is not declared', async () => {
-    const adapter = {
-      async readFile() {
-        throw new Error('this test should not read package.json')
-      },
-      async fileExists(path: string) {
-        return path === '/repo/pnpm-lock.yaml'
-      },
-    }
-
-    expect(await detectPackageManagerFromFiles('/repo', adapter)).toBe('pnpm')
-  })
-
-  it('falls back to npm when no package-manager hints exist', async () => {
-    const adapter = {
-      async readFile() {
-        throw new Error('this test should not read package.json')
-      },
-      async fileExists() {
-        return false
-      },
-    }
-
-    expect(await detectPackageManagerFromFiles('/repo', adapter)).toBe('npm')
   })
 })

@@ -25,6 +25,9 @@
     "dev": "tsdown --watch",
     "build": "tsdown"
   },
+  "dependencies": {
+    "package-manager-detector": "catalog:inline"
+  },
   "devDependencies": {
     "@volar/language-server": "catalog:lsp",
     "npmx-language-core": "workspace:*",
@@ -42,6 +45,7 @@
     "ocache": "0.1.4",
     "ofetch": "2.0.0-alpha.3",
     "ohash": "2.0.11",
+    "package-manager-detector": "1.6.0",
     "path-browserify": "1.0.1",
     "request-light": "0.7.0",
     "semver": "7.7.4",

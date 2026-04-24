@@ -23,6 +23,7 @@ catalogs:
     jsonc-parser: ^3.3.1
     ocache: ^0.1.4
     ofetch: ^2.0.0-alpha.3
+    package-manager-detector: ^1.6.0
     path-browserify: ^1.0.1
     reactive-vscode: ^1.0.1
     semver: ^7.7.4
