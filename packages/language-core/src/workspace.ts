@@ -31,6 +31,69 @@ export interface WorkspaceAdapter {
   detectPackageManager: (rootPath: string) => Promise<PackageManager>
 }
 
+const PACKAGE_MANAGER_PATTERN = /^(bun|npm|pnpm|yarn)(?:@|$)/
+const PACKAGE_MANAGER_LOCKFILES: [PackageManager, string[]][] = [
+  ['bun', ['bun.lock', 'bun.lockb']],
+  ['pnpm', ['pnpm-lock.yaml']],
+  ['yarn', ['yarn.lock']],
+  ['npm', ['package-lock.json', 'npm-shrinkwrap.json']],
+]
+
+function normalizePackageManager(value: string | undefined): PackageManager | undefined {
+  if (!value)
+    return
+
+  const match = PACKAGE_MANAGER_PATTERN.exec(value.trim())
+  const packageManager = match?.[1]
+  switch (packageManager) {
+    case 'bun':
+    case 'npm':
+    case 'pnpm':
+    case 'yarn':
+      return packageManager
+  }
+}
+
+export async function detectPackageManagerFromFiles(
+  rootPath: string,
+  adapter: Pick<WorkspaceAdapter, 'fileExists' | 'readFile'>,
+): Promise<PackageManager> {
+  const manifestPath = join(rootPath, PACKAGE_JSON_BASENAME)
+  if (await adapter.fileExists(manifestPath)) {
+    try {
+      const parsed = JSON.parse(await adapter.readFile(manifestPath))
+      const packageManager = isPackageManagerManifest(parsed)
+        ? normalizePackageManager(parsed.packageManager)
+        : undefined
+      if (packageManager)
+        return packageManager
+    } catch {
+    }
+  }
+
+  for (const [packageManager, basenames] of PACKAGE_MANAGER_LOCKFILES) {
+    for (const basename of basenames) {
+      if (await adapter.fileExists(join(rootPath, basename)))
+        return packageManager
+    }
+  }
+
+  if (await adapter.fileExists(join(rootPath, PNPM_WORKSPACE_BASENAME)))
+    return 'pnpm'
+
+  if (await adapter.fileExists(join(rootPath, YARN_WORKSPACE_BASENAME)))
+    return 'yarn'
+
+  return 'npm'
+}
+
+function isPackageManagerManifest(value: unknown): value is { packageManager?: string } {
+  if (typeof value !== 'object' || value === null)
+    return false
+
+  return !('packageManager' in value) || typeof value.packageManager === 'string'
+}
+
 function getWorkspaceFileBasename(packageManager: PackageManager): string | undefined {
   switch (packageManager) {
     case 'bun':
