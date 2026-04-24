@@ -1,0 +1,34 @@
+id = "npmx"
+name = "npmx"
+description = "npmx language support for Zed"
+version = "0.0.1"
+schema_version = 1
+authors = [ "Xat <i@xat.sh>" ]
+repository = "https://github.com/npmx-dev/vscode-npmx/tree/main/extensions/zed"
+
+[language_servers.npmx]
+name = "npmx"
+languages = [
+  "JSON",
+  "YAML",
+  "JavaScript",
+  "JSX",
+  "TypeScript",
+  "TSX",
+  "HTML",
+  "Vue",
+  "Astro",
+  "Svelte"
+]
+
+[language_servers.npmx.language_ids]
+JSON = "json"
+YAML = "yaml"
+JavaScript = "javascript"
+JSX = "javascriptreact"
+TypeScript = "typescript"
+TSX = "typescriptreact"
+HTML = "html"
+Vue = "vue"
+Astro = "astro"
+Svelte = "svelte"
