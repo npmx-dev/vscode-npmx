@@ -209,10 +209,6 @@ importers:
         version: 2.8.3
 
   packages/language-server:
-    dependencies:
-      package-manager-detector:
-        specifier: catalog:inline
-        version: 1.6.0
     devDependencies:
       '@volar/language-server':
         specifier: catalog:lsp
@@ -229,6 +225,9 @@ importers:
       ocache:
         specifier: catalog:inline
         version: 0.1.4
+      package-manager-detector:
+        specifier: catalog:inline
+        version: 1.6.0
       vscode-uri:
         specifier: catalog:lsp
         version: 3.1.0

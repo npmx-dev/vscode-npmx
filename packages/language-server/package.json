@@ -25,15 +25,13 @@
     "dev": "tsdown --watch",
     "build": "tsdown"
   },
-  "dependencies": {
-    "package-manager-detector": "catalog:inline"
-  },
   "devDependencies": {
     "@volar/language-server": "catalog:lsp",
     "npmx-language-core": "workspace:*",
     "npmx-language-service": "workspace:*",
     "npmx-shared": "workspace:*",
     "ocache": "catalog:inline",
+    "package-manager-detector": "catalog:inline",
     "vscode-uri": "catalog:lsp"
   },
   "inlinedDependencies": {
