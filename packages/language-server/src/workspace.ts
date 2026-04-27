@@ -1,24 +1,15 @@
 import type { Connection, LanguageServer } from '@volar/language-server'
 import type { DependencyInfo, PackageManager, WorkspaceAdapter } from 'npmx-language-core/workspace'
 import type { IWorkspaceState } from 'npmx-language-service/types'
-import type { GetPackageManagerRequest } from 'npmx-shared/protocol'
 import { access, readFile } from 'node:fs/promises'
-import { RequestType } from '@volar/language-server'
 import { DEPENDENCY_FILE_GLOB, PACKAGE_JSON_BASENAME } from 'npmx-language-core/constants'
 import { isDependencyFile, isPackageManifest } from 'npmx-language-core/utils'
 import { WorkspaceContext } from 'npmx-language-core/workspace'
-import { GET_PACKAGE_MANAGER_METHOD } from 'npmx-shared/protocol'
 import { defineCachedFunction } from 'ocache'
 import { detect } from 'package-manager-detector'
 import { URI } from 'vscode-uri'
 
 type EditorFlavor = ReturnType<IWorkspaceState['getEditorFlavor']>
-
-const getPackageManagerRequestType = new RequestType<
-  GetPackageManagerRequest.ParamsType,
-  GetPackageManagerRequest.ResponseType,
-  GetPackageManagerRequest.ErrorType
->(GET_PACKAGE_MANAGER_METHOD)
 
 export async function detectPackageManagerFromProject(rootPath: string): Promise<PackageManager> {
   const result = await detect({
@@ -37,7 +28,7 @@ export async function detectPackageManagerFromProject(rootPath: string): Promise
   }
 }
 
-function createLanguageServerAdapter(folderUri: URI, connection: Connection, server: LanguageServer): WorkspaceAdapter {
+function createLanguageServerAdapter(folderUri: URI, server: LanguageServer): WorkspaceAdapter {
   return {
     async readFile(path: string): Promise<string> {
       const uri = folderUri.with({ path })
@@ -58,15 +49,6 @@ function createLanguageServerAdapter(folderUri: URI, connection: Connection, ser
     },
 
     async detectPackageManager(rootPath): Promise<PackageManager> {
-      try {
-        const result = await connection.sendRequest(getPackageManagerRequestType, {
-          uri: rootPath,
-        })
-        if (result)
-          return result
-      } catch {
-      }
-
       return await detectPackageManagerFromProject(rootPath)
     },
   }
@@ -139,7 +121,7 @@ export class WorkspaceState implements IWorkspaceState {
     async (folderUri) => {
       const ctx = await WorkspaceContext.create(
         folderUri.path,
-        createLanguageServerAdapter(folderUri, this.#connection, this.#server),
+        createLanguageServerAdapter(folderUri, this.#server),
       )
       this.#cachedFolderPaths.add(folderUri.path)
 

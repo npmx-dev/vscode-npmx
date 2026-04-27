@@ -4,7 +4,6 @@ import { LanguageClient, TransportKind } from '@volar/vscode/node'
 import { DEPENDENCY_FILE_GLOB } from 'npmx-language-core/constants'
 import { displayName, extensionId } from 'npmx-shared/meta'
 import { Hover, MarkdownString } from 'vscode'
-import { registerRequests } from './request'
 
 const SUPPORTED_LANGUAGES = [
   'javascript',
@@ -72,8 +71,6 @@ export function launch(serverPath: string) {
       outputChannelName: `${displayName} Language Server`,
     },
   )
-
-  registerRequests(client)
 
   return { client, ready: client.start() }
 }

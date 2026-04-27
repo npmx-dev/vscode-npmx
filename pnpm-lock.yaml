@@ -52,6 +52,9 @@ catalogs:
     ofetch:
       specifier: ^2.0.0-alpha.3
       version: 2.0.0-alpha.3
+    package-manager-detector:
+      specifier: ^1.6.0
+      version: 1.6.0
     path-browserify:
       specifier: ^1.0.1
       version: 1.0.1
@@ -206,6 +209,10 @@ importers:
         version: 2.8.3
 
   packages/language-server:
+    dependencies:
+      package-manager-detector:
+        specifier: catalog:inline
+        version: 1.6.0
     devDependencies:
       '@volar/language-server':
         specifier: catalog:lsp
