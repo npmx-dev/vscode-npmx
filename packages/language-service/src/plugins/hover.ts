@@ -7,65 +7,76 @@ import { URI } from 'vscode-uri'
 import { getConfig } from '../config'
 import { getResolvedDependencyAtOffset } from '../utils/document'
 
-export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
-  async function renderHover(dep: DependencyInfo, useCodicons: boolean): Promise<Hover | undefined> {
-    const { resolvedName, resolvedSpec, resolvedProtocol, packageInfo } = dep
+function iconLabel(useCodicons: boolean, codicon: string, unicode: string, label: string): string {
+  return useCodicons
+    ? `$(${codicon})&nbsp;${label}`
+    : `${unicode} ${label}`
+}
 
-    switch (resolvedProtocol) {
-      case 'jsr': {
-        const jsrPackageLink = useCodicons
-          ? `[$(package)&nbsp;View on jsr.io](${jsrPackageUrl(resolvedName)})`
-          : `[View on jsr.io](${jsrPackageUrl(resolvedName)})`
+function iconText(useCodicons: boolean, codicon: string, unicode: string, text: string): string {
+  return useCodicons
+    ? `$(${codicon}) ${text}`
+    : `${unicode} ${text}`
+}
 
-        return {
-          contents: {
-            kind: 'markdown',
-            value: useCodicons
-              ? `${jsrPackageLink} | $(warning) Not on npmx.dev`
-              : `${jsrPackageLink} | Not on npmx.dev`,
-          },
-        } satisfies Hover
+function markdownLink(label: string, url: string): string {
+  return `[${label}](${url})`
+}
+
+export async function renderHoverMarkdown(dep: DependencyInfo, useCodicons: boolean): Promise<string | undefined> {
+  const { resolvedName, resolvedSpec, resolvedProtocol, packageInfo } = dep
+
+  switch (resolvedProtocol) {
+    case 'jsr': {
+      const jsrPackageLink = markdownLink(
+        iconLabel(useCodicons, 'package', '📦', 'View on jsr.io'),
+        jsrPackageUrl(resolvedName),
+      )
+
+      return `${jsrPackageLink} | ${iconText(useCodicons, 'warning', '⚠', 'Not on npmx.dev')}`
+    }
+    case 'npm': {
+      const pkg = await packageInfo()
+      if (!pkg)
+        return iconText(useCodicons, 'warning', '⚠', 'Unable to fetch package information.')
+
+      const resolvedVersion = await dep.resolvedVersion()
+      let content = ''
+      if (resolvedVersion && pkg.versionsMeta[resolvedVersion]?.provenance) {
+        content += `${markdownLink(
+          iconLabel(useCodicons, 'verified', '✓', 'Verified provenance'),
+          `${npmxPackageUrl(resolvedName, resolvedSpec)}#provenance`,
+        )}\n\n`
       }
-      case 'npm': {
-        const pkg = await packageInfo()
-        if (!pkg) {
-          return {
-            contents: {
-              kind: 'markdown',
-              value: useCodicons
-                ? '$(warning) Unable to fetch package information'
-                : 'Unable to fetch package information.',
-            },
-          } satisfies Hover
-        }
 
-        const resolvedVersion = await dep.resolvedVersion()
-        let content = ''
-        if (resolvedVersion && pkg.versionsMeta[resolvedVersion]?.provenance) {
-          content += useCodicons
-            ? `[$(verified)&nbsp;Verified provenance](${npmxPackageUrl(resolvedName, resolvedSpec)}#provenance)\n\n`
-            : `[Verified provenance](${npmxPackageUrl(resolvedName, resolvedSpec)}#provenance)\n\n`
-        }
+      const packageLink = markdownLink(
+        iconLabel(useCodicons, 'package', '📦', 'View on npmx.dev'),
+        npmxPackageUrl(resolvedName),
+      )
+      const docsLink = markdownLink(
+        iconLabel(useCodicons, 'book', '📖', 'View docs on npmx.dev'),
+        npmxDocsUrl(resolvedName, resolvedSpec),
+      )
 
-        const packageLink = useCodicons
-          ? `[$(package)&nbsp;View on npmx.dev](${npmxPackageUrl(resolvedName)})`
-          : `[View on npmx.dev](${npmxPackageUrl(resolvedName)})`
-        const docsLink = useCodicons
-          ? `[$(book)&nbsp;View docs on npmx.dev](${npmxDocsUrl(resolvedName, resolvedSpec)})`
-          : `[View docs on npmx.dev](${npmxDocsUrl(resolvedName, resolvedSpec)})`
-
-        content += `${packageLink} | ${docsLink}`
-
-        return {
-          contents: {
-            kind: 'markdown',
-            value: content,
-          },
-        }
-      }
+      return `${content}${packageLink} | ${docsLink}`
     }
   }
+}
 
+async function renderHover(dep: DependencyInfo, useCodicons: boolean): Promise<Hover | undefined> {
+  const content = await renderHoverMarkdown(dep, useCodicons)
+  if (!content)
+    return
+
+  return {
+    contents: {
+      kind: 'markdown',
+      value: content,
+    },
+  } satisfies Hover
+}
+
+export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
   return {
     name: 'npmx-hover',
     capabilities: {
