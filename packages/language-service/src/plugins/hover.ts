@@ -7,16 +7,16 @@ import { URI } from 'vscode-uri'
 import { getConfig } from '../config'
 import { getResolvedDependencyAtOffset } from '../utils/document'
 
-function iconLabel(useCodicons: boolean, codicon: string, unicode: string, label: string): string {
+function iconLabel(useCodicons: boolean, codicon: string, emoji: string, label: string): string {
   return useCodicons
     ? `$(${codicon})&nbsp;${label}`
-    : `${unicode} ${label}`
+    : `${emoji} ${label}`
 }
 
-function iconText(useCodicons: boolean, codicon: string, unicode: string, text: string): string {
+function iconText(useCodicons: boolean, codicon: string, emoji: string, text: string): string {
   return useCodicons
     ? `$(${codicon}) ${text}`
-    : `${unicode} ${text}`
+    : `${emoji} ${text}`
 }
 
 function markdownLink(label: string, url: string): string {
@@ -33,18 +33,18 @@ export async function renderHoverMarkdown(dep: DependencyInfo, useCodicons: bool
         jsrPackageUrl(resolvedName),
       )
 
-      return `${jsrPackageLink} | ${iconText(useCodicons, 'warning', '⚠', 'Not on npmx.dev')}`
+      return `${jsrPackageLink} | ${iconText(useCodicons, 'warning', '⚠️', 'Not on npmx.dev')}`
     }
     case 'npm': {
       const pkg = await packageInfo()
       if (!pkg)
-        return iconText(useCodicons, 'warning', '⚠', 'Unable to fetch package information.')
+        return iconText(useCodicons, 'warning', '⚠️', 'Unable to fetch package information.')
 
       const resolvedVersion = await dep.resolvedVersion()
       let content = ''
       if (resolvedVersion && pkg.versionsMeta[resolvedVersion]?.provenance) {
         content += `${markdownLink(
-          iconLabel(useCodicons, 'verified', '✓', 'Verified provenance'),
+          iconLabel(useCodicons, 'verified', '✅', 'Verified provenance'),
           `${npmxPackageUrl(resolvedName, resolvedSpec)}#provenance`,
         )}\n\n`
       }

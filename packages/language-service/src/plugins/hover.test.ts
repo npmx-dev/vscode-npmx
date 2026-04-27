@@ -46,20 +46,20 @@ describe('renderHoverMarkdown', () => {
     `)
   })
 
-  it('should use unicode icons when markdown icons are disabled', async () => {
+  it('should use emoji icons when codicons are disabled', async () => {
     await expect(renderHoverMarkdown(createDependency(), false)).resolves.toMatchInlineSnapshot(`
-      "[✓ Verified provenance](https://npmx.dev/package/lodash/v/^1.0.0#provenance)
+      "[✅ Verified provenance](https://npmx.dev/package/lodash/v/^1.0.0#provenance)
 
       [📦 View on npmx.dev](https://npmx.dev/package/lodash) | [📖 View docs on npmx.dev](https://npmx.dev/docs/lodash/v/^1.0.0)"
     `)
   })
 
-  it('should use unicode icons for non-npm packages without markdown icons', async () => {
+  it('should use emoji icons for non-npm packages without codicons', async () => {
     await expect(renderHoverMarkdown(createDependency({
       protocol: 'jsr',
       resolvedName: '@std/fs',
       resolvedSpec: '^1.0.0',
       resolvedProtocol: 'jsr',
-    }), false)).resolves.toMatchInlineSnapshot('"[📦 View on jsr.io](https://jsr.io/@std/fs) | ⚠ Not on npmx.dev"')
+    }), false)).resolves.toMatchInlineSnapshot('"[📦 View on jsr.io](https://jsr.io/@std/fs) | ⚠️ Not on npmx.dev"')
   })
 })
