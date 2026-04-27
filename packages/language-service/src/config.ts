@@ -94,7 +94,7 @@ export function getConfig<K extends ConfigKey>(
 export async function getConfig(context: LanguageServiceContext, section: ConfigKey): Promise<ConfigValue> {
   const getConfiguration = context.env.getConfiguration
   const spec = configSpecs[section]
-  const fallback = getDefaultConfig(spec)
+  const fallback = scopedConfigs.defaults[spec.scopedKey]
 
   if (!getConfiguration)
     return fallback
@@ -128,17 +128,6 @@ function readPath(value: unknown, path: readonly string[]): unknown {
   }
 
   return current
-}
-
-function getDefaultConfig(spec: {
-  scopedKey: keyof ScopedConfigKeyTypeMap
-  validate: (value: unknown) => ConfigValue | undefined
-}): ConfigValue {
-  const value = spec.validate(scopedConfigs.defaults[spec.scopedKey])
-  if (value === undefined)
-    throw new Error(`Invalid default configuration for ${String(spec.scopedKey)}`)
-
-  return value
 }
 
 function readConfigFromRoot(

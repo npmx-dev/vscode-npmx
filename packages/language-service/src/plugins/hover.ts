@@ -1,20 +1,31 @@
 import type { Hover, LanguageServicePlugin, LanguageServicePluginInstance } from '@volar/language-service'
 import type { DependencyInfo } from 'npmx-language-core/workspace'
-import type { IWorkspaceState } from '../types'
+import type { IconStyle, IWorkspaceState } from '../types'
 import { jsrPackageUrl, npmxDocsUrl, npmxPackageUrl } from 'npmx-language-core/links'
 import { getImportSpecifierAtOffset, isDependencyFile } from 'npmx-language-core/utils'
 import { URI } from 'vscode-uri'
 import { getConfig } from '../config'
 import { getResolvedDependencyAtOffset } from '../utils/document'
 
-function iconLabel(useCodicons: boolean, codicon: string, emoji: string, label: string): string {
-  return useCodicons
+const ICONS = {
+  package: { codicon: 'package', emoji: '📦' },
+  verified: { codicon: 'verified', emoji: '✅' },
+  book: { codicon: 'book', emoji: '📖' },
+  warning: { codicon: 'warning', emoji: '⚠️' },
+} as const
+
+type IconName = keyof typeof ICONS
+
+function iconLabel(iconStyle: IconStyle, name: IconName, label: string): string {
+  const { codicon, emoji } = ICONS[name]
+  return iconStyle === 'codicon'
     ? `$(${codicon})&nbsp;${label}`
     : `${emoji} ${label}`
 }
 
-function iconText(useCodicons: boolean, codicon: string, emoji: string, text: string): string {
-  return useCodicons
+function iconText(iconStyle: IconStyle, name: IconName, text: string): string {
+  const { codicon, emoji } = ICONS[name]
+  return iconStyle === 'codicon'
     ? `$(${codicon}) ${text}`
     : `${emoji} ${text}`
 }
@@ -23,38 +34,38 @@ function markdownLink(label: string, url: string): string {
   return `[${label}](${url})`
 }
 
-export async function renderHoverMarkdown(dep: DependencyInfo, useCodicons: boolean): Promise<string | undefined> {
+export async function renderHoverMarkdown(dep: DependencyInfo, iconStyle: IconStyle): Promise<string | undefined> {
   const { resolvedName, resolvedSpec, resolvedProtocol, packageInfo } = dep
 
   switch (resolvedProtocol) {
     case 'jsr': {
       const jsrPackageLink = markdownLink(
-        iconLabel(useCodicons, 'package', '📦', 'View on jsr.io'),
+        iconLabel(iconStyle, 'package', 'View on jsr.io'),
         jsrPackageUrl(resolvedName),
       )
 
-      return `${jsrPackageLink} | ${iconText(useCodicons, 'warning', '⚠️', 'Not on npmx.dev')}`
+      return `${jsrPackageLink} | ${iconText(iconStyle, 'warning', 'Not on npmx.dev')}`
     }
     case 'npm': {
       const pkg = await packageInfo()
       if (!pkg)
-        return iconText(useCodicons, 'warning', '⚠️', 'Unable to fetch package information.')
+        return iconText(iconStyle, 'warning', 'Unable to fetch package information.')
 
       const resolvedVersion = await dep.resolvedVersion()
       let content = ''
       if (resolvedVersion && pkg.versionsMeta[resolvedVersion]?.provenance) {
         content += `${markdownLink(
-          iconLabel(useCodicons, 'verified', '✅', 'Verified provenance'),
+          iconLabel(iconStyle, 'verified', 'Verified provenance'),
           `${npmxPackageUrl(resolvedName, resolvedSpec)}#provenance`,
         )}\n\n`
       }
 
       const packageLink = markdownLink(
-        iconLabel(useCodicons, 'package', '📦', 'View on npmx.dev'),
+        iconLabel(iconStyle, 'package', 'View on npmx.dev'),
         npmxPackageUrl(resolvedName),
       )
       const docsLink = markdownLink(
-        iconLabel(useCodicons, 'book', '📖', 'View docs on npmx.dev'),
+        iconLabel(iconStyle, 'book', 'View docs on npmx.dev'),
         npmxDocsUrl(resolvedName, resolvedSpec),
       )
 
@@ -63,8 +74,8 @@ export async function renderHoverMarkdown(dep: DependencyInfo, useCodicons: bool
   }
 }
 
-async function renderHover(dep: DependencyInfo, useCodicons: boolean): Promise<Hover | undefined> {
-  const content = await renderHoverMarkdown(dep, useCodicons)
+async function renderHover(dep: DependencyInfo, iconStyle: IconStyle): Promise<Hover | undefined> {
+  const content = await renderHoverMarkdown(dep, iconStyle)
   if (!content)
     return
 
@@ -87,7 +98,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
         async provideHover(document, position): Promise<Hover | undefined> {
           if (!await getConfig(context, 'npmx.hover.enabled'))
             return
-          const { codicons } = workspaceState.getClientFeatures()
+          const { iconStyle } = workspaceState.getClientFeatures()
 
           const uri = URI.parse(document.uri)
           if (uri.scheme !== 'file')
@@ -103,7 +114,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
             if (!dep)
               return
 
-            return renderHover(dep, codicons)
+            return renderHover(dep, iconStyle)
           } else {
             const text = document.getText()
             const specifier = getImportSpecifierAtOffset(text, offset)
@@ -117,7 +128,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
             if (!dep)
               return
 
-            return renderHover(dep, codicons)
+            return renderHover(dep, iconStyle)
           }
         },
       }

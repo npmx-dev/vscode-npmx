@@ -5,15 +5,15 @@ import { access, readFile } from 'node:fs/promises'
 import { DEPENDENCY_FILE_GLOB, PACKAGE_JSON_BASENAME } from 'npmx-language-core/constants'
 import { isDependencyFile, isPackageManifest } from 'npmx-language-core/utils'
 import { WorkspaceContext } from 'npmx-language-core/workspace'
+import { DEFAULT_CLIENT_FEATURES } from 'npmx-language-service/types'
 import { defineCachedFunction } from 'ocache'
 import { detect } from 'package-manager-detector'
 import { URI } from 'vscode-uri'
 
-export const DEFAULT_CLIENT_FEATURES: ClientFeatures = {
-  catalogInlayHints: true,
-  codicons: false,
-}
-
+/**
+ * Exported for unit tests only.
+ * @internal
+ */
 export async function detectPackageManagerFromProject(rootPath: string): Promise<PackageManager> {
   const result = await detect({
     cwd: rootPath,
@@ -51,9 +51,7 @@ function createLanguageServerAdapter(folderUri: URI, server: LanguageServer): Wo
       }
     },
 
-    async detectPackageManager(rootPath): Promise<PackageManager> {
-      return await detectPackageManagerFromProject(rootPath)
-    },
+    detectPackageManager: detectPackageManagerFromProject,
   }
 }
 

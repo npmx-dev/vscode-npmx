@@ -32,11 +32,16 @@ impl zed::Extension for NpmxExtension {
     ) -> zed::Result<zed::Command> {
         let lsp_settings = Self::language_server_settings(language_server_id, worktree);
         if let Some(binary) = lsp_settings.binary {
-            let command = binary
-                .path
-                .unwrap_or_else(|| zed::node_binary_path().unwrap_or_else(|_| String::from("node")));
+            let command = match binary.path {
+                Some(path) => path,
+                None => zed::node_binary_path()?,
+            };
             let args = binary.arguments.unwrap_or_default();
-            let env = binary.env.unwrap_or_default().into_iter().collect();
+            let env = worktree
+                .shell_env()
+                .into_iter()
+                .chain(binary.env.unwrap_or_default())
+                .collect();
 
             return Ok(zed::Command { command, args, env });
         }

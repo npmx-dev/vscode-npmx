@@ -1,9 +1,10 @@
 import type { ClientFeatures } from 'npmx-language-service/types'
 import { createConnection, createServer, createSimpleProject } from '@volar/language-server/node'
 import { createNpmxLanguageServicePlugins } from 'npmx-language-service'
+import { DEFAULT_CLIENT_FEATURES } from 'npmx-language-service/types'
 import { name, version } from '../package.json' with { type: 'json' }
 import { registerRequests } from './request'
-import { createWorkspaceState, DEFAULT_CLIENT_FEATURES } from './workspace'
+import { createWorkspaceState } from './workspace'
 
 export function startServer() {
   const connection = createConnection()
@@ -38,30 +39,21 @@ export function startServer() {
   registerRequests(connection, workspaceState)
 }
 
-function readClientFeatures(value: unknown): ClientFeatures {
-  if (typeof value !== 'object' || value === null)
-    return DEFAULT_CLIENT_FEATURES
-
-  if (!('npmx' in value))
-    return DEFAULT_CLIENT_FEATURES
-
-  const npmx = value.npmx
-  if (typeof npmx !== 'object' || npmx === null || !('clientFeatures' in npmx))
-    return DEFAULT_CLIENT_FEATURES
-
-  const clientFeatures = npmx.clientFeatures
-  if (typeof clientFeatures !== 'object' || clientFeatures === null)
-    return DEFAULT_CLIENT_FEATURES
-
-  return {
-    catalogInlayHints: readBoolean(clientFeatures, 'catalogInlayHints', DEFAULT_CLIENT_FEATURES.catalogInlayHints),
-    codicons: readBoolean(clientFeatures, 'codicons', DEFAULT_CLIENT_FEATURES.codicons),
-  }
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
 }
 
-function readBoolean(value: object, key: string, fallback: boolean): boolean {
-  const candidate = Object.entries(value).find(([name]) => name === key)?.[1]
-  return typeof candidate === 'boolean'
-    ? candidate
-    : fallback
+function readClientFeatures(value: unknown): ClientFeatures {
+  if (!isObject(value) || !isObject(value.npmx) || !isObject(value.npmx.clientFeatures))
+    return DEFAULT_CLIENT_FEATURES
+
+  const cf = value.npmx.clientFeatures
+  return {
+    catalogInlayHints: typeof cf.catalogInlayHints === 'boolean'
+      ? cf.catalogInlayHints
+      : DEFAULT_CLIENT_FEATURES.catalogInlayHints,
+    iconStyle: cf.iconStyle === 'codicon' || cf.iconStyle === 'emoji'
+      ? cf.iconStyle
+      : DEFAULT_CLIENT_FEATURES.iconStyle,
+  }
 }

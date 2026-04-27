@@ -38,28 +38,28 @@ function createDependency(overrides: Partial<DependencyInfo> = {}): DependencyIn
 }
 
 describe('renderHoverMarkdown', () => {
-  it('should use codicons when codicons are enabled', async () => {
-    await expect(renderHoverMarkdown(createDependency(), true)).resolves.toMatchInlineSnapshot(`
+  it('renders codicon markup for codicon-capable clients', async () => {
+    await expect(renderHoverMarkdown(createDependency(), 'codicon')).resolves.toMatchInlineSnapshot(`
       "[$(verified)&nbsp;Verified provenance](https://npmx.dev/package/lodash/v/^1.0.0#provenance)
 
       [$(package)&nbsp;View on npmx.dev](https://npmx.dev/package/lodash) | [$(book)&nbsp;View docs on npmx.dev](https://npmx.dev/docs/lodash/v/^1.0.0)"
     `)
   })
 
-  it('should use emoji icons when codicons are disabled', async () => {
-    await expect(renderHoverMarkdown(createDependency(), false)).resolves.toMatchInlineSnapshot(`
+  it('renders emoji icons for non-codicon clients', async () => {
+    await expect(renderHoverMarkdown(createDependency(), 'emoji')).resolves.toMatchInlineSnapshot(`
       "[✅ Verified provenance](https://npmx.dev/package/lodash/v/^1.0.0#provenance)
 
       [📦 View on npmx.dev](https://npmx.dev/package/lodash) | [📖 View docs on npmx.dev](https://npmx.dev/docs/lodash/v/^1.0.0)"
     `)
   })
 
-  it('should use emoji icons for non-npm packages without codicons', async () => {
+  it('renders emoji icons for non-npm packages with emoji style', async () => {
     await expect(renderHoverMarkdown(createDependency({
       protocol: 'jsr',
       resolvedName: '@std/fs',
       resolvedSpec: '^1.0.0',
       resolvedProtocol: 'jsr',
-    }), false)).resolves.toMatchInlineSnapshot('"[📦 View on jsr.io](https://jsr.io/@std/fs) | ⚠️ Not on npmx.dev"')
+    }), 'emoji')).resolves.toMatchInlineSnapshot('"[📦 View on jsr.io](https://jsr.io/@std/fs) | ⚠️ Not on npmx.dev"')
   })
 })
