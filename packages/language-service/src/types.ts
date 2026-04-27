@@ -1,9 +1,12 @@
 import type { DependencyInfo, WorkspaceContext } from 'npmx-language-core/workspace'
 
-export type EditorFlavor = 'unknown' | 'vscode' | 'zed'
+export interface ClientFeatures {
+  catalogInlayHints: boolean
+  markdownIcons: boolean
+}
 
 export interface IWorkspaceState {
-  getEditorFlavor: () => EditorFlavor
+  getClientFeatures: () => ClientFeatures
   getWorkspaceContext: (uri: string) => Promise<WorkspaceContext | undefined>
   getResolvedDependencies: (uri: string) => Promise<DependencyInfo[] | undefined>
   getResolvedDependenciesForContainingPackage: (uri: string) => Promise<DependencyInfo[] | undefined>

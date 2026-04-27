@@ -76,7 +76,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
         async provideHover(document, position): Promise<Hover | undefined> {
           if (!await getConfig(context, 'npmx.hover.enabled'))
             return
-          const useCodicons = workspaceState.getEditorFlavor() === 'vscode'
+          const { markdownIcons } = workspaceState.getClientFeatures()
 
           const uri = URI.parse(document.uri)
           if (uri.scheme !== 'file')
@@ -92,7 +92,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
             if (!dep)
               return
 
-            return renderHover(dep, useCodicons)
+            return renderHover(dep, markdownIcons)
           } else {
             const text = document.getText()
             const specifier = getImportSpecifierAtOffset(text, offset)
@@ -106,7 +106,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
             if (!dep)
               return
 
-            return renderHover(dep, useCodicons)
+            return renderHover(dep, markdownIcons)
           }
         },
       }

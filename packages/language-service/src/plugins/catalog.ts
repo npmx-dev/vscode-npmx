@@ -130,7 +130,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
         },
 
         async provideInlayHints(document, range) {
-          if (workspaceState.getEditorFlavor() === 'vscode')
+          if (!workspaceState.getClientFeatures().catalogInlayHints)
             return
 
           const dependencyFileUri = getDependencyFileUri(document.uri)

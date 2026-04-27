@@ -67,6 +67,14 @@ export function launch(serverPath: string) {
       synchronize: {
         configurationSection: [displayName],
       },
+      initializationOptions: {
+        npmx: {
+          clientFeatures: {
+            catalogInlayHints: false,
+            markdownIcons: true,
+          },
+        },
+      },
       diagnosticCollectionName: displayName,
       outputChannelName: `${displayName} Language Server`,
     },

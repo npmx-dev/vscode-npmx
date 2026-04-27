@@ -1,6 +1,6 @@
 import type { Connection, LanguageServer } from '@volar/language-server'
 import type { DependencyInfo, PackageManager, WorkspaceAdapter } from 'npmx-language-core/workspace'
-import type { IWorkspaceState } from 'npmx-language-service/types'
+import type { ClientFeatures, IWorkspaceState } from 'npmx-language-service/types'
 import { access, readFile } from 'node:fs/promises'
 import { DEPENDENCY_FILE_GLOB, PACKAGE_JSON_BASENAME } from 'npmx-language-core/constants'
 import { isDependencyFile, isPackageManifest } from 'npmx-language-core/utils'
@@ -9,7 +9,10 @@ import { defineCachedFunction } from 'ocache'
 import { detect } from 'package-manager-detector'
 import { URI } from 'vscode-uri'
 
-type EditorFlavor = ReturnType<IWorkspaceState['getEditorFlavor']>
+export const DEFAULT_CLIENT_FEATURES: ClientFeatures = {
+  catalogInlayHints: true,
+  markdownIcons: false,
+}
 
 export async function detectPackageManagerFromProject(rootPath: string): Promise<PackageManager> {
   const result = await detect({
@@ -57,7 +60,7 @@ function createLanguageServerAdapter(folderUri: URI, server: LanguageServer): Wo
 export class WorkspaceState implements IWorkspaceState {
   #connection: Connection
   #server: LanguageServer
-  #editorFlavor: EditorFlavor = 'unknown'
+  #clientFeatures: ClientFeatures = DEFAULT_CLIENT_FEATURES
 
   constructor(connection: Connection, server: LanguageServer) {
     this.#connection = connection
@@ -87,12 +90,12 @@ export class WorkspaceState implements IWorkspaceState {
     })
   }
 
-  setEditorFlavor(editorFlavor: EditorFlavor) {
-    this.#editorFlavor = editorFlavor
+  setClientFeatures(clientFeatures: ClientFeatures) {
+    this.#clientFeatures = clientFeatures
   }
 
-  getEditorFlavor(): EditorFlavor {
-    return this.#editorFlavor
+  getClientFeatures(): ClientFeatures {
+    return this.#clientFeatures
   }
 
   async #invalidateDependencyCacheByUri(uri: URI) {
