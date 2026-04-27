@@ -12,6 +12,7 @@
 | Package | Description |
 | ------- | ----------- |
 | [`extensions/vscode`](./extensions/vscode) | [VS Code extension](https://marketplace.visualstudio.com/items?itemName=npmx-dev.vscode-npmx) for npmx |
+| [`extensions/zed`](./extensions/zed) | Zed extension for npmx, backed by the shared language server |
 | [`packages/shared`](./packages/shared) | Shared constants, types, and LSP protocol definitions |
 | [`packages/language-core`](./packages/language-core) | Core logic: extractors, API clients, workspace context |
 | [`packages/language-service`](./packages/language-service) | Volar language service plugins (hover, completion, diagnostics, etc.) |
@@ -19,7 +20,7 @@
 
 ## Features
 
-- **Hover Information** &ndash; Quick links to package details and documentation on [npmx.dev](https://npmx.dev), with provenance verification status.
+- **Hover Information** &ndash; Quick links to package details and documentation on [npmx.dev](https://npmx.dev), with provenance verification status. VS Code uses codicons, while other editors use emoji icons.
 - **Version Completion** &ndash; Autocomplete package versions with provenance filtering and prerelease exclusion support.
 - **Workspace-Aware Resolution** &ndash; Dependencies in `package.json`, `pnpm-workspace.yaml`, and `.yarnrc.yml` are resolved from a shared workspace context, including npm, pnpm, yarn, and bun package managers plus root `package.json` catalogs and workspace references.
 - **Diagnostics**
@@ -35,6 +36,11 @@
 - **Commands**
   - Open [npmx.dev](https://npmx.dev) in external browser
   - Open `node_modules` files on [npmx.dev](https://npmx.dev) code viewer with syntax highlighting (from editor title, editor context menu, explorer context menu, or command palette)
+
+## Editor Support
+
+- **VS Code** &ndash; Primary extension package with hover, completion, diagnostics, document links, catalog decorations, code actions, and commands.
+- **Zed** &ndash; In-repo development extension using the same language server over stdio. It supports the shared LSP features and forwards `lsp.npmx.settings` as `npmx` workspace configuration.
 
 ## Related
 
