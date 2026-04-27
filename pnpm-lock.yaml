@@ -88,8 +88,8 @@ catalogs:
       specifier: ^4.12.0
       version: 4.12.0
     module-replacements:
-      specifier: ^2.11.0
-      version: 2.11.0
+      specifier: ^3.0.0-beta.7
+      version: 3.0.0-beta.7
     msw:
       specifier: ^2.13.5
       version: 2.13.5
@@ -130,7 +130,7 @@ importers:
         version: 4.12.0(@types/vscode@1.101.0)
       module-replacements:
         specifier: catalog:test
-        version: 2.11.0
+        version: 3.0.0-beta.7
       msw:
         specifier: catalog:test
         version: 2.13.5(@types/node@25.6.0)(typescript@5.9.3)
@@ -197,7 +197,7 @@ importers:
         version: 3.3.1
       module-replacements:
         specifier: catalog:test
-        version: 2.11.0
+        version: 3.0.0-beta.7
       path-browserify:
         specifier: catalog:inline
         version: 1.0.1
@@ -1804,6 +1804,9 @@ packages:
 
   module-replacements@2.11.0:
     resolution: {integrity: sha512-j5sNQm3VCpQQ7nTqGeOZtoJtV3uKERgCBm9QRhmGRiXiqkf7iRFOkfxdJRZWLkqYY8PNf4cDQF/WfXUYLENrRA==}
+
+  module-replacements@3.0.0-beta.7:
+    resolution: {integrity: sha512-n1F9l3gF1wNh13xmnXS2JU7P9c3DlzCgVEyLKrVN0U37RwrXyYoePMMvYvs/6aUONAxbnscphzESZTCorXFh7Q==}
 
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
@@ -4167,6 +4170,8 @@ snapshots:
       ufo: 1.6.3
 
   module-replacements@2.11.0: {}
+
+  module-replacements@3.0.0-beta.7: {}
 
   ms@2.1.3: {}
 

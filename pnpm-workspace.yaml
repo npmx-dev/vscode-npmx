@@ -36,7 +36,7 @@ catalogs:
     vscode-uri: ^3.1.0
   test:
     jest-mock-vscode: ^4.12.0
-    module-replacements: ^2.11.0
+    module-replacements: ^3.0.0-beta.7
     msw: ^2.13.5
     vite-tsconfig-paths: ^6.1.1
     vitest: ^4.1.5
