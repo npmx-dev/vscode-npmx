@@ -71,7 +71,7 @@ export function launch(serverPath: string) {
         npmx: {
           clientFeatures: {
             catalogInlayHints: false,
-            markdownIcons: true,
+            codicons: true,
           },
         },
       },

@@ -55,7 +55,7 @@ function readClientFeatures(value: unknown): ClientFeatures {
 
   return {
     catalogInlayHints: readBoolean(clientFeatures, 'catalogInlayHints', DEFAULT_CLIENT_FEATURES.catalogInlayHints),
-    markdownIcons: readBoolean(clientFeatures, 'markdownIcons', DEFAULT_CLIENT_FEATURES.markdownIcons),
+    codicons: readBoolean(clientFeatures, 'codicons', DEFAULT_CLIENT_FEATURES.codicons),
   }
 }
 

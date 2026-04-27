@@ -2,7 +2,7 @@ import type { DependencyInfo, WorkspaceContext } from 'npmx-language-core/worksp
 
 export interface ClientFeatures {
   catalogInlayHints: boolean
-  markdownIcons: boolean
+  codicons: boolean
 }
 
 export interface IWorkspaceState {

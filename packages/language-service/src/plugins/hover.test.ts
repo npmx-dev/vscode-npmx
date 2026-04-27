@@ -38,7 +38,7 @@ function createDependency(overrides: Partial<DependencyInfo> = {}): DependencyIn
 }
 
 describe('renderHoverMarkdown', () => {
-  it('should use codicons when markdown icons are enabled', async () => {
+  it('should use codicons when codicons are enabled', async () => {
     await expect(renderHoverMarkdown(createDependency(), true)).resolves.toMatchInlineSnapshot(`
       "[$(verified)&nbsp;Verified provenance](https://npmx.dev/package/lodash/v/^1.0.0#provenance)
 

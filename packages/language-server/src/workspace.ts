@@ -11,7 +11,7 @@ import { URI } from 'vscode-uri'
 
 export const DEFAULT_CLIENT_FEATURES: ClientFeatures = {
   catalogInlayHints: true,
-  markdownIcons: false,
+  codicons: false,
 }
 
 export async function detectPackageManagerFromProject(rootPath: string): Promise<PackageManager> {
