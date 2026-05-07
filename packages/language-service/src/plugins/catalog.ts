@@ -154,7 +154,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
 
             return [{
               position: document.positionAt(specEnd),
-              label: ` ${dependency.resolvedSpec}`,
+              label: dependency.resolvedSpec,
               paddingLeft: true,
             }]
           })
