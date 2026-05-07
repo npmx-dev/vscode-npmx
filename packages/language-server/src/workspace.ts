@@ -7,7 +7,7 @@ import { isDependencyFile, isPackageManifest } from 'npmx-language-core/utils'
 import { WorkspaceContext } from 'npmx-language-core/workspace'
 import { DEFAULT_CLIENT_FEATURES } from 'npmx-language-service/types'
 import { defineCachedFunction } from 'ocache'
-import { detect } from 'package-manager-detector'
+import { detect } from 'package-manager-detector/detect'
 import { URI } from 'vscode-uri'
 
 /**

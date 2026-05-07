@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { detectPackageManagerFromProject } from './workspace'
 
-vi.mock('package-manager-detector', () => ({
+vi.mock('package-manager-detector/detect', () => ({
   detect: vi.fn(),
 }))
 
-const { detect } = await import('package-manager-detector')
+const { detect } = await import('package-manager-detector/detect')
 
 describe('detectPackageManagerFromProject', () => {
   afterEach(() => {
