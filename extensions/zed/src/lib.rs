@@ -53,6 +53,29 @@ impl zed::Extension for NpmxExtension {
         })
     }
 
+    fn language_server_initialization_options(
+        &mut self,
+        language_server_id: &LanguageServerId,
+        worktree: &zed::Worktree,
+    ) -> zed::Result<Option<serde_json::Value>> {
+        let settings = Self::language_server_settings(language_server_id, worktree);
+        let workspace_settings = settings.settings.unwrap_or_default();
+        let client_features =
+            workspace_settings
+                .get("clientFeatures")
+                .cloned()
+                .unwrap_or(serde_json::json!({
+                    "catalogInlayHints": true,
+                    "iconStyle": "emoji",
+                }));
+
+        Ok(Some(serde_json::json!({
+            "npmx": {
+                "clientFeatures": client_features
+            }
+        })))
+    }
+
     fn language_server_workspace_configuration(
         &mut self,
         language_server_id: &LanguageServerId,
