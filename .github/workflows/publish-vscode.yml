@@ -1,6 +1,10 @@
 name: Publish VS Code Extension
 
 on:
+  # TODO: Restore this trigger after these Zed release changes are merged to the main branch.
+  # push:
+  #   tags:
+  #     - v*
   workflow_dispatch:
 
 jobs:

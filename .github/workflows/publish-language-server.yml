@@ -4,11 +4,6 @@ on:
   push:
     tags:
       - v*
-    paths:
-      - 'packages/language-server/**'
-      - 'packages/language-core/**'
-      - 'packages/language-service/**'
-      - 'packages/shared/**'
 
 jobs:
   publish-language-server:

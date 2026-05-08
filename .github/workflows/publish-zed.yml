@@ -4,8 +4,6 @@ on:
   push:
     tags:
       - v*
-    paths:
-      - 'extensions/zed/**'
 
 jobs:
   publish-zed-extension:
