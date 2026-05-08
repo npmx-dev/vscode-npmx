@@ -30,6 +30,8 @@ jobs:
         uses: huacnlee/zed-extension-action@v2
         with:
           extension-name: npmx
+          # TODO: Update this to the correct fork before enabling automated publishing.
           push-to: withxat/issue-zed-extensions
         env:
+          # TODO: Add the COMMITTER_TOKEN secret before enabling automated publishing.
           COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
