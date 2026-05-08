@@ -26,7 +26,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsgo -b --noEmit",
-    "release": "npx bumpp -r"
+    "release": "npx bumpp -r --execute \"node scripts/sync-zed-version.mjs\""
   },
   "nano-staged": {
     "*": "eslint --fix"
