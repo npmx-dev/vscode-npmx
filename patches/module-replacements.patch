@@ -1,0 +1,12 @@
+diff --git a/package.json b/package.json
+index 838e4bebd6a55b1316254fc664a2cdae44d0946a..9d0f4ca6159d0bc919233a4f5e105e94d0b6063e 100644
+--- a/package.json
++++ b/package.json
+@@ -26,6 +26,7 @@
+     "dist",
+     "manifests"
+   ],
++  "sideEffects": false,
+   "repository": {
+     "type": "git",
+     "url": "git+https://github.com/e18e/module-replacements.git"

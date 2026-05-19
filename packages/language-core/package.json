@@ -43,7 +43,7 @@
   "inlinedDependencies": {
     "fast-npm-meta": "1.5.0",
     "jsonc-parser": "3.3.1",
-    "module-replacements": "2.11.0",
+    "module-replacements": "3.0.0-beta.7",
     "path-browserify": "1.0.1",
     "yaml": "2.8.3"
   }

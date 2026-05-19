@@ -28,5 +28,8 @@
     "semver": "catalog:inline",
     "vscode-languageserver-textdocument": "catalog:inline",
     "vscode-uri": "catalog:lsp"
+  },
+  "inlinedDependencies": {
+    "module-replacements": "3.0.0-beta.7"
   }
 }
