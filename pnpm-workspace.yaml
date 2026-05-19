@@ -1,8 +1,11 @@
-
+shellEmulator: true
+trustPolicy: no-downgrade
 packages:
   - extensions/*
   - packages/*
 
+patchedDependencies:
+  module-replacements: patches/module-replacements.patch
 catalogs:
   dev:
     '@types/node': ^25.6.0
@@ -38,7 +41,3 @@ catalogs:
     msw: ^2.13.5
     vite-tsconfig-paths: ^6.1.1
     vitest: ^4.1.5
-patchedDependencies:
-  module-replacements: patches/module-replacements.patch
-shellEmulator: true
-trustPolicy: no-downgrade
