@@ -1,11 +1,11 @@
 import type { BaseLanguageClient } from '@volar/vscode'
 import type { DecorationOptions } from 'vscode'
-import { logger } from '#state'
-import { offsetRangeToRange } from '#utils/ast'
-import { getResolvedDependencies } from '#utils/request'
 import { isPackageManifest } from 'npmx-language-core/utils'
 import { useActiveTextEditor, useEditorDecorations, watch } from 'reactive-vscode'
 import { Range } from 'vscode'
+import { logger } from '#state'
+import { offsetRangeToRange } from '#utils/ast'
+import { getResolvedDependencies } from '#utils/request'
 
 export function useDecorators(client: BaseLanguageClient) {
   const activeEditor = useActiveTextEditor()

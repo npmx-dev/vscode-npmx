@@ -1,9 +1,9 @@
-import { logger } from '#state'
-import { readPackageManifest } from '#utils/file'
 import { PACKAGE_JSON_BASENAME } from 'npmx-language-core/constants'
 import { npmxFileUrl } from 'npmx-language-core/links'
 import { env, Uri, window } from 'vscode'
 import { findUp } from 'vscode-find-up'
+import { logger } from '#state'
+import { readPackageManifest } from '#utils/file'
 
 export async function openFileInNpmx(fileUri?: Uri) {
   const textEditor = window.activeTextEditor
