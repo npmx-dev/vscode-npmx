@@ -12,7 +12,7 @@ catalogs:
     '@types/node': ^25.9.0
     '@types/path-browserify': ^1.0.3
     '@types/semver': ^7.7.1
-    '@typescript/native-preview': 7.0.0-dev.20260519.1
+    '@typescript/native-preview': beta
     '@vida0905/eslint-config': ^2.12.0
     eslint: ^10.4.0
     husky: ^9.1.7
