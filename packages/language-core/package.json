@@ -1,7 +1,7 @@
 {
   "name": "npmx-language-core",
   "type": "module",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": true,
   "license": "MIT",
   "repository": {
@@ -30,21 +30,22 @@
   },
   "dependencies": {
     "ocache": "catalog:inline",
-    "ofetch": "catalog:inline",
     "semver": "catalog:inline"
   },
   "devDependencies": {
     "fast-npm-meta": "catalog:inline",
     "jsonc-parser": "catalog:inline",
     "module-replacements": "catalog:test",
+    "ofetch": "catalog:inline",
     "path-browserify": "catalog:inline",
     "yaml": "catalog:inline"
   },
   "inlinedDependencies": {
-    "fast-npm-meta": "1.5.0",
+    "fast-npm-meta": "1.5.1",
     "jsonc-parser": "3.3.1",
-    "module-replacements": "2.11.0",
+    "module-replacements": "3.0.0-beta.7",
+    "ofetch": "2.0.0-alpha.3",
     "path-browserify": "1.0.1",
-    "yaml": "2.8.3"
+    "yaml": "2.9.0"
   }
 }

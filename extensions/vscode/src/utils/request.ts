@@ -1,9 +1,9 @@
 import type { BaseLanguageClient } from '@volar/vscode'
 import type { GetResolvedDependenciesRequest } from 'npmx-shared/protocol'
 import type { Uri } from 'vscode'
-import { logger } from '#state'
 import { RequestType } from '@volar/vscode'
 import { GET_RESOLVED_DEPENDENCIES_METHOD } from 'npmx-shared/protocol'
+import { logger } from '#state'
 
 const getResolvedDependenciesRequestType = new RequestType<
   GetResolvedDependenciesRequest.ParamsType,

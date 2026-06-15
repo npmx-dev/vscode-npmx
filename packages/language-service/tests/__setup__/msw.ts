@@ -4,10 +4,6 @@ import { setupServer } from 'msw/node'
 import { NPMX_DEV_API } from 'npmx-language-core/constants'
 import { afterAll, afterEach, beforeAll } from 'vitest'
 
-const replacementsByName = new Map(
-  all.moduleReplacements.map((r) => [r.moduleName, r]),
-)
-
 const vulnerabilityResults: Record<string, Record<string, unknown>> = {
   'pkg-crit@1.0.0': {
     package: 'pkg-crit',
@@ -54,9 +50,26 @@ const vulnerabilityResults: Record<string, Record<string, unknown>> = {
   },
 }
 
+function getReplacement(pkg: string) {
+  if (!pkg)
+    return null
+  if (!Object.hasOwn(all.mappings, pkg))
+    return null
+  const mapping = all.mappings[pkg]
+  if (!mapping)
+    return null
+  const replacementId = mapping.replacements[0]
+  if (!replacementId)
+    return null
+  const replacement = all.replacements[replacementId]
+  if (!replacement)
+    return null
+  return { mapping, replacement }
+}
+
 const server = setupServer(
   http.get(`${NPMX_DEV_API}/replacements/:name`, ({ params }) => {
-    const data = replacementsByName.get(params.name as string)
+    const data = getReplacement(params.name as string)
     return data
       ? HttpResponse.json(data)
       : new HttpResponse(null, { status: 404 })

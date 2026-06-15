@@ -1,7 +1,7 @@
 {
   "name": "npmx-language-server",
   "type": "module",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": true,
   "license": "MIT",
   "repository": {
@@ -14,6 +14,7 @@
     ".": "./dist/index.cjs"
   },
   "main": "./dist/index.cjs",
+  "types": "./dist/index.d.cts",
   "bin": {
     "npmx-language-server": "./dist/index.cjs"
   },
@@ -41,12 +42,11 @@
     "@volar/source-map": "2.4.28",
     "@volar/typescript": "2.4.28",
     "ocache": "0.1.4",
-    "ofetch": "2.0.0-alpha.3",
     "ohash": "2.0.11",
     "package-manager-detector": "1.6.0",
     "path-browserify": "1.0.1",
     "request-light": "0.7.0",
-    "semver": "7.7.4",
+    "semver": "7.8.0",
     "vscode-jsonrpc": "8.2.0",
     "vscode-languageserver": "9.0.1",
     "vscode-languageserver-protocol": "3.17.5",

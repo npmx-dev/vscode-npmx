@@ -156,8 +156,8 @@ If you want to get ahead of any formatting issues, you can also run `pnpm lint:f
 
 ```typescript
 import type { PackageVersionsInfoWithMetadata } from 'fast-npm-meta'
-import { logger } from '#state'
 import { getVersions } from 'fast-npm-meta'
+import { logger } from '#state'
 import { memoize } from '../memoize'
 ```
 
