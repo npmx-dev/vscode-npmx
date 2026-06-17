@@ -31,7 +31,8 @@ function getReplacementDescription(resolvedName: string, replacement: ModuleRepl
   }
 }
 
-export const checkReplacement: DiagnosticRule = async ({ dep: { nameRange, resolvedName } }, ignoreList) => {
+export const checkReplacement: DiagnosticRule = async ({ dep }, ignoreList) => {
+  const { resolvedName, category } = dep
   if (checkIgnored({ ignoreList, name: resolvedName }))
     return
 
@@ -43,8 +44,12 @@ export const checkReplacement: DiagnosticRule = async ({ dep: { nameRange, resol
 
   const link = resolveDocUrl(replacement.replacement.url)
 
+  const range = category === 'overrides' || category === 'resolutions'
+    ? dep.specRange
+    : dep.nameRange
+
   return {
-    range: nameRange,
+    range,
     message: description,
     severity: 2 satisfies typeof DiagnosticSeverity.Warning,
     code: 'replacement',
