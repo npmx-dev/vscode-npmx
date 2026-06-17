@@ -15,5 +15,11 @@
     "ofetch": "^1.4.0",
     "array-includes": "^3.1.8",
     "is-number": "catalog:dev"
+  },
+  "pnpm": {
+    "overrides": {
+      "array-includes": "npm:array-includes-es@^3.1.8",
+      "lodash": "^4.17.20"
+    }
   }
 }

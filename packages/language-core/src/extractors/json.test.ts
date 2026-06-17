@@ -67,4 +67,84 @@ describe('jsonExtractor', () => {
       },
     })
   })
+
+  describe('getPackageManifestInfo', () => {
+    it('extracts overrides and resolutions from all package managers', () => {
+      const info = extractor.getPackageManifestInfo(`{
+        "name": "test-pkg",
+        "overrides": {
+          "lodash": "npm:lodash-es@^4.17.21",
+          "semver": "^7.0.0"
+        },
+        "resolutions": {
+          "**/lodash": "npm:lodash-es@^4.17.21",
+          "semver": "^7.0.0"
+        },
+        "pnpm": {
+          "overrides": {
+            "lodash": "npm:lodash-es@^4.17.21",
+            "semver": "^7.0.0"
+          }
+        }
+      }`)
+
+      const overrides = info?.dependencies.filter((d) => d.category === 'overrides')
+      const resolutions = info?.dependencies.filter((d) => d.category === 'resolutions')
+
+      expect(overrides).toHaveLength(4)
+      expect(resolutions).toHaveLength(2)
+
+      expect(overrides?.map(({ rawName, rawSpec }) => ({ rawName, rawSpec }))).toEqual([
+        { rawName: 'lodash', rawSpec: 'npm:lodash-es@^4.17.21' },
+        { rawName: 'semver', rawSpec: '^7.0.0' },
+        { rawName: 'lodash', rawSpec: 'npm:lodash-es@^4.17.21' },
+        { rawName: 'semver', rawSpec: '^7.0.0' },
+      ])
+
+      expect(resolutions?.map(({ rawName, rawSpec }) => ({ rawName, rawSpec }))).toEqual([
+        { rawName: 'lodash', rawSpec: 'npm:lodash-es@^4.17.21' },
+        { rawName: 'semver', rawSpec: '^7.0.0' },
+      ])
+    })
+
+    it('skips nested override objects', () => {
+      const info = extractor.getPackageManifestInfo(`{
+        "name": "test-pkg",
+        "overrides": {
+          "lodash": "npm:lodash-es@^4.17.21",
+          "express": {
+            "body-parser": "^1.0.0"
+          }
+        }
+      }`)
+
+      expect(info?.dependencies.filter((d) => d.category === 'overrides')).toHaveLength(1)
+    })
+
+    it('includes overrides alongside regular dependencies', () => {
+      const info = extractor.getPackageManifestInfo(`{
+        "name": "test-pkg",
+        "dependencies": {
+          "lodash": "^4.17.21"
+        },
+        "devDependencies": {
+          "vitest": "^4.0.0"
+        },
+        "overrides": {
+          "lodash": "npm:lodash-es@^4.17.21"
+        },
+        "resolutions": {
+          "semver": "npm:semver-ns@^7.0.0"
+        }
+      }`)
+
+      expect(info?.dependencies).toHaveLength(4)
+      expect(info?.dependencies.map(({ rawName, category }) => ({ rawName, category }))).toEqual([
+        { rawName: 'lodash', category: 'dependencies' },
+        { rawName: 'vitest', category: 'devDependencies' },
+        { rawName: 'lodash', category: 'overrides' },
+        { rawName: 'semver', category: 'resolutions' },
+      ])
+    })
+  })
 })

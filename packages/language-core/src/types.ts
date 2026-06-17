@@ -17,6 +17,8 @@ export type DependencyCategory
     | 'devDependencies'
     | 'peerDependencies'
     | 'optionalDependencies'
+    | 'overrides'
+    | 'resolutions'
     | 'catalog'
     | 'catalogs'
 

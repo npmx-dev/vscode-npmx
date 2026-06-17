@@ -32,7 +32,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
             if (dep.resolvedProtocol !== 'npm')
               continue
 
-            const { resolvedName, resolvedSpec, nameRange } = dep
+            const { resolvedName, resolvedSpec, nameRange, specRange, category } = dep
 
             let targetVersion: string | undefined
 
@@ -46,7 +46,9 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
               ? npmxPackageUrl(resolvedName, targetVersion)
               : npmxPackageUrl(resolvedName)
 
-            const [start, end] = nameRange
+            const [start, end] = category === 'overrides' || category === 'resolutions'
+              ? specRange
+              : nameRange
             links.push({
               range: {
                 start: document.positionAt(start),

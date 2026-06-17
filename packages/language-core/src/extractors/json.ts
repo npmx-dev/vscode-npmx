@@ -20,6 +20,17 @@ const DEPENDENCY_SECTIONS: DependencyCategory[] = [
   'optionalDependencies',
 ]
 
+const RESOLUTION_SECTIONS: {
+  path: string[]
+  category: 'overrides' | 'resolutions'
+}[] = [
+  { path: ['overrides'], category: 'overrides' },
+  { path: ['resolutions'], category: 'resolutions' },
+  { path: ['pnpm', 'overrides'], category: 'overrides' },
+]
+
+const RESOLUTIONS_KEY_PREFIX = '**/'
+
 interface CatalogMeta {
   category: 'catalog' | 'catalogs'
   categoryName?: string
@@ -137,6 +148,28 @@ export class JsonExtractor implements PackageManifestExtractor, WorkspaceCatalog
           result.push(info)
       }
     })
+
+    for (const { path, category } of RESOLUTION_SECTIONS) {
+      const node = findNodeAtLocation(root, path)
+      if (!node || !node.children)
+        continue
+
+      for (const dep of node.children) {
+        const info = this.#parseDependencyNode(dep, category)
+        if (!info)
+          continue
+
+        if (category === 'resolutions' && info.rawName.startsWith(RESOLUTIONS_KEY_PREFIX)) {
+          result.push({
+            ...info,
+            rawName: info.rawName.slice(RESOLUTIONS_KEY_PREFIX.length),
+            nameRange: [info.nameRange[0] + RESOLUTIONS_KEY_PREFIX.length, info.nameRange[1]],
+          })
+        } else {
+          result.push(info)
+        }
+      }
+    }
 
     return result
   }
