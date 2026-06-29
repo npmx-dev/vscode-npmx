@@ -11,6 +11,8 @@ const packageInfo = {
   versionsMeta: {
     '1.0.0': {
       provenance: true,
+      trustedPublisher: true,
+      staged: true,
     },
   },
   timeCreated: '2026-01-01T00:00:00.000Z',
@@ -40,7 +42,7 @@ function createDependency(overrides: Partial<DependencyInfo> = {}): DependencyIn
 describe('renderHoverMarkdown', () => {
   it('renders codicon markup for codicon-capable clients', async () => {
     await expect(renderHoverMarkdown(createDependency(), 'codicon')).resolves.toMatchInlineSnapshot(`
-      "[$(verified)&nbsp;Verified provenance](https://npmx.dev/package/lodash/v/^1.0.0#provenance)
+      "[$(verified)&nbsp;Verified provenance](https://npmx.dev/package/lodash/v/^1.0.0#provenance) · $(workspace-trusted)&nbsp;Trusted publisher · $(session-in-progress)&nbsp;Staged
 
       [$(package)&nbsp;View on npmx.dev](https://npmx.dev/package/lodash) | [$(book)&nbsp;View docs on npmx.dev](https://npmx.dev/docs/lodash/v/^1.0.0)"
     `)
@@ -48,7 +50,7 @@ describe('renderHoverMarkdown', () => {
 
   it('renders emoji icons for non-codicon clients', async () => {
     await expect(renderHoverMarkdown(createDependency(), 'emoji')).resolves.toMatchInlineSnapshot(`
-      "[✅ Verified provenance](https://npmx.dev/package/lodash/v/^1.0.0#provenance)
+      "[✅ Verified provenance](https://npmx.dev/package/lodash/v/^1.0.0#provenance) · 🔑 Trusted publisher · 🚧 Staged
 
       [📦 View on npmx.dev](https://npmx.dev/package/lodash) | [📖 View docs on npmx.dev](https://npmx.dev/docs/lodash/v/^1.0.0)"
     `)

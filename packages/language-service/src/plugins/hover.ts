@@ -12,6 +12,8 @@ const ICONS = {
   verified: { codicon: 'verified', emoji: '✅' },
   book: { codicon: 'book', emoji: '📖' },
   warning: { codicon: 'warning', emoji: '⚠️' },
+  trusted: { codicon: 'workspace-trusted', emoji: '🔑' },
+  staged: { codicon: 'session-in-progress', emoji: '🚧' },
 } as const
 
 type IconName = keyof typeof ICONS
@@ -21,13 +23,6 @@ function iconLabel(iconStyle: IconStyle, name: IconName, label: string): string 
   return iconStyle === 'codicon'
     ? `$(${codicon})&nbsp;${label}`
     : `${emoji} ${label}`
-}
-
-function iconText(iconStyle: IconStyle, name: IconName, text: string): string {
-  const { codicon, emoji } = ICONS[name]
-  return iconStyle === 'codicon'
-    ? `$(${codicon}) ${text}`
-    : `${emoji} ${text}`
 }
 
 function markdownLink(label: string, url: string): string {
@@ -44,20 +39,32 @@ export async function renderHoverMarkdown(dep: DependencyInfo, iconStyle: IconSt
         jsrPackageUrl(resolvedName),
       )
 
-      return `${jsrPackageLink} | ${iconText(iconStyle, 'warning', 'Not on npmx.dev')}`
+      return `${jsrPackageLink} | ${iconLabel(iconStyle, 'warning', 'Not on npmx.dev')}`
     }
     case 'npm': {
       const pkg = await packageInfo()
       if (!pkg)
-        return iconText(iconStyle, 'warning', 'Unable to fetch package information.')
+        return iconLabel(iconStyle, 'warning', 'Unable to fetch package information.')
 
       const resolvedVersion = await dep.resolvedVersion()
       let content = ''
-      if (resolvedVersion && pkg.versionsMeta[resolvedVersion]?.provenance) {
-        content += `${markdownLink(
-          iconLabel(iconStyle, 'verified', 'Verified provenance'),
-          `${npmxPackageUrl(resolvedName, resolvedSpec)}#provenance`,
-        )}\n\n`
+      if (resolvedVersion) {
+        const meta = pkg.versionsMeta[resolvedVersion]
+        const badges: string[] = []
+        if (meta?.provenance) {
+          badges.push(markdownLink(
+            iconLabel(iconStyle, 'verified', 'Verified provenance'),
+            `${npmxPackageUrl(resolvedName, resolvedSpec)}#provenance`,
+          ))
+        }
+        if (meta?.trustedPublisher) {
+          badges.push(iconLabel(iconStyle, 'trusted', 'Trusted publisher'))
+        }
+        if (meta?.staged) {
+          badges.push(iconLabel(iconStyle, 'staged', 'Staged'))
+        }
+        if (badges.length > 0)
+          content += `${badges.join(' · ')}\n\n`
       }
 
       const packageLink = markdownLink(
