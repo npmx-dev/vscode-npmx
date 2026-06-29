@@ -15,7 +15,6 @@ export default defineConfig({
   },
   minify: 'dce-only',
   deps: {
-    alwaysBundle: ['package-manager-detector'],
     onlyBundle: [
       /^vscode-/,
       /^@volar\//,

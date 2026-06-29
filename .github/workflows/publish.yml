@@ -33,10 +33,19 @@ jobs:
         working-directory: extensions/vscode
         run: pnpm package
 
-      - name: Publish Extension
+      - name: Publish VSCode Extension
         working-directory: extensions/vscode
         run: npx vsxpub --no-dependencies
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VSCE_PAT: ${{secrets.VSCE_PAT}}
           OVSX_PAT: ${{secrets.OVSX_PAT}}
+
+      # - name: Publish Zed Extension
+      #   uses: huacnlee/zed-extension-action@v2
+      #   with:
+      #     extension-name: npmx
+      #     push-to: npmx.dev/npmx
+      #   env:
+      #     # the personal access token should have "repo" & "workflow" scopes
+      #     COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}

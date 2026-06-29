@@ -25,17 +25,7 @@ jobs:
       - name: Type Check
         run: pnpm run typecheck
 
-      - name: Upload LSP packages
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          retention-days: 3
-          name: lsp-packages
-          path: packages/*/dist
-
   test:
-    needs:
-      - lint
-
     strategy:
       matrix:
         os: [ubuntu-slim, windows-latest, macos-latest]
@@ -50,11 +40,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Download LSP packages
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: lsp-packages
-          path: packages
+      - name: Build
+        run: pnpm build
 
       - name: Unit Test
         run: pnpm run test
