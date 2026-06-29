@@ -4,9 +4,6 @@ packages:
   - extensions/*
   - packages/*
 
-patchedDependencies:
-  module-replacements@3.0.0-beta.7: patches/module-replacements.patch
-
 catalogs:
   dev:
     '@types/node': ^25.9.0
@@ -23,6 +20,7 @@ catalogs:
   inline:
     fast-npm-meta: ^1.5.1
     jsonc-parser: ^3.3.1
+    module-replacements: ^3.0.0-beta.8
     ocache: ^0.1.4
     ofetch: ^2.0.0-alpha.3
     package-manager-detector: ^1.6.0
@@ -39,7 +37,6 @@ catalogs:
     vscode-uri: ^3.1.0
   test:
     jest-mock-vscode: ^4.12.0
-    module-replacements: ^3.0.0-beta.7
     msw: ^2.14.6
     vite-tsconfig-paths: ^6.1.1
     vitest: ^4.1.6

@@ -35,7 +35,7 @@
   "devDependencies": {
     "fast-npm-meta": "catalog:inline",
     "jsonc-parser": "catalog:inline",
-    "module-replacements": "catalog:test",
+    "module-replacements": "catalog:inline",
     "ofetch": "catalog:inline",
     "path-browserify": "catalog:inline",
     "yaml": "catalog:inline"
@@ -43,7 +43,7 @@
   "inlinedDependencies": {
     "fast-npm-meta": "1.5.1",
     "jsonc-parser": "3.3.1",
-    "module-replacements": "3.0.0-beta.7",
+    "module-replacements": "3.0.0-beta.8",
     "ofetch": "2.0.0-alpha.3",
     "path-browserify": "1.0.1",
     "yaml": "2.9.0"

@@ -1,7 +1,7 @@
 import type { DiagnosticSeverity } from '@volar/language-service'
 import type { ModuleReplacement } from 'module-replacements'
 import type { DiagnosticRule } from '../types'
-import { resolveDocUrl } from 'module-replacements'
+import { resolveDocUrl } from 'module-replacements/dist/util.js'
 import { getReplacement } from 'npmx-language-core/api/replacement'
 import { checkIgnored } from 'npmx-language-core/utils'
 

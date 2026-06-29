@@ -46,6 +46,9 @@ catalogs:
     jsonc-parser:
       specifier: ^3.3.1
       version: 3.3.1
+    module-replacements:
+      specifier: ^3.0.0-beta.8
+      version: 3.0.0-beta.8
     ocache:
       specifier: ^0.1.4
       version: 0.1.4
@@ -90,9 +93,6 @@ catalogs:
     jest-mock-vscode:
       specifier: ^4.12.0
       version: 4.12.0
-    module-replacements:
-      specifier: ^3.0.0-beta.7
-      version: 3.0.0-beta.7
     msw:
       specifier: ^2.14.6
       version: 2.14.6
@@ -102,9 +102,6 @@ catalogs:
     vitest:
       specifier: ^4.1.6
       version: 4.1.6
-
-patchedDependencies:
-  module-replacements@3.0.0-beta.7: 8f7c0cb98f974db7ca81b2eb2ee331b456b2cb0f2ce92d5125a1d98abbd404ca
 
 importers:
 
@@ -135,8 +132,8 @@ importers:
         specifier: catalog:test
         version: 4.12.0(@types/vscode@1.101.0)
       module-replacements:
-        specifier: catalog:test
-        version: 3.0.0-beta.7(patch_hash=8f7c0cb98f974db7ca81b2eb2ee331b456b2cb0f2ce92d5125a1d98abbd404ca)
+        specifier: catalog:inline
+        version: 3.0.0-beta.8
       msw:
         specifier: catalog:test
         version: 2.14.6(@types/node@25.9.0)(typescript@5.9.3)
@@ -199,8 +196,8 @@ importers:
         specifier: catalog:inline
         version: 3.3.1
       module-replacements:
-        specifier: catalog:test
-        version: 3.0.0-beta.7(patch_hash=8f7c0cb98f974db7ca81b2eb2ee331b456b2cb0f2ce92d5125a1d98abbd404ca)
+        specifier: catalog:inline
+        version: 3.0.0-beta.8
       ofetch:
         specifier: catalog:inline
         version: 2.0.0-alpha.3
@@ -1824,8 +1821,8 @@ packages:
   mlly@1.8.2:
     resolution: {integrity: sha512-d+ObxMQFmbt10sretNDytwt85VrbkhhUA/JBGm1MPaWJ65Cl4wOgLaB1NYvJSZ0Ef03MMEU/0xpPMXUIQ29UfA==}
 
-  module-replacements@3.0.0-beta.7:
-    resolution: {integrity: sha512-n1F9l3gF1wNh13xmnXS2JU7P9c3DlzCgVEyLKrVN0U37RwrXyYoePMMvYvs/6aUONAxbnscphzESZTCorXFh7Q==}
+  module-replacements@3.0.0-beta.8:
+    resolution: {integrity: sha512-sc8TepP9elxoOBXEpxmhPzKKjTjbswHVcmsKGbgvm3k6jZlLu/WMV/Lfmga6IGMgHU/V3WtY2s6VEgM4nTElUQ==}
 
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
@@ -2158,6 +2155,7 @@ packages:
   tsconfck@3.1.6:
     resolution: {integrity: sha512-ks6Vjr/jEw0P1gmOVwutM3B7fWxoWBL2KRDb1JfqGVawBmO5UsvmWOQFGHBPl5yxYz4eERr19E6L7NMv+Fej4w==}
     engines: {node: ^18 || >=20}
+    deprecated: unmaintained
     hasBin: true
     peerDependencies:
       typescript: ^5.0.0
@@ -2547,7 +2545,7 @@ snapshots:
   '@e18e/eslint-plugin@0.4.1(eslint@10.4.0)':
     dependencies:
       empathic: 2.0.1
-      module-replacements: 3.0.0-beta.7(patch_hash=8f7c0cb98f974db7ca81b2eb2ee331b456b2cb0f2ce92d5125a1d98abbd404ca)
+      module-replacements: 3.0.0-beta.8
       semver: 7.8.0
     optionalDependencies:
       eslint: 10.4.0
@@ -3190,7 +3188,7 @@ snapshots:
 
   ast-kit@3.0.0-beta.1:
     dependencies:
-      '@babel/parser': 8.0.0-rc.4
+      '@babel/parser': 8.0.0-rc.5
       estree-walker: 3.0.3
       pathe: 2.0.3
 
@@ -4179,7 +4177,7 @@ snapshots:
       pkg-types: 1.3.1
       ufo: 1.6.4
 
-  module-replacements@3.0.0-beta.7(patch_hash=8f7c0cb98f974db7ca81b2eb2ee331b456b2cb0f2ce92d5125a1d98abbd404ca): {}
+  module-replacements@3.0.0-beta.8: {}
 
   ms@2.1.3: {}
 

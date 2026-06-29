@@ -40,7 +40,7 @@
     "eslint": "catalog:dev",
     "husky": "catalog:dev",
     "jest-mock-vscode": "catalog:test",
-    "module-replacements": "catalog:test",
+    "module-replacements": "catalog:inline",
     "msw": "catalog:test",
     "nano-staged": "catalog:dev",
     "tsdown": "catalog:dev",
