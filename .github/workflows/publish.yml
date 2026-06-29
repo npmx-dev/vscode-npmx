@@ -1,4 +1,4 @@
-name: Publish VS Code Extension
+name: Publish Extensions
 
 on:
   push:
