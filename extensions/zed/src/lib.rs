@@ -1,4 +1,4 @@
-use zed_extension_api::{self as zed, serde_json, settings::LspSettings, LanguageServerId};
+use zed_extension_api::{self as zed, LanguageServerId, serde_json, settings::LspSettings};
 
 struct NpmxExtension;
 
