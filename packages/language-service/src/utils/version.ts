@@ -1,5 +1,9 @@
+import type { PackageInfo } from 'npmx-language-core/api/package'
 import type { DependencyInfo } from 'npmx-language-core/workspace'
+import type SemVer from 'semver/classes/semver'
 import { formatPackageId } from 'npmx-language-core/utils'
+import gt from 'semver/functions/gt'
+import parse from 'semver/functions/parse'
 
 const RANGE_PREFIXES = ['>=', '<=', '=', '>', '<']
 
@@ -44,4 +48,50 @@ export function formatUpgradeVersion(dep: DependencyInfo, target: string): strin
     return result
 
   return `${declaredProtocol}:${formatPackageId(resolvedName, result)}`
+}
+
+export type UpgradeType = 'major' | 'minor' | 'patch'
+
+export interface UpgradeTier {
+  type: UpgradeType
+  version: string
+}
+
+export function resolveUpgradeTiers(pkg: PackageInfo, resolvedVersion: string): UpgradeTier[] {
+  const current = parse(resolvedVersion)
+  if (!current)
+    return []
+
+  const currentMajor = current.major
+  const currentMinor = current.minor
+
+  let maxPatch: SemVer | undefined
+  let maxMinor: SemVer | undefined
+  let maxMajor: SemVer | undefined
+
+  for (const v of Object.keys(pkg.versionsMeta)) {
+    const parsed = parse(v, { loose: true })
+    if (!parsed || parsed.prerelease.length > 0 || !gt(parsed, current))
+      continue
+
+    if (parsed.major === currentMajor && parsed.minor === currentMinor) {
+      if (!maxPatch || gt(parsed, maxPatch))
+        maxPatch = parsed
+    } else if (parsed.major === currentMajor) {
+      if (!maxMinor || gt(parsed, maxMinor))
+        maxMinor = parsed
+    } else {
+      if (!maxMajor || gt(parsed, maxMajor))
+        maxMajor = parsed
+    }
+  }
+
+  const tiers: UpgradeTier[] = []
+  if (maxPatch)
+    tiers.push({ type: 'patch', version: maxPatch.version })
+  if (maxMinor)
+    tiers.push({ type: 'minor', version: maxMinor.version })
+  if (maxMajor)
+    tiers.push({ type: 'major', version: maxMajor.version })
+  return tiers
 }
