@@ -1,4 +1,6 @@
-use zed_extension_api::{self as zed, LanguageServerId, serde_json, settings::LspSettings};
+use zed_extension_api::{self as zed, LanguageServerId, Result, serde_json, settings::LspSettings};
+
+const PACKAGE_NAME: &str = "npmx-language-server";
 
 struct NpmxExtension;
 
@@ -12,11 +14,39 @@ impl NpmxExtension {
             .unwrap_or_default()
     }
 
-    fn default_server_script() -> String {
-        format!(
-            "{}/../../packages/language-server/dist/index.cjs",
-            env!("CARGO_MANIFEST_DIR")
-        )
+    fn server_binary(worktree: &zed::Worktree, lsp_settings: &LspSettings) -> Result<zed::Command> {
+        // 1. User override via lsp.npmx.binary
+        if let Some(binary) = &lsp_settings.binary {
+            let command = match &binary.path {
+                Some(path) => path.clone(),
+                None => zed::node_binary_path()?,
+            };
+            let args = binary.arguments.clone().unwrap_or_default();
+            let env = worktree
+                .shell_env()
+                .into_iter()
+                .chain(binary.env.clone().unwrap_or_default())
+                .collect();
+            return Ok(zed::Command { command, args, env });
+        }
+
+        // 2. Install or update npm package pinned to Cargo.toml version
+        let version = env!("CARGO_PKG_VERSION");
+
+        let installed = zed::npm_package_installed_version(PACKAGE_NAME)?;
+        if installed.as_deref() != Some(version) {
+            zed::npm_install_package(PACKAGE_NAME, version)?;
+        }
+
+        let node = zed::node_binary_path()?;
+        Ok(zed::Command {
+            command: node,
+            args: vec![
+                format!("node_modules/.bin/{PACKAGE_NAME}"),
+                "--stdio".to_string(),
+            ],
+            env: worktree.shell_env().into_iter().collect(),
+        })
     }
 }
 
@@ -31,26 +61,7 @@ impl zed::Extension for NpmxExtension {
         worktree: &zed::Worktree,
     ) -> zed::Result<zed::Command> {
         let lsp_settings = Self::language_server_settings(language_server_id, worktree);
-        if let Some(binary) = lsp_settings.binary {
-            let command = match binary.path {
-                Some(path) => path,
-                None => zed::node_binary_path()?,
-            };
-            let args = binary.arguments.unwrap_or_default();
-            let env = worktree
-                .shell_env()
-                .into_iter()
-                .chain(binary.env.unwrap_or_default())
-                .collect();
-
-            return Ok(zed::Command { command, args, env });
-        }
-
-        Ok(zed::Command {
-            command: zed::node_binary_path()?,
-            args: vec![Self::default_server_script(), String::from("--stdio")],
-            env: worktree.shell_env().into_iter().collect(),
-        })
+        Self::server_binary(worktree, &lsp_settings)
     }
 
     fn language_server_initialization_options(
