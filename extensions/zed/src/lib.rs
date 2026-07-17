@@ -15,7 +15,6 @@ impl NpmxExtension {
     }
 
     fn server_binary(worktree: &zed::Worktree, lsp_settings: &LspSettings) -> Result<zed::Command> {
-        // 1. User override via lsp.npmx.binary
         if let Some(binary) = &lsp_settings.binary {
             let command = match &binary.path {
                 Some(path) => path.clone(),
@@ -30,7 +29,6 @@ impl NpmxExtension {
             return Ok(zed::Command { command, args, env });
         }
 
-        // 2. Install or update npm package pinned to Cargo.toml version
         let version = env!("CARGO_PKG_VERSION");
 
         let installed = zed::npm_package_installed_version(PACKAGE_NAME)?;
