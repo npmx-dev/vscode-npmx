@@ -29,6 +29,9 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Publish npm packages to registry
+        run: pnpm -r publish --access public --no-git-checks --provenance
+
       - name: Generate .vsix file
         working-directory: extensions/vscode
         run: pnpm package

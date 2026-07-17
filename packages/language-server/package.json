@@ -2,7 +2,6 @@
   "name": "npmx-language-server",
   "type": "module",
   "version": "0.8.0",
-  "private": true,
   "license": "MIT",
   "repository": {
     "type": "git",
