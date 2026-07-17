@@ -110,13 +110,13 @@
             "resolved"
           ],
           "enumDescriptions": [
-            "Disable clickable links",
+            "Disable clickable package version spec links",
             "Link to package page (latest version)",
             "Use raw version from package.json (preserves ^1.0.0, latest, etc.)",
             "Resolve to actual matching version via API (^18.0.0 → 18.2.0)"
           ],
           "default": "declared",
-          "description": "Enable clickable links for package names"
+          "description": "Enable clickable links for package version specs"
         },
         "npmx.ignore.upgrade": {
           "scope": "resource",

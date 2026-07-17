@@ -20,11 +20,24 @@ function isOffsetInRange(offset: number, [start, end]: OffsetRange): boolean {
   return offset >= start && offset <= end
 }
 
+export function getResolvedDependencyNameAtOffset(
+  dependencies: DependencyInfo[],
+  offset: number,
+): DependencyInfo | undefined {
+  return dependencies.find((dep) => isOffsetInRange(offset, dep.nameRange))
+}
+
+export function getResolvedDependencySpecAtOffset(
+  dependencies: DependencyInfo[],
+  offset: number,
+): DependencyInfo | undefined {
+  return dependencies.find((dep) => isOffsetInRange(offset, dep.specRange))
+}
+
 export function getResolvedDependencyAtOffset(
   dependencies: DependencyInfo[],
   offset: number,
 ): DependencyInfo | undefined {
-  return dependencies.find((dep) =>
-    isOffsetInRange(offset, dep.nameRange) || isOffsetInRange(offset, dep.specRange),
-  )
+  return getResolvedDependencyNameAtOffset(dependencies, offset)
+    ?? getResolvedDependencySpecAtOffset(dependencies, offset)
 }

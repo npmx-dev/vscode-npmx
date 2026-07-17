@@ -1,4 +1,4 @@
-import type { WorkspaceAdapter } from './workspace'
+import type { PackageManager, WorkspaceAdapter } from './workspace'
 import { describe, expect, it } from 'vitest'
 import { WorkspaceContext } from './workspace'
 
@@ -173,5 +173,133 @@ describe('workspaceContext', () => {
         resolvedProtocol: 'jsr',
       },
     ])
+  })
+
+  describe('findInstalledPackageManifestPath', () => {
+    interface InstallLookupFixtureOptions {
+      files: string[]
+      packageManager?: PackageManager
+      realpaths?: [path: string, realpath: string][]
+    }
+
+    async function createInstallLookupFixture({
+      files,
+      packageManager = 'npm',
+      realpaths = [],
+    }: InstallLookupFixtureOptions) {
+      const checkedPaths: string[] = []
+      const fileSet = new Set(files)
+      const realpathMap = new Map(realpaths)
+      const adapter: WorkspaceAdapter = {
+        async readFile() {
+          throw new Error('this test should not read package manifests')
+        },
+        async fileExists(path) {
+          checkedPaths.push(path)
+          return fileSet.has(path)
+        },
+        async detectPackageManager() {
+          return packageManager
+        },
+      }
+
+      if (realpaths.length > 0) {
+        adapter.realpath = async (path) => realpathMap.get(path) ?? path
+      }
+
+      return {
+        checkedPaths,
+        ctx: await WorkspaceContext.create('/repo', adapter),
+      }
+    }
+
+    it('finds installed package manifests while walking toward the workspace root', async () => {
+      const { checkedPaths, ctx } = await createInstallLookupFixture({
+        files: [
+          '/repo/node_modules/lodash/package.json',
+        ],
+      })
+
+      await expect(ctx.findInstalledPackageManifestPath(
+        '/repo/packages/app/package.json',
+        'lodash',
+      )).resolves.toBe('/repo/node_modules/lodash/package.json')
+      expect(checkedPaths).toEqual([
+        '/repo/packages/app/node_modules/lodash/package.json',
+        '/repo/packages/node_modules/lodash/package.json',
+        '/repo/node_modules/lodash/package.json',
+      ])
+    })
+
+    it('finds scoped installed package manifests', async () => {
+      const { checkedPaths, ctx } = await createInstallLookupFixture({
+        files: [
+          '/repo/packages/app/node_modules/@scope/pkg/package.json',
+        ],
+      })
+
+      await expect(ctx.findInstalledPackageManifestPath(
+        '/repo/packages/app/package.json',
+        '@scope/pkg',
+      )).resolves.toBe('/repo/packages/app/node_modules/@scope/pkg/package.json')
+      expect(checkedPaths).toEqual([
+        '/repo/packages/app/node_modules/@scope/pkg/package.json',
+      ])
+    })
+
+    it('uses the real path of node_modules packages when resolving transitive dependencies', async () => {
+      const { checkedPaths, ctx } = await createInstallLookupFixture({
+        files: [
+          '/repo/node_modules/.pnpm/foo@1.0.0/node_modules/bar/package.json',
+        ],
+        packageManager: 'pnpm',
+        realpaths: [[
+          '/repo/node_modules/foo/package.json',
+          '/repo/node_modules/.pnpm/foo@1.0.0/node_modules/foo/package.json',
+        ]],
+      })
+
+      checkedPaths.length = 0
+      await expect(ctx.findInstalledPackageManifestPath(
+        '/repo/node_modules/foo/package.json',
+        'bar',
+      )).resolves.toBe('/repo/node_modules/.pnpm/foo@1.0.0/node_modules/bar/package.json')
+      expect(checkedPaths).toEqual([
+        '/repo/node_modules/.pnpm/foo@1.0.0/node_modules/foo/node_modules/bar/package.json',
+        '/repo/node_modules/.pnpm/foo@1.0.0/node_modules/bar/package.json',
+      ])
+    })
+
+    it('keeps external symlink lookups on workspace-visible paths', async () => {
+      const { checkedPaths, ctx } = await createInstallLookupFixture({
+        files: [
+          '/repo/node_modules/foo/node_modules/bar/package.json',
+        ],
+        realpaths: [[
+          '/repo/node_modules/foo/package.json',
+          '/linked/foo/package.json',
+        ]],
+      })
+
+      await expect(ctx.findInstalledPackageManifestPath(
+        '/repo/node_modules/foo/package.json',
+        'bar',
+      )).resolves.toBe('/repo/node_modules/foo/node_modules/bar/package.json')
+      expect(checkedPaths).toEqual([
+        '/repo/node_modules/foo/node_modules/bar/package.json',
+      ])
+    })
+
+    it('ignores dependency names that cannot be package names', async () => {
+      const { checkedPaths, ctx } = await createInstallLookupFixture({ files: [] })
+
+      for (const packageName of ['../outside', '@/pkg']) {
+        await expect(ctx.findInstalledPackageManifestPath(
+          '/repo/package.json',
+          packageName,
+        )).resolves.toBeUndefined()
+      }
+      expect(checkedPaths).toEqual([])
+    })
   })
 })

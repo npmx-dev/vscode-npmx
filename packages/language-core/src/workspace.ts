@@ -8,9 +8,9 @@ import type {
   WorkspaceCatalogInfo,
 } from './types'
 import { defineCachedFunction } from 'ocache'
-import { dirname, join } from 'path-browserify'
+import { basename, dirname, join } from 'path-browserify'
 import { getPackageInfo } from './api/package'
-import { PACKAGE_JSON_BASENAME, PNPM_WORKSPACE_BASENAME, YARN_WORKSPACE_BASENAME } from './constants'
+import { NODE_MODULES_BASENAME, PACKAGE_JSON_BASENAME, PNPM_WORKSPACE_BASENAME, YARN_WORKSPACE_BASENAME } from './constants'
 import { getExtractor } from './extractors'
 import { isPackageManifest, lazyInit, resolveDependencySpec, resolveExactVersion } from './utils'
 
@@ -28,6 +28,7 @@ export type PackageManager = 'bun' | 'npm' | 'pnpm' | 'yarn'
 export interface WorkspaceAdapter {
   readFile: (path: string) => Promise<string>
   fileExists: (path: string) => Promise<boolean>
+  realpath?: (path: string) => Promise<string>
   detectPackageManager: (rootPath: string) => Promise<PackageManager>
 }
 
@@ -40,6 +41,28 @@ function getWorkspaceFileBasename(packageManager: PackageManager): string | unde
     case 'yarn':
       return YARN_WORKSPACE_BASENAME
   }
+}
+
+function isPathInsideOrEqual(path: string, parent: string): boolean {
+  return path === parent || path.startsWith(`${parent}/`)
+}
+
+function isPackageNamePathSafe(name: string): boolean {
+  if (name === '' || name.includes('\\'))
+    return false
+
+  const parts = name.split('/')
+  if (parts.some((part) => part === '' || part === '.' || part === '..'))
+    return false
+
+  if (!name.startsWith('@'))
+    return parts.length === 1
+
+  const [scope, packageName] = parts
+  return parts.length === 2
+    && scope !== undefined
+    && packageName !== undefined
+    && scope.length > 1
 }
 
 function createResolvedDependencyInfo(
@@ -177,10 +200,44 @@ export class WorkspaceContext {
   async findNearestPackageManifestPath(packageManifestPath: string): Promise<string | undefined> {
     let dir = dirname(packageManifestPath)
 
-    while (dir === this.rootPath || dir.startsWith(`${this.rootPath}/`)) {
+    while (isPathInsideOrEqual(dir, this.rootPath)) {
       const manifestPath = join(dir, PACKAGE_JSON_BASENAME)
       if (await this.adapter.fileExists(manifestPath))
         return manifestPath
+
+      if (dir === this.rootPath)
+        break
+
+      const parent = dirname(dir)
+      if (parent === dir)
+        break
+      dir = parent
+    }
+  }
+
+  async findInstalledPackageManifestPath(
+    packageManifestPath: string,
+    packageName: string,
+  ): Promise<string | undefined> {
+    if (!isPackageNamePathSafe(packageName))
+      return
+
+    let searchPath = packageManifestPath
+    if (this.adapter.realpath) {
+      const realPath = await this.adapter.realpath(packageManifestPath).catch(() => undefined)
+      // Keep external symlinks on the workspace-visible path so subsequent lookups still have a workspace context.
+      if (realPath && isPathInsideOrEqual(realPath, this.rootPath))
+        searchPath = realPath
+    }
+
+    let dir = dirname(searchPath)
+
+    while (isPathInsideOrEqual(dir, this.rootPath)) {
+      if (basename(dir) !== NODE_MODULES_BASENAME) {
+        const manifestPath = join(dir, NODE_MODULES_BASENAME, packageName, PACKAGE_JSON_BASENAME)
+        if (await this.adapter.fileExists(manifestPath))
+          return manifestPath
+      }
 
       if (dir === this.rootPath)
         break

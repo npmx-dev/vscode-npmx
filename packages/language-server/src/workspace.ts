@@ -1,7 +1,7 @@
 import type { Connection, LanguageServer } from '@volar/language-server'
 import type { DependencyInfo, PackageManager, WorkspaceAdapter } from 'npmx-language-core/workspace'
 import type { ClientFeatures, IWorkspaceState } from 'npmx-language-service/types'
-import { access, readFile } from 'node:fs/promises'
+import { access, realpath as fsRealpath, readFile } from 'node:fs/promises'
 import { DEPENDENCY_FILE_GLOB, PACKAGE_JSON_BASENAME } from 'npmx-language-core/constants'
 import { isDependencyFile, isPackageManifest } from 'npmx-language-core/utils'
 import { WorkspaceContext } from 'npmx-language-core/workspace'
@@ -49,6 +49,10 @@ function createLanguageServerAdapter(folderUri: URI, server: LanguageServer): Wo
       } catch {
         return false
       }
+    },
+
+    async realpath(path: string): Promise<string> {
+      return URI.file(await fsRealpath(folderUri.with({ path }).fsPath)).path
     },
 
     detectPackageManager: detectPackageManagerFromProject,

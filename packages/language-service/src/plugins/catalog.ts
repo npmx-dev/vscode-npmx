@@ -3,7 +3,18 @@ import type { DependencyInfo } from 'npmx-language-core/workspace'
 import type { IWorkspaceState } from '../types'
 import { isPackageManifest, normalizeCatalogName } from 'npmx-language-core/utils'
 import { URI } from 'vscode-uri'
-import { getDocumentByUri, getResolvedDependencyAtOffset } from '../utils/document'
+import { getDocumentByUri, getResolvedDependencySpecAtOffset } from '../utils/document'
+
+export function getCatalogDependencyAtOffset(
+  dependencies: DependencyInfo[],
+  offset: number,
+): DependencyInfo | undefined {
+  const dependency = getResolvedDependencySpecAtOffset(dependencies, offset)
+  if (!dependency?.rawSpec.startsWith('catalog:'))
+    return
+
+  return dependency
+}
 
 export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
   function getDependencyFileUri(documentUri: string): URI | undefined {
@@ -19,11 +30,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
     if (!dependencies)
       return
 
-    const dependency = getResolvedDependencyAtOffset(dependencies, offset)
-    if (!dependency?.rawSpec.startsWith('catalog:'))
-      return
-
-    return dependency
+    return getCatalogDependencyAtOffset(dependencies, offset)
   }
 
   function matchesCatalogDependency(candidate: DependencyInfo, dependency: DependencyInfo): boolean {

@@ -4,6 +4,7 @@ import { create as createNpmxCatalogService } from './plugins/catalog'
 import { create as createNpmxDiagnosticsService } from './plugins/diagnostics'
 import { create as createNpmxDocumentLinkService } from './plugins/document-link'
 import { create as createNpmxHoverService } from './plugins/hover'
+import { create as createNpmxInstalledPackageDefinitionService } from './plugins/installed-package-definition'
 import { create as createNpmxVersionCompletionService } from './plugins/version-completion'
 
 export function createNpmxLanguageServicePlugins(workspace: IWorkspaceState): LanguageServicePlugin[] {
@@ -12,6 +13,7 @@ export function createNpmxLanguageServicePlugins(workspace: IWorkspaceState): La
     createNpmxDiagnosticsService(workspace),
     createNpmxDocumentLinkService(workspace),
     createNpmxHoverService(workspace),
+    createNpmxInstalledPackageDefinitionService(workspace),
     createNpmxVersionCompletionService(workspace),
   ]
 }
