@@ -1,16 +1,8 @@
 # npmx for Zed
 
-This is the in-repo Zed extension for `npmx`. It runs the shared `npmx-language-server`
-over stdio, so Zed gets the same core package intelligence used by the VS Code extension.
+Enhance your npm package workflow in Zed.
 
-## Status
-
-- Uses the shared `npmx-language-server`
-- Targets local development from this monorepo first
-- Defaults to `packages/language-server/dist/index.cjs`
-- Launches the language server over `--stdio`
-- Supports overriding the launched command through Zed `lsp.npmx.binary` settings
-- Forwards `lsp.npmx.settings` to the language server as `npmx` workspace configuration
+This extension runs the `npmx-language-server` — the same language server used by the VS Code version — over stdio. The server version is pinned to the extension version and auto-installed from npm when needed.
 
 ## Features
 
@@ -21,16 +13,9 @@ over stdio, so Zed gets the same core package intelligence used by the VS Code e
 - Document links for package names
 - Workspace-aware dependency resolution for npm, pnpm, yarn, and bun projects
 
-## Local Development
-
-1. Build the language server from the repo root with `pnpm build`.
-2. In Zed, install `extensions/zed` as a dev extension.
-3. If you want a custom launch command, configure `lsp.npmx.binary` in your Zed settings.
-
 ## Settings
 
-Zed settings under `lsp.npmx.settings` are forwarded directly to the language server.
-Use scoped npmx settings without the leading `npmx.` prefix:
+Settings under `lsp.npmx.settings` are forwarded to the language server as `npmx` workspace configuration. Use scoped npmx settings without the leading `npmx.` prefix:
 
 ```json
 {
@@ -59,7 +44,7 @@ Use scoped npmx settings without the leading `npmx.` prefix:
 }
 ```
 
-To override the launched language server command:
+To override the language server command (e.g. for local development):
 
 ```json
 {
@@ -77,8 +62,19 @@ To override the launched language server command:
 }
 ```
 
+## Local Development
+
+1. Build the language server from the repo root with `pnpm build`.
+2. Configure `lsp.npmx.binary` in Zed settings pointing to the local build (see above).
+3. Install `extensions/zed` as a dev extension in Zed.
+
+## Publishing
+
+1. Bump version in `Cargo.toml`, `extension.toml`, and `packages/language-server/package.json`.
+2. Build the monorepo and publish `npmx-language-server` to npm.
+3. Open a PR to [zed-industries/extensions](https://github.com/zed-industries/extensions) updating the submodule and version.
+
 ## Notes
 
 - Zed dev extensions require Rust installed via `rustup`; the Zed docs explicitly call out that Homebrew Rust will not work for dev extension compilation.
-- This dev extension expects the repo-local language server bundle at `packages/language-server/dist/index.cjs`, so build the monorepo before installing it in Zed.
-- If you override `lsp.npmx.binary`, make sure the launched server process still receives an LSP transport argument such as `--stdio`.
+- The language server version is pinned to the extension's `Cargo.toml` version. It auto-installs via the Zed npm API when the extension activates.
