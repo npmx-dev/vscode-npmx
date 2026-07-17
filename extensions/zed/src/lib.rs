@@ -15,18 +15,21 @@ impl NpmxExtension {
     }
 
     fn server_binary(worktree: &zed::Worktree, lsp_settings: &LspSettings) -> Result<zed::Command> {
+        let mut env: Vec<(String, String)> = worktree.shell_env().into_iter().collect();
+
         if let Some(binary) = &lsp_settings.binary {
-            let command = match &binary.path {
-                Some(path) => path.clone(),
-                None => zed::node_binary_path()?,
-            };
-            let args = binary.arguments.clone().unwrap_or_default();
-            let env = worktree
-                .shell_env()
-                .into_iter()
-                .chain(binary.env.clone().unwrap_or_default())
-                .collect();
-            return Ok(zed::Command { command, args, env });
+            if let Some(binary_env) = &binary.env {
+                env.extend(binary_env.clone());
+            }
+
+            if binary.path.is_some() || binary.arguments.is_some() {
+                let command = match &binary.path {
+                    Some(path) => path.clone(),
+                    None => zed::node_binary_path()?,
+                };
+                let args = binary.arguments.clone().unwrap_or_default();
+                return Ok(zed::Command { command, args, env });
+            }
         }
 
         let version = env!("CARGO_PKG_VERSION");
@@ -40,10 +43,10 @@ impl NpmxExtension {
         Ok(zed::Command {
             command: node,
             args: vec![
-                format!("node_modules/.bin/{PACKAGE_NAME}"),
+                format!("node_modules/{PACKAGE_NAME}/dist/index.cjs"),
                 "--stdio".to_string(),
             ],
-            env: worktree.shell_env().into_iter().collect(),
+            env,
         })
     }
 }
