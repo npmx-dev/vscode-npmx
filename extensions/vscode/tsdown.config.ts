@@ -11,12 +11,12 @@ export default defineConfig({
     neverBundle: ['vscode'],
     /// keep-sorted
     onlyBundle: [
+      '@typescript/typescript6',
       'balanced-match',
       'brace-expansion',
       'minimatch',
       'path-browserify',
       'semver',
-      'typescript',
       'vscode-find-up',
       /@volar/,
       /reactive-vscode/,

@@ -30,6 +30,6 @@
     "vscode-uri": "catalog:lsp"
   },
   "inlinedDependencies": {
-    "module-replacements": "3.0.0-beta.8"
+    "module-replacements": "3.0.0"
   }
 }

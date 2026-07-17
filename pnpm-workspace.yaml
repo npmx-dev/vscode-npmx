@@ -11,12 +11,13 @@ catalogs:
     '@types/node': ^26.1.1
     '@types/path-browserify': ^1.0.3
     '@types/semver': ^7.7.1
-    '@typescript/native-preview': beta
     '@vida0905/eslint-config': ^2.13.0
     eslint: ^10.7.0
     husky: ^9.1.7
     nano-staged: ^1.0.2
     tsdown: ^0.22.9
+    typescript: npm:@typescript/typescript6@^6.0.2
+    typescript7: npm:typescript@^7.0.2
     vite: ^8.1.5
     vscode-ext-gen: ^1.6.0
   inline:

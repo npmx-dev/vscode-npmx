@@ -27,7 +27,7 @@
     "lint:fix": "eslint . --fix",
     "fmt:rust": "cargo fmt --manifest-path extensions/zed/Cargo.toml",
     "fmt:rust:check": "cargo fmt --manifest-path extensions/zed/Cargo.toml --check",
-    "typecheck": "tsgo -b --noEmit",
+    "typecheck": "tsc -b --noEmit",
     "release": "npx bumpp -r --execute \"node scripts/sync-zed-version.mjs\"",
     "prepare": "husky"
   },
@@ -39,7 +39,6 @@
     "@types/node": "catalog:dev",
     "@types/path-browserify": "catalog:dev",
     "@types/semver": "catalog:dev",
-    "@typescript/native-preview": "catalog:dev",
     "@vida0905/eslint-config": "catalog:dev",
     "eslint": "catalog:dev",
     "husky": "catalog:dev",
@@ -48,6 +47,8 @@
     "msw": "catalog:test",
     "nano-staged": "catalog:dev",
     "tsdown": "catalog:dev",
+    "typescript": "catalog:dev",
+    "typescript7": "catalog:dev",
     "vite": "catalog:dev",
     "vite-tsconfig-paths": "catalog:test",
     "vitest": "catalog:test"
