@@ -33,7 +33,7 @@
   },
   "nano-staged": {
     "*": "eslint --fix",
-    "extensions/zed/**/*.rs": "cargo fmt --manifest-path extensions/zed/Cargo.toml"
+    "extensions/zed/**/*.rs": "cargo fmt --manifest-path extensions/zed/Cargo.toml --"
   },
   "devDependencies": {
     "@types/node": "catalog:dev",
