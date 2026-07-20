@@ -72,4 +72,4 @@ jobs:
           source-packages: ./source-packages/*.tgz
           pack-size-threshold: -1
           size-threshold: -1
-          duplicate-threshold: 0
+          duplicate-threshold: -1
