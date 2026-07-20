@@ -66,7 +66,7 @@ jobs:
           name: source-packages
           path: ./source-packages
       - name: Create Diff
-        uses: e18e/action-dependency-diff@8e9b8c1957ab066d36235a43f4c1ff1522e1bdbc # v1.6.1
+        uses: e18e/action-dependency-diff@3648e18f3cb944fbc79b52b7febc153a8b5381cb # fix: disable duplicate checks when threshold <= 0
         with:
           base-packages: ./base-packages/*.tgz
           source-packages: ./source-packages/*.tgz
