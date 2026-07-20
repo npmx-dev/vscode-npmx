@@ -27,6 +27,7 @@
     "npmx-shared": "workspace:*",
     "semver": "catalog:inline",
     "vscode-languageserver-textdocument": "catalog:inline",
+    "vscode-languageserver-types": "catalog:lsp",
     "vscode-uri": "catalog:lsp"
   },
   "inlinedDependencies": {

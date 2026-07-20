@@ -1,10 +1,13 @@
-minimumReleaseAgeExclude:
-  - tsdown@0.22.9
 shellEmulator: true
 trustPolicy: no-downgrade
 packages:
   - extensions/*
   - packages/*
+
+overrides:
+  vscode-jsonrpc: 9.0.1
+  vscode-languageserver-protocol: 3.17.5
+  vscode-languageserver-types: 3.18.0
 
 catalogs:
   dev:
@@ -37,6 +40,7 @@ catalogs:
     '@volar/language-server': ^2.4.28
     '@volar/language-service': ^2.4.28
     '@volar/vscode': ^2.4.28
+    vscode-languageserver-types: ^3.18.0
     vscode-uri: ^3.1.0
   test:
     jest-mock-vscode: ^4.12.0
