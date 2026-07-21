@@ -18,7 +18,7 @@ catalogs:
     eslint: ^10.7.0
     husky: ^9.1.7
     nano-staged: ^1.0.2
-    tsdown: ^0.22.9
+    tsdown: ^0.22.12
     typescript: npm:@typescript/typescript6@^6.0.2
     typescript7: npm:typescript@^7.0.2
     vite: ^8.1.5
