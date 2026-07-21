@@ -1,4 +1,3 @@
-import { execSync } from 'node:child_process'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { styleText } from 'node:util'
 import pkgJson from '../package.json' with { type: 'json' }
@@ -39,6 +38,5 @@ if (
   nextZedExtensionToml !== zedExtensionToml
   || nextZedCargoToml !== zedCargoToml
 ) {
-  execSync('git add extensions/zed/', { cwd: root.pathname })
-  success('Staged')
+  success('Synced')
 }

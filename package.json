@@ -28,7 +28,7 @@
     "fmt:rust": "cargo fmt --manifest-path extensions/zed/Cargo.toml",
     "fmt:rust:check": "cargo fmt --manifest-path extensions/zed/Cargo.toml --check",
     "typecheck": "tsc -b --noEmit",
-    "release": "npx bumpp -r --execute \"node scripts/sync-zed-version.ts\"",
+    "release": "npx bumpp -r -a -x \"node scripts/sync-zed-version.ts\"",
     "prepare": "husky"
   },
   "nano-staged": {
