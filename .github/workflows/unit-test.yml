@@ -17,7 +17,7 @@ jobs:
     permissions: {}
     steps:
       - name: Setup JS
-        uses: sxzz/workflows/setup-js@69098296b6f6083ed99f38e2040f2a7238580e27 # v1.4.0
+        uses: sxzz/workflows/setup-js@dd67f194be6388e12ee61ad0cd3b81cf74bfd294
 
       - name: Build
         run: pnpm build
@@ -36,7 +36,7 @@ jobs:
     permissions: {}
     steps:
       - name: Setup JS
-        uses: sxzz/workflows/setup-js@69098296b6f6083ed99f38e2040f2a7238580e27 # v1.4.0
+        uses: sxzz/workflows/setup-js@dd67f194be6388e12ee61ad0cd3b81cf74bfd294
         with:
           node-version: ${{ matrix.node-version }}
 
