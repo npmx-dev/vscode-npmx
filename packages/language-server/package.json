@@ -40,17 +40,17 @@
     "@volar/language-service": "2.4.28",
     "@volar/source-map": "2.4.28",
     "@volar/typescript": "2.4.28",
-    "ocache": "0.1.4",
+    "ocache": "0.2.0",
     "ohash": "2.0.11",
-    "package-manager-detector": "1.6.0",
+    "package-manager-detector": "1.7.0",
     "path-browserify": "1.0.1",
     "request-light": "0.7.0",
-    "semver": "7.8.0",
-    "vscode-jsonrpc": "8.2.0",
+    "semver": "7.8.5",
+    "vscode-jsonrpc": "9.0.1",
     "vscode-languageserver": "9.0.1",
     "vscode-languageserver-protocol": "3.17.5",
     "vscode-languageserver-textdocument": "1.0.12",
-    "vscode-languageserver-types": "3.17.5",
+    "vscode-languageserver-types": "3.18.0",
     "vscode-uri": "3.1.0"
   }
 }

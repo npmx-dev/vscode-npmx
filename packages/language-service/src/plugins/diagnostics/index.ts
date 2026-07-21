@@ -1,8 +1,9 @@
-import type { CodeActionKind, Diagnostic, LanguageServicePlugin, LanguageServicePluginInstance } from '@volar/language-service'
+import type { CodeActionKind, LanguageServicePlugin, LanguageServicePluginInstance } from '@volar/language-service'
 import type { IWorkspaceState } from '../../types'
 import type { DiagnosticContext, DiagnosticRule } from './types'
 import { isDependencyFile } from 'npmx-language-core/utils'
 import { displayName } from 'npmx-shared/meta'
+import { Diagnostic } from 'vscode-languageserver-types'
 import { URI } from 'vscode-uri'
 import { getConfig } from '../../config'
 import { strategies } from './actions'
@@ -123,7 +124,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
             if (!strategy)
               return []
 
-            const groups = strategy.pattern.exec(diagnostic.message)?.groups
+            const groups = strategy.pattern.exec(Diagnostic.getMessageString(diagnostic))?.groups
             if (!groups)
               return []
 
