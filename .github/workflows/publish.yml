@@ -44,11 +44,10 @@ jobs:
           VSCE_PAT: ${{secrets.VSCE_PAT}}
           OVSX_PAT: ${{secrets.OVSX_PAT}}
 
-      # - name: Publish Zed Extension
-      #   uses: huacnlee/zed-extension-action@v2
-      #   with:
-      #     extension-name: npmx
-      #     push-to: npmx.dev/npmx
-      #   env:
-      #     # the personal access token should have "repo" & "workflow" scopes
-      #     COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
+      - name: Publish Zed Extension
+        uses: huacnlee/zed-extension-action@8cd592a0d24e1e41157740f1a529aeabddc88a1b # v2.0.0
+        with:
+          extension-name: npmx
+          push-to: 9romise/zed-extensions
+        env:
+          COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
