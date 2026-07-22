@@ -1,6 +1,8 @@
+use std::env;
 use zed_extension_api::{self as zed, LanguageServerId, Result, serde_json, settings::LspSettings};
 
 const PACKAGE_NAME: &str = "npmx-language-server";
+const SERVER_PATH: &str = "node_modules/npmx-language-server/dist/index.cjs";
 
 struct NpmxExtension;
 
@@ -40,10 +42,11 @@ impl NpmxExtension {
         }
 
         let node = zed::node_binary_path()?;
+        let server_path = env::current_dir().unwrap().join(SERVER_PATH);
         Ok(zed::Command {
             command: node,
             args: vec![
-                format!("node_modules/{PACKAGE_NAME}/dist/index.cjs"),
+                server_path.to_string_lossy().into_owned(),
                 "--stdio".to_string(),
             ],
             env,
