@@ -2,5 +2,8 @@
   "cSpell.words": [
     "npmx"
   ],
-  "js/ts.experimental.useTsgo": true
+  "js/ts.experimental.useTsgo": true,
+  "rust-analyzer.linkedProjects": [
+    "extensions/zed/Cargo.toml"
+  ]
 }
