@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "ocache": "catalog:inline",
-    "semver": "catalog:inline"
+    "verkit": "catalog:inline"
   },
   "devDependencies": {
     "fast-npm-meta": "catalog:inline",

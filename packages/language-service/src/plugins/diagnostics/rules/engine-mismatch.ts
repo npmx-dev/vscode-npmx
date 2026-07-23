@@ -3,9 +3,7 @@ import type { Engines } from 'npmx-language-core/types'
 import type { DiagnosticRule } from '../types'
 import { npmxPackageUrl } from 'npmx-language-core/links'
 import { formatPackageId, isPackageManifest } from 'npmx-language-core/utils'
-import SemverRange from 'semver/classes/range'
-import intersects from 'semver/ranges/intersects'
-import subset from 'semver/ranges/subset'
+import { isRangeSubset, parseRange, rangesIntersect } from 'verkit'
 import { URI } from 'vscode-uri'
 
 interface EngineMismatch {
@@ -27,17 +25,17 @@ export function resolveEngineMismatches(
       continue
 
     try {
-      const pkgRange = new SemverRange(packageRangeStr)
-      const depRange = new SemverRange(dependencyRangeStr)
+      const pkgRange = parseRange(packageRangeStr)
+      const depRange = parseRange(dependencyRangeStr)
 
-      if (subset(pkgRange, depRange))
+      if (isRangeSubset(pkgRange, depRange))
         continue
 
       mismatches.push({
         engine,
         packageRange: packageRangeStr,
         dependencyRange: dependencyRangeStr,
-        hasIntersection: intersects(pkgRange, depRange),
+        hasIntersection: rangesIntersect(pkgRange, depRange),
       })
     } catch {
       continue

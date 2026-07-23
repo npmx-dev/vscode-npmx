@@ -55,5 +55,10 @@ describe('resolveEngineMismatches', () => {
       { node: '>=18' },
       { node: 'lts' },
     )).toEqual([])
+
+    expect(resolveEngineMismatches(
+      { node: 'lts' },
+      { node: '>=18' },
+    )).toEqual([])
   })
 })

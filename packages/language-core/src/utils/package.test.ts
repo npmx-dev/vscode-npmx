@@ -64,6 +64,7 @@ describe('resolveExactVersion', () => {
     ['latest', '4.10.0'],
     ['next', '4.11.0-beta.1'],
     ['beta', null],
+    ['not a range', null],
   ])('should resolve $0 to $1', (spec, version) => {
     const pkg = {
       distTags: {

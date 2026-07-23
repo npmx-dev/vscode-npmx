@@ -43,6 +43,16 @@ describe('resolveUpgrade', () => {
     expect(resolveUpgrade(...await createOptions('3.0.0-alpha.1'), [])).toBe('3.0.0-alpha.5')
   })
 
+  it('should ignore build metadata when comparing versions', async () => {
+    const [dep, pkg] = await createOptions('^2.7.0')
+    expect(resolveUpgrade(dep, pkg, '2.7.0+build.1', [])).toBeUndefined()
+  })
+
+  it('should throw for an invalid resolved version', async () => {
+    const [dep, pkg] = await createOptions('^1.0.0')
+    expect(() => resolveUpgrade(dep, pkg, 'not a version', [])).toThrow(TypeError)
+  })
+
   it('should not flag when target upgrade version is ignored', async () => {
     expect(resolveUpgrade(...await createOptions('^1.0.0'), ['vite@^2.7.0'])).toBeUndefined()
   })

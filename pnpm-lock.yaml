@@ -12,9 +12,6 @@ catalogs:
     '@types/path-browserify':
       specifier: ^1.0.3
       version: 1.0.3
-    '@types/semver':
-      specifier: ^7.7.1
-      version: 7.7.1
     '@vida0905/eslint-config':
       specifier: ^2.13.0
       version: 2.13.0
@@ -67,9 +64,9 @@ catalogs:
     reactive-vscode:
       specifier: ^1.0.2
       version: 1.0.2
-    semver:
-      specifier: ^7.8.5
-      version: 7.8.5
+    verkit:
+      specifier: ^0.1.2
+      version: 0.1.2
     vscode-find-up:
       specifier: ^0.1.1
       version: 0.1.1
@@ -121,9 +118,6 @@ importers:
       '@types/path-browserify':
         specifier: catalog:dev
         version: 1.0.3
-      '@types/semver':
-        specifier: catalog:dev
-        version: 7.7.1
       '@vida0905/eslint-config':
         specifier: catalog:dev
         version: 2.13.0(@typescript-eslint/typescript-estree@8.64.0(@typescript/typescript6@6.0.2))(@typescript-eslint/utils@8.64.0(@typescript/typescript6@6.0.2)(eslint@10.7.0))(@typescript/typescript6@6.0.2)(@vue/compiler-sfc@3.5.40)(eslint@10.7.0)(vitest@4.1.10(@types/node@26.1.1)(msw@2.15.0(@types/node@26.1.1)(@typescript/typescript6@6.0.2))(vite@8.1.5(@types/node@26.1.1)(yaml@2.9.0)))
@@ -196,9 +190,9 @@ importers:
       ocache:
         specifier: catalog:inline
         version: 0.2.0
-      semver:
+      verkit:
         specifier: catalog:inline
-        version: 7.8.5
+        version: 0.1.2
     devDependencies:
       fast-npm-meta:
         specifier: catalog:inline
@@ -254,9 +248,9 @@ importers:
       npmx-shared:
         specifier: workspace:*
         version: link:../shared
-      semver:
+      verkit:
         specifier: catalog:inline
-        version: 7.8.5
+        version: 0.1.2
       vscode-languageserver-textdocument:
         specifier: catalog:inline
         version: 1.0.12
@@ -795,9 +789,6 @@ packages:
 
   '@types/path-browserify@1.0.3':
     resolution: {integrity: sha512-ZmHivEbNCBtAfcrFeBCiTjdIc2dey0l7oCGNGpSuRTy8jP6UVND7oUowlvDujBy8r2Hoa8bfFUOCiPWfmtkfxw==}
-
-  '@types/semver@7.7.1':
-    resolution: {integrity: sha512-FmgJfu+MOcQ370SD0ev7EI8TlCAfKYU+B4m5T3yXc1CiRN94g/SZPtsCkk506aUDtlMnFZvasDwHHUcZUEaYuA==}
 
   '@types/set-cookie-parser@2.4.10':
     resolution: {integrity: sha512-GGmQVGpQWUe5qglJozEjZV/5dyxbOOZ0LHe/lqyWssB88Y4svNfst0uqBVscdDeIKl5Jy5+aPSvy7mI9tYRguw==}
@@ -3140,8 +3131,6 @@ snapshots:
       undici-types: 8.3.0
 
   '@types/path-browserify@1.0.3': {}
-
-  '@types/semver@7.7.1': {}
 
   '@types/set-cookie-parser@2.4.10':
     dependencies:
