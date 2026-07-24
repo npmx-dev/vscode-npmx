@@ -1,5 +1,5 @@
-id = "npmx"
-name = "npmx"
+id = "npmx-language-server"
+name = "Npmx Language Server"
 description = "Enhance your npm package workflow in Zed"
 version = "0.9.2"
 schema_version = 1
@@ -10,8 +10,8 @@ authors = [
 ]
 repository = "https://github.com/npmx-dev/vscode-npmx/tree/main/extensions/zed"
 
-[language_servers.npmx]
-name = "npmx"
+[language_servers.npmx-language-server]
+name = "Npmx Language Server"
 languages = [
   "JSON",
   "YAML",
@@ -25,7 +25,7 @@ languages = [
   "Svelte"
 ]
 
-[language_servers.npmx.language_ids]
+[language_servers.npmx-language-server.language_ids]
 JSON = "json"
 YAML = "yaml"
 JavaScript = "javascript"
