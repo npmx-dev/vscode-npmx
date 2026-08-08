@@ -25,7 +25,7 @@
     "@volar/language-service": "catalog:lsp",
     "npmx-language-core": "workspace:*",
     "npmx-shared": "workspace:*",
-    "semver": "catalog:inline",
+    "verkit": "catalog:inline",
     "vscode-languageserver-textdocument": "catalog:inline",
     "vscode-languageserver-types": "catalog:lsp",
     "vscode-uri": "catalog:lsp"

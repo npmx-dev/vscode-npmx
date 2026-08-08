@@ -21,7 +21,7 @@ export default defineConfig({
       'package-manager-detector',
       'request-light',
       'path-browserify',
-      'semver',
+      'verkit',
       'ohash',
       'ocache',
     ],

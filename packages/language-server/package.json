@@ -45,7 +45,7 @@
     "package-manager-detector": "1.7.0",
     "path-browserify": "1.0.1",
     "request-light": "0.7.0",
-    "semver": "7.8.5",
+    "verkit": "0.3.2",
     "vscode-jsonrpc": "9.0.1",
     "vscode-languageserver": "9.0.1",
     "vscode-languageserver-protocol": "3.17.5",

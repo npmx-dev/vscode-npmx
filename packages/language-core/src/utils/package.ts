@@ -1,8 +1,5 @@
 import type { PackageInfo } from '../api/package'
-import Range from 'semver/classes/range'
-import gt from 'semver/functions/gt'
-import lte from 'semver/functions/lte'
-import satisfies from 'semver/functions/satisfies'
+import { isGreater, isLessOrEqual, parseRange, satisfies } from 'verkit'
 
 export function formatPackageId(name: string, version: string): string {
   return `${name}@${version}`
@@ -67,7 +64,7 @@ function getMaxSatisfying(versions: string[], current: string, tags: PackageInfo
   let version: string | null = null
 
   try {
-    const range = new Range(current)
+    const range = parseRange(current)
 
     let maxVersion: string | null = tags.latest
     if (!satisfies(maxVersion, range))
@@ -77,8 +74,8 @@ function getMaxSatisfying(versions: string[], current: string, tags: PackageInfo
       if (!satisfies(ver, range))
         continue
 
-      if (!maxVersion || lte(ver, maxVersion)) {
-        if (!version || gt(ver, version)) {
+      if (!maxVersion || isLessOrEqual(ver, maxVersion)) {
+        if (!version || isGreater(ver, version)) {
           version = ver
         }
       }

@@ -13,7 +13,6 @@ catalogs:
   dev:
     '@types/node': ^26.1.1
     '@types/path-browserify': ^1.0.3
-    '@types/semver': ^7.7.1
     '@vida0905/eslint-config': ^2.13.0
     eslint: ^10.7.0
     husky: ^9.1.7
@@ -32,7 +31,7 @@ catalogs:
     package-manager-detector: ^1.7.0
     path-browserify: ^1.0.1
     reactive-vscode: ^1.0.2
-    semver: ^7.8.5
+    verkit: ^0.3.2
     vscode-find-up: ^0.1.1
     vscode-languageserver-textdocument: ^1.0.12
     yaml: ^2.9.0

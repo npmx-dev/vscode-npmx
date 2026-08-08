@@ -4,9 +4,7 @@ import type { DependencyInfo } from 'npmx-language-core/workspace'
 import type { DiagnosticRule } from '../types'
 import { npmxPackageUrl } from 'npmx-language-core/links'
 import { checkIgnored } from 'npmx-language-core/utils'
-import gt from 'semver/functions/gt'
-import lte from 'semver/functions/lte'
-import prerelease from 'semver/functions/prerelease'
+import { getPrerelease, isGreater, isLessOrEqual } from 'verkit'
 import { formatUpgradeVersion } from '../../../utils/version'
 
 export function resolveUpgrade(dep: DependencyInfo, pkg: PackageInfo, resolvedVersion: string, ignoreList: string[]) {
@@ -17,7 +15,7 @@ export function resolveUpgrade(dep: DependencyInfo, pkg: PackageInfo, resolvedVe
   const { latest } = distTags
   const { resolvedName } = dep
 
-  if (gt(latest, resolvedVersion)) {
+  if (isGreater(latest, resolvedVersion)) {
     const targetVersion = formatUpgradeVersion(dep, latest)
     if (checkIgnored({ ignoreList, name: resolvedName, version: targetVersion }))
       return
@@ -25,16 +23,16 @@ export function resolveUpgrade(dep: DependencyInfo, pkg: PackageInfo, resolvedVe
     return targetVersion
   }
 
-  const currentPreId = prerelease(resolvedVersion)?.[0]
+  const currentPreId = getPrerelease(resolvedVersion)?.[0]
   if (currentPreId == null)
     return
 
   for (const [tag, tagVersion] of Object.entries(distTags)) {
     if (tag === 'latest')
       continue
-    if (prerelease(tagVersion)?.[0] !== currentPreId)
+    if (getPrerelease(tagVersion)?.[0] !== currentPreId)
       continue
-    if (lte(tagVersion, resolvedVersion))
+    if (isLessOrEqual(tagVersion, resolvedVersion))
       continue
     const targetVersion = formatUpgradeVersion(dep, tagVersion)
     if (checkIgnored({ ignoreList, name: resolvedName, version: targetVersion }))

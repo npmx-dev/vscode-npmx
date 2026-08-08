@@ -38,7 +38,6 @@
   "devDependencies": {
     "@types/node": "catalog:dev",
     "@types/path-browserify": "catalog:dev",
-    "@types/semver": "catalog:dev",
     "@vida0905/eslint-config": "catalog:dev",
     "eslint": "catalog:dev",
     "husky": "catalog:dev",

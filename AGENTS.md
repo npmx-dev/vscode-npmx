@@ -26,6 +26,6 @@ Monorepo (pnpm workspaces) for VS Code extension around [npmx.dev](https://npmx.
 ## Code Style
 - ESM, strict TypeScript — never use `any` or type-cast with `as`; validate rather than assert
 - Imports: type imports first, then `#` aliases (`#state`, `#utils/`, `#core/`), then external packages, then relative — no blank lines between groups
-- No `node:` built-in imports in `src/` (browser-compat constraint); use `semver` subpath imports (not bare `semver`)
+- No `node:` built-in imports in `src/` (browser-compat constraint)
 - Naming: files/folders `kebab-case`, tests `*.test.ts`, functions `camelCase`, constants `SCREAMING_SNAKE_CASE`, types `PascalCase`
 - Commits: [Conventional Commits](https://www.conventionalcommits.org/) — `type(scope): description` (lowercase subject)
