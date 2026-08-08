@@ -31,7 +31,7 @@ catalogs:
     package-manager-detector: ^1.7.0
     path-browserify: ^1.0.1
     reactive-vscode: ^1.0.2
-    verkit: ^0.1.2
+    verkit: ^0.3.2
     vscode-find-up: ^0.1.1
     vscode-languageserver-textdocument: ^1.0.12
     yaml: ^2.9.0
