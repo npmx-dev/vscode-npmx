@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { URI } from 'vscode-uri'
 import { detectPackageManagerFromProject } from './workspace'
 
 vi.mock('package-manager-detector/detect', () => ({
@@ -17,8 +18,8 @@ describe('detectPackageManagerFromProject', () => {
 
     await expect(detectPackageManagerFromProject('/repo')).resolves.toBe('pnpm')
     expect(detect).toHaveBeenCalledWith({
-      cwd: '/repo',
-      stopDir: '/repo',
+      cwd: URI.file('/repo').fsPath,
+      stopDir: URI.file('/repo').fsPath,
     })
   })
 
