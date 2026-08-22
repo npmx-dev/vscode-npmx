@@ -1,30 +1,42 @@
 name: Publish Extensions
 
 on:
-  push:
-    tags:
-      - v*
-  workflow_dispatch:
+  pull_request:
+    types: [closed]
+    branches: [main]
 
 jobs:
   publish-extension:
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      startsWith(github.event.pull_request.head.ref, 'release/')
+
+    runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: write
       actions: write
-
-    runs-on: ubuntu-slim
     steps:
       - name: Setup JS
         uses: sxzz/workflows/setup-js@dd67f194be6388e12ee61ad0cd3b81cf74bfd294
         with:
           fetch-all: true
 
+      - name: Create tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(jq -r '.version' package.json)
+          gh api "repos/$GITHUB_REPOSITORY/git/refs" \
+            -f ref="refs/tags/v$VERSION" \
+            -f sha="${{ github.event.pull_request.merge_commit_sha }}"
+
       - name: Generate Github Changelog
         run: npx changelogithub
         continue-on-error: true
         env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build
         run: pnpm build
@@ -41,8 +53,8 @@ jobs:
         run: npx vsxpub --no-dependencies
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VSCE_PAT: ${{secrets.VSCE_PAT}}
-          OVSX_PAT: ${{secrets.OVSX_PAT}}
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
 
       # - name: Publish Zed Extension
       #   uses: huacnlee/zed-extension-action@v2
