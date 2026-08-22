@@ -11,27 +11,27 @@ overrides:
 
 catalogs:
   dev:
-    '@types/node': ^26.1.1
+    '@types/node': ^26.2.0
     '@types/path-browserify': ^1.0.3
     '@vida0905/eslint-config': ^2.13.0
-    eslint: ^10.7.0
+    eslint: ^10.8.1
     husky: ^9.1.7
     nano-staged: ^1.0.2
-    tsdown: ^0.22.12
+    tsdown: ^0.22.14
     typescript: npm:@typescript/typescript6@^6.0.2
     typescript7: npm:typescript@^7.0.2
-    vite: ^8.1.5
+    vite: ^8.2.2
     vscode-ext-gen: ^1.6.0
   inline:
-    fast-npm-meta: ^2.1.0
+    fast-npm-meta: ^2.2.0
     jsonc-parser: ^3.3.1
-    module-replacements: ^3.0.0
-    ocache: ^0.2.0
+    module-replacements: ^3.2.0
+    ocache: ^0.3.0
     ofetch: ^2.0.0-alpha.3
-    package-manager-detector: ^1.7.0
+    package-manager-detector: ^1.8.0
     path-browserify: ^1.0.1
     reactive-vscode: ^1.0.2
-    verkit: ^0.3.2
+    verkit: ^0.4.0
     vscode-find-up: ^0.1.1
     vscode-languageserver-textdocument: ^1.0.12
     yaml: ^2.9.0
@@ -42,10 +42,10 @@ catalogs:
     vscode-languageserver-types: ^3.18.0
     vscode-uri: ^3.1.0
   test:
-    jest-mock-vscode: ^4.12.0
+    jest-mock-vscode: ^4.13.0
     msw: ^2.15.0
     vite-tsconfig-paths: ^6.1.1
-    vitest: ^4.1.10
+    vitest: ^4.1.11
 
 allowBuilds:
   msw: false

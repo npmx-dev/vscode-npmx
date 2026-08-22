@@ -15,7 +15,7 @@ describe('checkReplacement', () => {
         "codeDescription": {
           "href": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart",
         },
-        "message": ""left-pad" can be replaced with String.prototype.padStart, available since Node 8.0.0.",
+        "message": ""left-pad" can be replaced with String.prototype.padStart.",
         "range": [
           0,
           8,

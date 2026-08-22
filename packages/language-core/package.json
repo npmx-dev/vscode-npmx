@@ -41,9 +41,9 @@
     "yaml": "catalog:inline"
   },
   "inlinedDependencies": {
-    "fast-npm-meta": "2.1.0",
+    "fast-npm-meta": "2.2.0",
     "jsonc-parser": "3.3.1",
-    "module-replacements": "3.0.0",
+    "module-replacements": "3.2.0",
     "ofetch": "2.0.0-alpha.3",
     "path-browserify": "1.0.1",
     "yaml": "2.9.0"
