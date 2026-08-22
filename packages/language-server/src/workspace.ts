@@ -15,9 +15,12 @@ import { URI } from 'vscode-uri'
  * @internal
  */
 export async function detectPackageManagerFromProject(rootPath: string): Promise<PackageManager> {
+  // `rootPath` is a URI path (posix-style) coming from `WorkspaceContext`,
+  // but `detect()` reads the filesystem and requires a platform-native path.
+  const fsPath = URI.file(rootPath).fsPath
   const result = await detect({
-    cwd: rootPath,
-    stopDir: rootPath,
+    cwd: fsPath,
+    stopDir: fsPath,
   })
 
   switch (result?.name) {
