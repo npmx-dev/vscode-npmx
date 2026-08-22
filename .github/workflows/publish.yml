@@ -23,17 +23,20 @@ jobs:
         with:
           fetch-all: true
 
+      - name: Get version
+        id: version
+        run: echo "version=$(jq -r '.version' package.json)" >> "$GITHUB_OUTPUT"
+
       - name: Create tag
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          VERSION=$(jq -r '.version' package.json)
           gh api "repos/$GITHUB_REPOSITORY/git/refs" \
-            -f ref="refs/tags/v$VERSION" \
+            -f ref="refs/tags/v${{ steps.version.outputs.version }}" \
             -f sha="${{ github.event.pull_request.merge_commit_sha }}"
 
       - name: Generate Github Changelog
-        run: npx changelogithub
+        run: npx changelogithub --to v${{ steps.version.outputs.version }}
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
