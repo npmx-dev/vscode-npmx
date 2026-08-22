@@ -1,7 +1,7 @@
 {
   "name": "npmx-language-core",
   "type": "module",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "private": true,
   "license": "MIT",
   "repository": {
