@@ -34,6 +34,9 @@ export function createContext(options: CreateContextOptions): DiagnosticContext 
     packageInfo: async () => (pkg),
   }
   const workspace: DiagnosticContext['workspace'] = {
+    async findInstalledPackageManifestPath() {
+      return undefined
+    },
     getClientFeatures: () => ({ catalogInlayHints: true, iconStyle: 'emoji' }),
     async getPackageEngines() {
       return engines

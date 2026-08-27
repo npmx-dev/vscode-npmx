@@ -172,6 +172,18 @@ export class WorkspaceState implements IWorkspaceState {
     return await this.#getWorkspaceContextByFolder(folderUri)
   }
 
+  async findInstalledPackageManifestPath(uriString: string, packageName: string): Promise<string | undefined> {
+    const ctx = await this.getWorkspaceContext(uriString)
+    if (!ctx)
+      return
+
+    const uri = URI.parse(uriString)
+    if (uri.scheme !== 'file' || !isPackageManifest(uri.path))
+      return
+
+    return ctx.findInstalledPackageManifestPath(uri.path, packageName)
+  }
+
   async getPackageEngines(uriString: string): Promise<Engines | undefined> {
     const ctx = await this.getWorkspaceContext(uriString)
     if (!ctx)

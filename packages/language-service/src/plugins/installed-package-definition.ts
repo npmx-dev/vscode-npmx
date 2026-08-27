@@ -25,12 +25,8 @@ export async function provideInstalledPackageDefinition(
   if (!dependency)
     return
 
-  const workspaceContext = await workspaceState.getWorkspaceContext(document.uri)
-  if (!workspaceContext)
-    return
-
-  const targetPath = await workspaceContext.findInstalledPackageManifestPath(
-    packageManifestUri.path,
+  const targetPath = await workspaceState.findInstalledPackageManifestPath(
+    document.uri,
     dependency.rawName,
   )
   if (!targetPath)

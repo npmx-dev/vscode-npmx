@@ -3,6 +3,7 @@ import type { IWorkspaceState } from '../types'
 import { WorkspaceContext } from 'npmx-language-core/workspace'
 import { describe, expect, it } from 'vitest'
 import { TextDocument } from 'vscode-languageserver-textdocument'
+import { URI } from 'vscode-uri'
 import { createDependencyInfo } from '../test-utils/dependency'
 import { DEFAULT_CLIENT_FEATURES } from '../types'
 import { provideInstalledPackageDefinition } from './installed-package-definition'
@@ -26,6 +27,9 @@ async function createWorkspaceState(
   const workspaceContext = await WorkspaceContext.create('/repo', adapter)
 
   return {
+    async findInstalledPackageManifestPath(uri, packageName) {
+      return workspaceContext.findInstalledPackageManifestPath(URI.parse(uri).path, packageName)
+    },
     getClientFeatures: () => DEFAULT_CLIENT_FEATURES,
     async getPackageEngines() {
       return undefined
