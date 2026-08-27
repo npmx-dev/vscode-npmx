@@ -1,4 +1,4 @@
-import type { Engines } from 'npmx-language-core/types'
+import type { CatalogsInfo, Engines } from 'npmx-language-core/types'
 import type { DependencyInfo, WorkspaceContext } from 'npmx-language-core/workspace'
 
 export type IconStyle = 'codicon' | 'emoji'
@@ -15,6 +15,7 @@ export const DEFAULT_CLIENT_FEATURES: ClientFeatures = {
 
 export interface IWorkspaceState {
   findInstalledPackageManifestPath: (uri: string, packageName: string) => Promise<string | undefined>
+  getCatalogs: (uri: string) => Promise<CatalogsInfo | undefined>
   getClientFeatures: () => ClientFeatures
   getPackageEngines: (uri: string) => Promise<Engines | undefined>
   getWorkspaceContext: (uri: string) => Promise<WorkspaceContext | undefined>

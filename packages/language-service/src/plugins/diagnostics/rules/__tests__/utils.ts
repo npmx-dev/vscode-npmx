@@ -37,6 +37,9 @@ export function createContext(options: CreateContextOptions): DiagnosticContext 
     async findInstalledPackageManifestPath() {
       return undefined
     },
+    async getCatalogs() {
+      return undefined
+    },
     getClientFeatures: () => ({ catalogInlayHints: true, iconStyle: 'emoji' }),
     async getPackageEngines() {
       return engines

@@ -1,5 +1,5 @@
 import type { Connection, LanguageServer } from '@volar/language-server'
-import type { Engines } from 'npmx-language-core/types'
+import type { CatalogsInfo, Engines } from 'npmx-language-core/types'
 import type { DependencyInfo, PackageManager, WorkspaceAdapter } from 'npmx-language-core/workspace'
 import type { ClientFeatures, IWorkspaceState } from 'npmx-language-service/types'
 import { access, realpath as fsRealpath, readFile } from 'node:fs/promises'
@@ -182,6 +182,10 @@ export class WorkspaceState implements IWorkspaceState {
       return
 
     return ctx.findInstalledPackageManifestPath(uri.path, packageName)
+  }
+
+  async getCatalogs(uriString: string): Promise<CatalogsInfo | undefined> {
+    return (await this.getWorkspaceContext(uriString))?.getCatalogs()
   }
 
   async getPackageEngines(uriString: string): Promise<Engines | undefined> {

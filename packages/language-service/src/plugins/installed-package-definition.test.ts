@@ -30,6 +30,9 @@ async function createWorkspaceState(
     async findInstalledPackageManifestPath(uri, packageName) {
       return workspaceContext.findInstalledPackageManifestPath(URI.parse(uri).path, packageName)
     },
+    async getCatalogs() {
+      return undefined
+    },
     getClientFeatures: () => DEFAULT_CLIENT_FEATURES,
     async getPackageEngines() {
       return undefined

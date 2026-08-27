@@ -61,11 +61,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
           if (!dependency)
             return
 
-          const workspaceContext = await workspaceState.getWorkspaceContext(document.uri)
-          if (!workspaceContext)
-            return
-
-          const catalogs = await workspaceContext.getCatalogs()
+          const catalogs = await workspaceState.getCatalogs(document.uri)
           if (!catalogs)
             return
 
