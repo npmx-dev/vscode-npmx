@@ -14,6 +14,10 @@ export const DEFAULT_CLIENT_FEATURES: ClientFeatures = {
 }
 
 export interface IWorkspaceState {
+  findCatalogDependency: (uri: string, dependency: DependencyInfo) => Promise<{
+    dependency: DependencyInfo
+    path: string
+  } | undefined>
   findInstalledPackageManifestPath: (uri: string, packageName: string) => Promise<string | undefined>
   getCatalogs: (uri: string) => Promise<CatalogsInfo | undefined>
   getClientFeatures: () => ClientFeatures

@@ -27,6 +27,9 @@ async function createWorkspaceState(
   const workspaceContext = await WorkspaceContext.create('/repo', adapter)
 
   return {
+    async findCatalogDependency() {
+      return undefined
+    },
     async findInstalledPackageManifestPath(uri, packageName) {
       return workspaceContext.findInstalledPackageManifestPath(URI.parse(uri).path, packageName)
     },

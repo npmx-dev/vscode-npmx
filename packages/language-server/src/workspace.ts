@@ -4,7 +4,7 @@ import type { DependencyInfo, PackageManager, WorkspaceAdapter } from 'npmx-lang
 import type { ClientFeatures, IWorkspaceState } from 'npmx-language-service/types'
 import { access, realpath as fsRealpath, readFile } from 'node:fs/promises'
 import { CACHE_MAX_AGE_MAXIMUM, DEPENDENCY_FILE_GLOB, PACKAGE_JSON_BASENAME } from 'npmx-language-core/constants'
-import { isDependencyFile, isPackageManifest } from 'npmx-language-core/utils'
+import { isDependencyFile, isPackageManifest, normalizeCatalogName } from 'npmx-language-core/utils'
 import { WorkspaceContext } from 'npmx-language-core/workspace'
 import { DEFAULT_CLIENT_FEATURES } from 'npmx-language-service/types'
 import { defineCachedFunction } from 'ocache'
@@ -170,6 +170,24 @@ export class WorkspaceState implements IWorkspaceState {
       return
 
     return await this.#getWorkspaceContextByFolder(folderUri)
+  }
+
+  async findCatalogDependency(uriString: string, dependency: DependencyInfo) {
+    const ctx = await this.getWorkspaceContext(uriString)
+    if (!ctx?.workspaceFilePath)
+      return
+
+    const workspaceFileInfo = await ctx.loadWorkspaceFileInfo(ctx.workspaceFilePath)
+    const targetDependency = workspaceFileInfo?.dependencies.find((candidate) =>
+      candidate.rawName === dependency.resolvedName
+      && candidate.categoryName != null
+      && dependency.categoryName != null
+      && normalizeCatalogName(candidate.categoryName) === normalizeCatalogName(dependency.categoryName),
+    )
+    if (!targetDependency)
+      return
+
+    return { dependency: targetDependency, path: ctx.workspaceFilePath }
   }
 
   async findInstalledPackageManifestPath(uriString: string, packageName: string): Promise<string | undefined> {

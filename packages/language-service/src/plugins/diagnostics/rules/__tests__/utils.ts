@@ -34,6 +34,9 @@ export function createContext(options: CreateContextOptions): DiagnosticContext 
     packageInfo: async () => (pkg),
   }
   const workspace: DiagnosticContext['workspace'] = {
+    async findCatalogDependency() {
+      return undefined
+    },
     async findInstalledPackageManifestPath() {
       return undefined
     },
