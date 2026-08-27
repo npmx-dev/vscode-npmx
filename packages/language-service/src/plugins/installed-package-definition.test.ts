@@ -40,9 +40,6 @@ async function createWorkspaceState(
     async getPackageEngines() {
       return undefined
     },
-    async getWorkspaceContext() {
-      return workspaceContext
-    },
     async getResolvedDependencies() {
       return dependencies
     },

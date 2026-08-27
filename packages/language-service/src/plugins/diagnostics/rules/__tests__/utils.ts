@@ -47,9 +47,6 @@ export function createContext(options: CreateContextOptions): DiagnosticContext 
     async getPackageEngines() {
       return engines
     },
-    async getWorkspaceContext() {
-      return undefined
-    },
     async getResolvedDependencies() {
       return undefined
     },

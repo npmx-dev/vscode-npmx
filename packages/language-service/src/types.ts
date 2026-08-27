@@ -1,5 +1,5 @@
 import type { CatalogsInfo, Engines } from 'npmx-language-core/types'
-import type { DependencyInfo, WorkspaceContext } from 'npmx-language-core/workspace'
+import type { DependencyInfo } from 'npmx-language-core/workspace'
 
 export type IconStyle = 'codicon' | 'emoji'
 
@@ -22,7 +22,6 @@ export interface IWorkspaceState {
   getCatalogs: (uri: string) => Promise<CatalogsInfo | undefined>
   getClientFeatures: () => ClientFeatures
   getPackageEngines: (uri: string) => Promise<Engines | undefined>
-  getWorkspaceContext: (uri: string) => Promise<WorkspaceContext | undefined>
   getResolvedDependencies: (uri: string) => Promise<DependencyInfo[] | undefined>
   getResolvedDependenciesForContainingPackage: (uri: string) => Promise<DependencyInfo[] | undefined>
 }

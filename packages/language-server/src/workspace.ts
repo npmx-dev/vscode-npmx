@@ -164,7 +164,7 @@ export class WorkspaceState implements IWorkspaceState {
     return bestMatch
   }
 
-  async getWorkspaceContext(uriString: string): Promise<WorkspaceContext | undefined> {
+  async #getWorkspaceContext(uriString: string): Promise<WorkspaceContext | undefined> {
     const folderUri = this.#getWorkspaceFolderUri(uriString)
     if (!folderUri)
       return
@@ -173,7 +173,7 @@ export class WorkspaceState implements IWorkspaceState {
   }
 
   async findCatalogDependency(uriString: string, dependency: DependencyInfo) {
-    const ctx = await this.getWorkspaceContext(uriString)
+    const ctx = await this.#getWorkspaceContext(uriString)
     if (!ctx?.workspaceFilePath)
       return
 
@@ -191,7 +191,7 @@ export class WorkspaceState implements IWorkspaceState {
   }
 
   async findInstalledPackageManifestPath(uriString: string, packageName: string): Promise<string | undefined> {
-    const ctx = await this.getWorkspaceContext(uriString)
+    const ctx = await this.#getWorkspaceContext(uriString)
     if (!ctx)
       return
 
@@ -203,11 +203,11 @@ export class WorkspaceState implements IWorkspaceState {
   }
 
   async getCatalogs(uriString: string): Promise<CatalogsInfo | undefined> {
-    return (await this.getWorkspaceContext(uriString))?.getCatalogs()
+    return (await this.#getWorkspaceContext(uriString))?.getCatalogs()
   }
 
   async getPackageEngines(uriString: string): Promise<Engines | undefined> {
-    const ctx = await this.getWorkspaceContext(uriString)
+    const ctx = await this.#getWorkspaceContext(uriString)
     if (!ctx)
       return
 
@@ -219,7 +219,7 @@ export class WorkspaceState implements IWorkspaceState {
   }
 
   async getResolvedDependencies(uriString: string): Promise<DependencyInfo[] | undefined> {
-    const ctx = await this.getWorkspaceContext(uriString)
+    const ctx = await this.#getWorkspaceContext(uriString)
     if (!ctx)
       return
 
@@ -241,7 +241,7 @@ export class WorkspaceState implements IWorkspaceState {
   }
 
   async getResolvedDependenciesForContainingPackage(uriString: string): Promise<DependencyInfo[] | undefined> {
-    const ctx = await this.getWorkspaceContext(uriString)
+    const ctx = await this.#getWorkspaceContext(uriString)
     if (!ctx)
       return
 
