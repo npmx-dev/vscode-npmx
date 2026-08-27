@@ -1,4 +1,5 @@
 import type { Connection, LanguageServer } from '@volar/language-server'
+import type { Engines } from 'npmx-language-core/types'
 import type { DependencyInfo, PackageManager, WorkspaceAdapter } from 'npmx-language-core/workspace'
 import type { ClientFeatures, IWorkspaceState } from 'npmx-language-service/types'
 import { access, realpath as fsRealpath, readFile } from 'node:fs/promises'
@@ -169,6 +170,18 @@ export class WorkspaceState implements IWorkspaceState {
       return
 
     return await this.#getWorkspaceContextByFolder(folderUri)
+  }
+
+  async getPackageEngines(uriString: string): Promise<Engines | undefined> {
+    const ctx = await this.getWorkspaceContext(uriString)
+    if (!ctx)
+      return
+
+    const uri = URI.parse(uriString)
+    if (uri.scheme !== 'file' || !isPackageManifest(uri.path))
+      return
+
+    return (await ctx.loadPackageManifestInfo(uri.path))?.engines
   }
 
   async getResolvedDependencies(uriString: string): Promise<DependencyInfo[] | undefined> {

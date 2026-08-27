@@ -27,6 +27,9 @@ async function createWorkspaceState(
 
   return {
     getClientFeatures: () => DEFAULT_CLIENT_FEATURES,
+    async getPackageEngines() {
+      return undefined
+    },
     async getWorkspaceContext() {
       return workspaceContext
     },

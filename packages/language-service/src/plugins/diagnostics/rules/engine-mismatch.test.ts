@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { resolveEngineMismatches } from './engine-mismatch'
+import { createContext } from './__tests__/utils'
+import { checkEngineMismatch, resolveEngineMismatches } from './engine-mismatch'
 
 describe('resolveEngineMismatches', () => {
   it('should flag when engine ranges do not overlap', () => {
@@ -60,5 +61,21 @@ describe('resolveEngineMismatches', () => {
       { node: 'lts' },
       { node: '>=18' },
     )).toEqual([])
+  })
+})
+
+describe('checkEngineMismatch', () => {
+  it('reads package engines through the workspace interface', async () => {
+    await expect(checkEngineMismatch(
+      createContext({
+        name: 'foo',
+        version: '1.0.0',
+        engines: { node: '>=20' },
+        versionsMeta: {
+          '1.0.0': { engines: { node: '>=22' } },
+        },
+      }),
+      [],
+    )).resolves.toMatchObject({ code: 'engine-mismatch' })
   })
 })
