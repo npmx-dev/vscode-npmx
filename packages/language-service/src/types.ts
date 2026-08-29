@@ -14,14 +14,14 @@ export const DEFAULT_CLIENT_FEATURES: ClientFeatures = {
 }
 
 export interface IWorkspaceState {
+  getClientFeatures: () => ClientFeatures
+  getCatalogs: (uri: string) => Promise<CatalogsInfo | undefined>
   findCatalogDependency: (uri: string, dependency: DependencyInfo) => Promise<{
     dependency: DependencyInfo
     path: string
   } | undefined>
-  findInstalledPackageManifestPath: (uri: string, packageName: string) => Promise<string | undefined>
-  getCatalogs: (uri: string) => Promise<CatalogsInfo | undefined>
-  getClientFeatures: () => ClientFeatures
   getPackageEngines: (uri: string) => Promise<Engines | undefined>
   getResolvedDependencies: (uri: string) => Promise<DependencyInfo[] | undefined>
   getResolvedDependenciesForContainingPackage: (uri: string) => Promise<DependencyInfo[] | undefined>
+  findInstalledPackageManifestPath: (uri: string, packageName: string) => Promise<string | undefined>
 }
