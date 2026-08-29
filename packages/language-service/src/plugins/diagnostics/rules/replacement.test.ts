@@ -15,6 +15,9 @@ describe('checkReplacement', () => {
         "codeDescription": {
           "href": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart",
         },
+        "data": {
+          "packageName": "left-pad",
+        },
         "message": ""left-pad" can be replaced with String.prototype.padStart.",
         "range": [
           0,

@@ -10,7 +10,14 @@ export interface DiagnosticContext {
   workspace: IWorkspaceState
 }
 
-export interface RangeDiagnosticInfo extends Omit<Diagnostic, 'range'> {
+export interface DiagnosticActionData {
+  packageId?: string
+  packageName?: string
+  targetVersion?: string
+}
+
+export interface RangeDiagnosticInfo extends Omit<Diagnostic, 'data' | 'range'> {
+  data?: DiagnosticActionData
   range: OffsetRange
 }
 

@@ -48,6 +48,7 @@ export const checkReplacement: DiagnosticRule = async ({ dep: { nameRange, resol
     message: description,
     severity: 2 satisfies typeof DiagnosticSeverity.Warning,
     code: 'replacement',
+    data: { packageName: resolvedName },
     ...(link && { codeDescription: { href: link } }),
   }
 }

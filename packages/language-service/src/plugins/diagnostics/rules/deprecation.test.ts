@@ -25,6 +25,7 @@ describe('checkDeprecation', () => {
 
     expect(result).toMatchObject({
       code: 'deprecation',
+      data: { packageId: 'lodash@1.0.0' },
     })
     expect(result!.message).toMatchInlineSnapshot('""lodash@1.0.0" has been deprecated: old notice"')
   })
@@ -34,6 +35,7 @@ describe('checkDeprecation', () => {
 
     expect(result).toMatchObject({
       code: 'deprecation',
+      data: { packageId: 'lodash@1.2.0' },
     })
     expect(result!.message).toMatchInlineSnapshot('""lodash@1.2.0" has been deprecated: new notice"')
   })
