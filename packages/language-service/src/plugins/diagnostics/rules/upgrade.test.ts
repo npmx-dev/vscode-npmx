@@ -2,7 +2,7 @@ import type { PackageInfo } from 'npmx-language-core/api/package'
 import type { DependencyInfo } from 'npmx-language-core/workspace'
 import { describe, expect, it } from 'vitest'
 import { createContext } from './__tests__/utils'
-import { resolveUpgrade } from './upgrade'
+import { checkUpgrade, resolveUpgrade } from './upgrade'
 
 const distTags: Record<string, string> = {
   latest: '2.7.0',
@@ -22,8 +22,19 @@ async function createOptions(version: string): Promise<[DependencyInfo, PackageI
 }
 
 describe('resolveUpgrade', () => {
-  it('should flag when latest is greater than current version', async () => {
-    expect(resolveUpgrade(...await createOptions('^1.0.0'), [])).toBe('^2.7.0')
+  it('returns structured action data', async () => {
+    await expect(checkUpgrade(createContext({
+      name: 'vite',
+      version: '^1.0.0',
+      distTags,
+      versionsMeta,
+    }), [])).resolves.toMatchObject({
+      code: 'upgrade',
+      data: {
+        packageName: 'vite',
+        targetVersion: '^2.7.0',
+      },
+    })
   })
 
   it.each([

@@ -1,12 +1,11 @@
-import type { CodeActionKind, LanguageServicePlugin, LanguageServicePluginInstance } from '@volar/language-service'
+import type { CodeActionKind, Diagnostic, LanguageServicePlugin, LanguageServicePluginInstance } from '@volar/language-service'
 import type { IWorkspaceState } from '../../types'
 import type { DiagnosticContext, DiagnosticRule } from './types'
 import { isDependencyFile } from 'npmx-language-core/utils'
 import { displayName } from 'npmx-shared/meta'
-import { Diagnostic } from 'vscode-languageserver-types'
 import { URI } from 'vscode-uri'
 import { getConfig } from '../../config'
-import { strategies } from './actions'
+import { createCodeActions } from './actions'
 import { checkDeprecation } from './rules/deprecation'
 import { checkDistTag } from './rules/dist-tag'
 import { checkEngineMismatch } from './rules/engine-mismatch'
@@ -112,26 +111,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
         },
 
         provideCodeActions(document, _range, codeActionContext) {
-          return codeActionContext.diagnostics.flatMap((diagnostic) => {
-            if (diagnostic.source !== displayName)
-              return []
-
-            if (!diagnostic.code)
-              return []
-
-            const code = String(diagnostic.code)
-            const strategy = strategies[code]
-            if (!strategy)
-              return []
-
-            const groups = strategy.pattern.exec(Diagnostic.getMessageString(diagnostic))?.groups
-            if (!groups)
-              return []
-
-            const actionContext = { code, documentUri: document.uri, diagnostic, groups }
-
-            return strategy.actionBuilders.flatMap((build) => build(actionContext))
-          })
+          return createCodeActions(document.uri, codeActionContext.diagnostics)
         },
       }
     },

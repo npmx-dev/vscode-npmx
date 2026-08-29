@@ -16,11 +16,14 @@ export const checkDeprecation: DiagnosticRule = async ({ dep, pkg }, ignoreList)
   if (checkIgnored({ ignoreList, name: resolvedName, version: resolvedVersion }))
     return
 
+  const packageId = formatPackageId(resolvedName, resolvedVersion)
+
   return {
     range: specRange,
-    message: `"${formatPackageId(resolvedName, resolvedVersion)}" has been deprecated: ${versionInfo.deprecated}`,
+    message: `"${packageId}" has been deprecated: ${versionInfo.deprecated}`,
     severity: 1 satisfies typeof DiagnosticSeverity.Error,
     code: 'deprecation',
+    data: { packageId },
     codeDescription: { href: npmxPackageUrl(resolvedName, resolvedSpec) },
     tags: [2 satisfies typeof DiagnosticTag.Deprecated],
   }

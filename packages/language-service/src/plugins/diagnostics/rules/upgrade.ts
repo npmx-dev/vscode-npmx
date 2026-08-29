@@ -56,6 +56,10 @@ export const checkUpgrade: DiagnosticRule = async ({ dep, pkg }, ignoreList) => 
     severity: 4 satisfies typeof DiagnosticSeverity.Hint,
     message: `"${dep.resolvedName}" can be upgraded to ${targetVersion}.`,
     code: 'upgrade',
+    data: {
+      packageName: dep.resolvedName,
+      targetVersion,
+    },
     codeDescription: { href: npmxPackageUrl(dep.resolvedName, targetVersion) },
   }
 }
