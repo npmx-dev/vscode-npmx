@@ -1,9 +1,10 @@
 import type { Connection, LanguageServer } from '@volar/language-server'
+import type { CatalogsInfo, Engines } from 'npmx-language-core/types'
 import type { DependencyInfo, PackageManager, WorkspaceAdapter } from 'npmx-language-core/workspace'
 import type { ClientFeatures, IWorkspaceState } from 'npmx-language-service/types'
 import { access, realpath as fsRealpath, readFile } from 'node:fs/promises'
 import { CACHE_MAX_AGE_MAXIMUM, DEPENDENCY_FILE_GLOB, PACKAGE_JSON_BASENAME } from 'npmx-language-core/constants'
-import { isDependencyFile, isPackageManifest } from 'npmx-language-core/utils'
+import { isDependencyFile, isPackageManifest, normalizeCatalogName } from 'npmx-language-core/utils'
 import { WorkspaceContext } from 'npmx-language-core/workspace'
 import { DEFAULT_CLIENT_FEATURES } from 'npmx-language-service/types'
 import { defineCachedFunction } from 'ocache'
@@ -163,7 +164,7 @@ export class WorkspaceState implements IWorkspaceState {
     return bestMatch
   }
 
-  async getWorkspaceContext(uriString: string): Promise<WorkspaceContext | undefined> {
+  async #getWorkspaceContext(uriString: string): Promise<WorkspaceContext | undefined> {
     const folderUri = this.#getWorkspaceFolderUri(uriString)
     if (!folderUri)
       return
@@ -171,8 +172,54 @@ export class WorkspaceState implements IWorkspaceState {
     return await this.#getWorkspaceContextByFolder(folderUri)
   }
 
+  async findCatalogDependency(uriString: string, dependency: DependencyInfo) {
+    const ctx = await this.#getWorkspaceContext(uriString)
+    if (!ctx?.workspaceFilePath)
+      return
+
+    const workspaceFileInfo = await ctx.loadWorkspaceFileInfo(ctx.workspaceFilePath)
+    const targetDependency = workspaceFileInfo?.dependencies.find((candidate) =>
+      candidate.rawName === dependency.resolvedName
+      && candidate.categoryName != null
+      && dependency.categoryName != null
+      && normalizeCatalogName(candidate.categoryName) === normalizeCatalogName(dependency.categoryName),
+    )
+    if (!targetDependency)
+      return
+
+    return { dependency: targetDependency, path: ctx.workspaceFilePath }
+  }
+
+  async findInstalledPackageManifestPath(uriString: string, packageName: string): Promise<string | undefined> {
+    const ctx = await this.#getWorkspaceContext(uriString)
+    if (!ctx)
+      return
+
+    const uri = URI.parse(uriString)
+    if (uri.scheme !== 'file' || !isPackageManifest(uri.path))
+      return
+
+    return ctx.findInstalledPackageManifestPath(uri.path, packageName)
+  }
+
+  async getCatalogs(uriString: string): Promise<CatalogsInfo | undefined> {
+    return (await this.#getWorkspaceContext(uriString))?.getCatalogs()
+  }
+
+  async getPackageEngines(uriString: string): Promise<Engines | undefined> {
+    const ctx = await this.#getWorkspaceContext(uriString)
+    if (!ctx)
+      return
+
+    const uri = URI.parse(uriString)
+    if (uri.scheme !== 'file' || !isPackageManifest(uri.path))
+      return
+
+    return (await ctx.loadPackageManifestInfo(uri.path))?.engines
+  }
+
   async getResolvedDependencies(uriString: string): Promise<DependencyInfo[] | undefined> {
-    const ctx = await this.getWorkspaceContext(uriString)
+    const ctx = await this.#getWorkspaceContext(uriString)
     if (!ctx)
       return
 
@@ -194,7 +241,7 @@ export class WorkspaceState implements IWorkspaceState {
   }
 
   async getResolvedDependenciesForContainingPackage(uriString: string): Promise<DependencyInfo[] | undefined> {
-    const ctx = await this.getWorkspaceContext(uriString)
+    const ctx = await this.#getWorkspaceContext(uriString)
     if (!ctx)
       return
 

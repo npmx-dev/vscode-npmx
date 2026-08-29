@@ -16,7 +16,7 @@ interface CreateContextOptions {
 }
 
 export function createContext(options: CreateContextOptions): DiagnosticContext {
-  const { name, version, distTags = {}, versionsMeta = {}, category = 'dependencies' } = options
+  const { name, version, distTags = {}, versionsMeta = {}, engines, category = 'dependencies' } = options
   const { protocol, resolvedName, resolvedSpec, resolvedProtocol } = resolveDependencySpec(name, version)
   const pkg = { distTags, versionsMeta } as PackageInfo
 
@@ -33,5 +33,26 @@ export function createContext(options: CreateContextOptions): DiagnosticContext 
     resolvedVersion: async () => resolveExactVersion(pkg, resolvedSpec),
     packageInfo: async () => (pkg),
   }
-  return { uri: 'file:///package.json', dep, pkg } as DiagnosticContext
+  const workspace: DiagnosticContext['workspace'] = {
+    async findCatalogDependency() {
+      return undefined
+    },
+    async findInstalledPackageManifestPath() {
+      return undefined
+    },
+    async getCatalogs() {
+      return undefined
+    },
+    getClientFeatures: () => ({ catalogInlayHints: true, iconStyle: 'emoji' }),
+    async getPackageEngines() {
+      return engines
+    },
+    async getResolvedDependencies() {
+      return undefined
+    },
+    async getResolvedDependenciesForContainingPackage() {
+      return undefined
+    },
+  }
+  return { uri: 'file:///package.json', dep, pkg, workspace }
 }

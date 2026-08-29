@@ -2,9 +2,8 @@ import type { DiagnosticSeverity } from '@volar/language-service'
 import type { Engines } from 'npmx-language-core/types'
 import type { DiagnosticRule } from '../types'
 import { npmxPackageUrl } from 'npmx-language-core/links'
-import { formatPackageId, isPackageManifest } from 'npmx-language-core/utils'
+import { formatPackageId } from 'npmx-language-core/utils'
 import { isRangeSubset, parseRange, rangesIntersect } from 'verkit'
-import { URI } from 'vscode-uri'
 
 interface EngineMismatch {
   engine: string
@@ -46,10 +45,6 @@ export function resolveEngineMismatches(
 }
 
 export const checkEngineMismatch: DiagnosticRule = async ({ uri, dep, pkg, workspace }) => {
-  const path = URI.parse(uri).path
-
-  if (!isPackageManifest(path))
-    return
   if (dep.category !== 'dependencies')
     return
 
@@ -57,8 +52,7 @@ export const checkEngineMismatch: DiagnosticRule = async ({ uri, dep, pkg, works
   if (!resolvedVersion)
     return
 
-  const wsCtx = await workspace.getWorkspaceContext(uri)
-  const engines = (await wsCtx?.loadPackageManifestInfo(path))?.engines
+  const engines = await workspace.getPackageEngines(uri)
   if (!engines)
     return
 

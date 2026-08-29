@@ -1,7 +1,7 @@
 import type { CompletionItemKind, CompletionList, LanguageServicePlugin, LanguageServicePluginInstance, LocationLink } from '@volar/language-service'
 import type { DependencyInfo } from 'npmx-language-core/workspace'
 import type { IWorkspaceState } from '../types'
-import { isPackageManifest, normalizeCatalogName } from 'npmx-language-core/utils'
+import { isPackageManifest } from 'npmx-language-core/utils'
 import { URI } from 'vscode-uri'
 import { getDocumentByUri, getResolvedDependencySpecAtOffset } from '../utils/document'
 
@@ -33,13 +33,6 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
     return getCatalogDependencyAtOffset(dependencies, offset)
   }
 
-  function matchesCatalogDependency(candidate: DependencyInfo, dependency: DependencyInfo): boolean {
-    return candidate.rawName === dependency.resolvedName
-      && candidate.categoryName != null
-      && dependency.categoryName != null
-      && normalizeCatalogName(candidate.categoryName) === normalizeCatalogName(dependency.categoryName)
-  }
-
   return {
     name: 'npmx-catalog',
     capabilities: {
@@ -61,11 +54,7 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
           if (!dependency)
             return
 
-          const workspaceContext = await workspaceState.getWorkspaceContext(document.uri)
-          if (!workspaceContext)
-            return
-
-          const catalogs = await workspaceContext.getCatalogs()
+          const catalogs = await workspaceState.getCatalogs(document.uri)
           if (!catalogs)
             return
 
@@ -96,26 +85,16 @@ export function create(workspaceState: IWorkspaceState): LanguageServicePlugin {
           if (!dependency)
             return
 
-          const workspaceContext = await workspaceState.getWorkspaceContext(document.uri)
-          if (!workspaceContext?.workspaceFilePath)
+          const target = await workspaceState.findCatalogDependency(document.uri, dependency)
+          if (!target)
             return
 
-          const workspaceFileInfo = await workspaceContext.loadWorkspaceFileInfo(workspaceContext.workspaceFilePath)
-          if (!workspaceFileInfo)
-            return
-
-          const targetDependency = workspaceFileInfo.dependencies.find((candidate) =>
-            matchesCatalogDependency(candidate, dependency),
-          )
-          if (!targetDependency)
-            return
-
-          const workspaceFileUri = dependencyFileUri.with({ path: workspaceContext.workspaceFilePath })
+          const workspaceFileUri = dependencyFileUri.with({ path: target.path })
           const workspaceDocument = await getDocumentByUri(context, workspaceFileUri)
           if (!workspaceDocument)
             return
 
-          const [targetStart, targetEnd] = targetDependency.specRange
+          const [targetStart, targetEnd] = target.dependency.specRange
           const originStart = document.positionAt(dependency.specRange[0])
           const originEnd = document.positionAt(dependency.specRange[1])
 
