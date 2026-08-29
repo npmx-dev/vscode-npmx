@@ -261,11 +261,7 @@ importers:
         specifier: catalog:lsp
         version: 3.1.0
 
-  packages/shared:
-    dependencies:
-      npmx-language-core:
-        specifier: workspace:*
-        version: link:../language-core
+  packages/shared: {}
 
 packages:
 
