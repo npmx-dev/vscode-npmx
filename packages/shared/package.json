@@ -23,8 +23,5 @@
   "scripts": {
     "dev": "tsdown --watch",
     "build": "tsdown"
-  },
-  "dependencies": {
-    "npmx-language-core": "workspace:*"
   }
 }
