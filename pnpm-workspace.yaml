@@ -20,7 +20,7 @@ catalogs:
     tsdown: ^0.22.14
     typescript: npm:@typescript/typescript6@^6.0.2
     typescript7: npm:typescript@^7.0.2
-    vite: ^8.2.2
+    vite: ^8.2.4
     vscode-ext-gen: ^1.6.0
   inline:
     fast-npm-meta: ^2.2.0
