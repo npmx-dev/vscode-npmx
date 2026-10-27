@@ -59,6 +59,7 @@
 
 | Key                                 | Description                                                                                                                                                | Type      | Default             |
 | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------- |
+| `npmx.catalog.display`              | Display style for resolved catalog versions                                                                                                                | `string`  | `"decoration"`      |
 | `npmx.hover.enabled`                | Enable hover information for packages                                                                                                                      | `boolean` | `true`              |
 | `npmx.completion.version`           | Version completion behavior                                                                                                                                | `string`  | `"provenance-only"` |
 | `npmx.completion.excludePrerelease` | Exclude prerelease versions (alpha, beta, rc, canary, etc.) from completion suggestions                                                                    | `boolean` | `true`              |
@@ -75,6 +76,8 @@
 | `npmx.ignore.vulnerability`         | Ignore list for vulnerability diagnostics ("name" or "name@version"). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics) | `array`   | `[]`                |
 
 <!-- configs -->
+
+Set `npmx.catalog.display` to `"decoration"` (default) for resolved catalog versions at the end of the line, or `"inlay-hint"` to show them next to the catalog reference. Changes take effect without reloading the window. Inlay hints also require `editor.inlayHints.enabled` to be enabled.
 
 ## Ignore Diagnostics
 

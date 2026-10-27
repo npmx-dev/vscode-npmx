@@ -4,6 +4,7 @@ import { LanguageClient, TransportKind } from '@volar/vscode/node'
 import { DEPENDENCY_FILE_GLOB } from 'npmx-language-core/constants'
 import { displayName, extensionId } from 'npmx-shared/meta'
 import { Hover, MarkdownString } from 'vscode'
+import { provideCatalogInlayHints } from './providers/catalog-display'
 
 const SUPPORTED_LANGUAGES = [
   'javascript',
@@ -39,6 +40,7 @@ export function launch(serverPath: string) {
     {
       middleware: {
         ...middleware,
+        provideInlayHints: provideCatalogInlayHints,
         provideHover: async (document, position, token, next) => {
           const hover = await next(document, position, token)
           if (!hover)
@@ -70,7 +72,7 @@ export function launch(serverPath: string) {
       initializationOptions: {
         npmx: {
           clientFeatures: {
-            catalogInlayHints: false,
+            catalogInlayHints: true,
             iconStyle: 'codicon',
           },
         },

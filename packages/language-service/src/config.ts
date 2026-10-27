@@ -29,6 +29,10 @@ function stringArrayConfig(value: unknown): string[] | undefined {
 }
 
 const configSpecs = {
+  'npmx.catalog.display': {
+    scopedKey: 'catalog.display',
+    validate: (value) => value === 'decoration' || value === 'inlay-hint' ? value : undefined,
+  },
   'npmx.hover.enabled': {
     scopedKey: 'hover.enabled',
     validate: booleanConfig,

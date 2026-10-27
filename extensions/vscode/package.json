@@ -46,6 +46,20 @@
     "configuration": {
       "title": "npmx",
       "properties": {
+        "npmx.catalog.display": {
+          "type": "string",
+          "enum": [
+            "decoration",
+            "inlay-hint"
+          ],
+          "enumDescriptions": [
+            "Show resolved catalog versions at the end of the line",
+            "Show resolved catalog versions next to the catalog reference using inlay hints"
+          ],
+          "default": "decoration",
+          "description": "Display style for resolved catalog versions",
+          "markdownDescription": "Display style for resolved catalog versions. Inlay hints also require `#editor.inlayHints.enabled#` to be enabled."
+        },
         "npmx.hover.enabled": {
           "type": "boolean",
           "default": true,
