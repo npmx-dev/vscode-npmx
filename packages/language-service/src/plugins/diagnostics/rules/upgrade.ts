@@ -4,7 +4,7 @@ import type { DependencyInfo } from 'npmx-language-core/workspace'
 import type { DiagnosticRule } from '../types'
 import { npmxPackageUrl } from 'npmx-language-core/links'
 import { checkIgnored } from 'npmx-language-core/utils'
-import { getPrerelease, isGreater, isLessOrEqual } from 'verkit'
+import { getPrerelease, isGreaterThan, isLessThanOrEqual } from 'verkit'
 import { formatUpgradeVersion } from '../../../utils/version'
 
 export function resolveUpgrade(dep: DependencyInfo, pkg: PackageInfo, resolvedVersion: string, ignoreList: string[]) {
@@ -15,7 +15,7 @@ export function resolveUpgrade(dep: DependencyInfo, pkg: PackageInfo, resolvedVe
   const { latest } = distTags
   const { resolvedName } = dep
 
-  if (isGreater(latest, resolvedVersion)) {
+  if (isGreaterThan(latest, resolvedVersion)) {
     const targetVersion = formatUpgradeVersion(dep, latest)
     if (checkIgnored({ ignoreList, name: resolvedName, version: targetVersion }))
       return
@@ -32,7 +32,7 @@ export function resolveUpgrade(dep: DependencyInfo, pkg: PackageInfo, resolvedVe
       continue
     if (getPrerelease(tagVersion)?.[0] !== currentPreId)
       continue
-    if (isLessOrEqual(tagVersion, resolvedVersion))
+    if (isLessThanOrEqual(tagVersion, resolvedVersion))
       continue
     const targetVersion = formatUpgradeVersion(dep, tagVersion)
     if (checkIgnored({ ignoreList, name: resolvedName, version: targetVersion }))

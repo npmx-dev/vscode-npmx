@@ -18,7 +18,7 @@ describe('checkReplacement', () => {
         "data": {
           "packageName": "left-pad",
         },
-        "message": ""left-pad" can be replaced with String.prototype.padStart.",
+        "message": ""left-pad" can be replaced with String.prototype.padStart, available since Node 8.0.0.",
         "range": [
           0,
           8,

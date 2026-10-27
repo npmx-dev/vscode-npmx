@@ -1,5 +1,5 @@
 import type { PackageInfo } from '../api/package'
-import { isGreater, isLessOrEqual, parseRange, satisfies } from 'verkit'
+import { isGreaterThan, isLessThanOrEqual, parseRange, satisfies } from 'verkit'
 
 export function formatPackageId(name: string, version: string): string {
   return `${name}@${version}`
@@ -74,8 +74,8 @@ function getMaxSatisfying(versions: string[], current: string, tags: PackageInfo
       if (!satisfies(ver, range))
         continue
 
-      if (!maxVersion || isLessOrEqual(ver, maxVersion)) {
-        if (!version || isGreater(ver, version)) {
+      if (!maxVersion || isLessThanOrEqual(ver, maxVersion)) {
+        if (!version || isGreaterThan(ver, version)) {
           version = ver
         }
       }
