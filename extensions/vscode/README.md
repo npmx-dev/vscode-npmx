@@ -70,10 +70,10 @@
 | `npmx.diagnostics.distTag`          | Show warnings when a dependency uses a dist tag                                                                                                            | `boolean` | `true`              |
 | `npmx.diagnostics.engineMismatch`   | Show warnings when dependency engines mismatch with the current package                                                                                    | `boolean` | `true`              |
 | `npmx.packageLinks`                 | Enable clickable links for package version specs                                                                                                           | `string`  | `"declared"`        |
-| `npmx.ignore.upgrade`               | Ignore list for upgrade diagnostics ("name" or "name@version"). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics)       | `array`   | `[]`                |
-| `npmx.ignore.deprecation`           | Ignore list for deprecation diagnostics ("name" or "name@version"). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics)   | `array`   | `[]`                |
-| `npmx.ignore.replacement`           | Ignore list for replacement diagnostics ("name" only). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics)                | `array`   | `[]`                |
-| `npmx.ignore.vulnerability`         | Ignore list for vulnerability diagnostics ("name" or "name@version"). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx#ignore-diagnostics) | `array`   | `[]`                |
+| `npmx.ignore.upgrade`               | Ignore list for upgrade diagnostics ("name" or "name@version"). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx/tree/main/extensions/vscode#ignore-diagnostics)       | `array`   | `[]`                |
+| `npmx.ignore.deprecation`           | Ignore list for deprecation diagnostics ("name" or "name@version"). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx/tree/main/extensions/vscode#ignore-diagnostics)   | `array`   | `[]`                |
+| `npmx.ignore.replacement`           | Ignore list for replacement diagnostics ("name" only). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx/tree/main/extensions/vscode#ignore-diagnostics)                | `array`   | `[]`                |
+| `npmx.ignore.vulnerability`         | Ignore list for vulnerability diagnostics ("name" or "name@version"). See [Ignore Diagnostics](https://github.com/npmx-dev/vscode-npmx/tree/main/extensions/vscode#ignore-diagnostics) | `array`   | `[]`                |
 
 <!-- configs -->
 
